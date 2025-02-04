@@ -14,6 +14,16 @@ The project goes as follows:
 
 ## Data
 
+All proteins leading in to:
+-	TLR cascades
+-	Complement cascade
+-	Neutrophil degranulation
+-	Interferon Signaling
+-	Signaling by Interleukins
+-	TNFR2 non canonical NFkB…
+
+
+
 ### Peptide repos
 
 ### Target structures
