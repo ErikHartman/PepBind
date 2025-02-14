@@ -27,3 +27,25 @@ All proteins leading in to:
 ### Peptide repos
 
 ### Target structures
+
+### Scoring functions
+
+
+
+Possibly relevant scoring functions:
+- pDockQ 
+- GDockScore
+
+Bopep scoring functions:
+- Interface_dG,
+- rosetta_score,
+- interface_delta_hbond_unsat,
+- packstat
+
+DONE:
+- [x] Curate subset of protein-peptide interactions (see **get_protein_peptide.py**)
+
+TODO: 
+- [ ] Find appropriate scoring functions: should be implementable (Should they be recent?)
+- [ ] Determine functions that are well performing on boolean tasks (e.g. whether a peptide binds or not)
+- [ ] Determine functions that are well performing on regression tasks (e.g. how strong a peptide binds - affinity)
