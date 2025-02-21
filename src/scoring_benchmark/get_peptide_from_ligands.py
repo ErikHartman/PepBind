@@ -82,6 +82,9 @@ def convert_to_dataframe(input_file):
     df = pd.DataFrame(data, columns=['PDB code', 'Resolution', 'Release year', 'Binding data', 'Reference', 'Ligand name'])
     return df
 
+
+
+
 def main():
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     input_file = os.path.join(base_dir, "data/databases/refined-set/index/INDEX_refined_set.2020")
@@ -107,3 +110,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
