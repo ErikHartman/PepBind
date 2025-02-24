@@ -1,6 +1,6 @@
 import requests
 import pandas as pd
-import time
+import os
 from tqdm import tqdm
 
 pathways = {
@@ -12,8 +12,16 @@ pathways = {
     "TNFR2 non-canonical NF-kB pathway": "R-HSA-5668541",
 }
 
+data_dir = os.path.abspath("/srv/data1/general/immunopeptides_data/")
+
+input_file = os.path.join(
+    data_dir, "databases/0_uniprot2reactome_all_levels_2024_02_04.txt"
+)
+
+print(input_file)
+
 uniprot2reactome = pd.read_csv(
-    "/Users/erikhartman/dev/immunopeptides/data/databases/0_uniprot2reactome_all_levels_2024_02_04.txt",
+    input_file,
     names=["uniprot", "reactome", "url", "rxn_name", "x", "species"],
     sep="\t",
 )
@@ -65,6 +73,7 @@ extracellular_ids = []
 fullNames = []
 uniProtkbIds = []
 
+
 def is_wanted_protein(fullName, uniProtkbId):
     if "immunoglobulin" in fullName.lower():
         return False
@@ -78,6 +87,7 @@ def is_wanted_protein(fullName, uniProtkbId):
         return False
     return True
 
+
 for uid in tqdm(uniprot_ids, desc="Processing UniProt IDs"):
     extracellular, fullName, uniProtkbId = is_extracellular(uid)
     if is_wanted_protein(fullName, uniProtkbId):
@@ -85,7 +95,7 @@ for uid in tqdm(uniprot_ids, desc="Processing UniProt IDs"):
             extracellular_ids.append(uid)
             fullNames.append(fullName)
             uniProtkbIds.append(uniProtkbId)
-    #time.sleep(0.1)
+    # time.sleep(0.1)
 
 print("Extracellular proteins:")
 print(uniProtkbIds)
@@ -104,13 +114,16 @@ extracellular_df = extracellular_df.merge(info_df, on="uniprot", how="left")
 print(extracellular_df)
 
 extracellular_df.to_csv(
-    "/Users/erikhartman/dev/immunopeptides/data/databases/1_uniprot2reactome_all_levels_2024_02_04_extracellular_cell_membrane.txt",
+    os.path.join(
+        data_dir,
+        "databases/1_uniprot2reactome_all_levels_2024_02_04_extracellular_cell_membrane.txt",
+    ),
     index=False,
     sep="\t",
 )
 
 info_df.to_csv(
-    "/Users/erikhartman/dev/immunopeptides/data/databases/1_proteins_extracellular_cell_membrane.txt",
+    os.path.join(data_dir, "databases/1_proteins_extracellular_cell_membrane.txt"),
     index=False,
     sep="\t",
 )

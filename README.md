@@ -14,6 +14,9 @@ The project goes as follows:
 
 ## Data
 
+All data is in `/srv/data1/general/immunopeptides_data`
+
+## Target proteins: 
 All proteins leading in to:
 -	TLR cascades
 -	Complement cascade
@@ -22,6 +25,12 @@ All proteins leading in to:
 -	Signaling by Interleukins
 -	TNFR2 non canonical NFkB…
 
+See `/src/get_proteins`.
+
+## Benchmark data
+
+See `/src/scoring_benchmark`
+
 
 
 ### Peptide repos
@@ -29,8 +38,6 @@ All proteins leading in to:
 ### Target structures
 
 ### Scoring functions
-
-
 
 Possibly relevant scoring functions:
 - pDockQ 
