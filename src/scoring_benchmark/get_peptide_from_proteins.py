@@ -8,7 +8,7 @@ def parse_line(line):
     resolution = parts[1]
     release_year = parts[2]
     binding_data = parts[3]
-    reference = f"{pdb_code}.pdf"
+    reference = f"{pdb_code}.pdb"
     ligand_info = " ".join(parts[5:])
     ligand_name = ligand_info.split(",")[0]
     return pdb_code, resolution, release_year, binding_data, reference, ligand_name
@@ -27,11 +27,11 @@ if __name__ == "__main__":
     data_dir = os.path.abspath("/srv/data1/general/immunopeptides_data/")
 
     input_file = os.path.join(
-        data_dir, "data/databases/refined-set/index/INDEX_general_PP.2020"
+        data_dir, "databases/benchmark_data/INDEX_general_PP.2020"
     )
 
     output_file_peptide = os.path.join(
-        data_dir, "data/benchmark_data/peptide-like-proteins.csv"
+        data_dir, "databases/benchmark_data/peptide_like_proteins.csv"
     )
 
     data = {
@@ -63,3 +63,4 @@ if __name__ == "__main__":
 
     df = pd.DataFrame(data)
     df.to_csv(output_file_peptide, index=False)
+    print(f"Wrote info for all chains with peptide length < 50 to: {output_file_peptide}")

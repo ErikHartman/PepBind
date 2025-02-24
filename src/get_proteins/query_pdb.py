@@ -7,7 +7,7 @@ import json
 data_dir = os.path.abspath("/srv/data1/general/immunopeptides_data/")
 
 extracellular_df = pd.read_csv(
-    os.path.join(data_dir, "databases/1_proteins_extracellular_cell_membrane.txt"),
+    os.path.join(data_dir, "databases/target_data/1_proteins_extracellular_cell_membrane.txt"),
     sep="\t",
 )
 
@@ -78,7 +78,7 @@ result_df = extracellular_df.merge(pdb_df, on="uniprot", how="left")
 result_df = result_df.dropna(subset=["pdb_ids"])
 print(len(result_df))
 
-output_file = os.path.join(data_dir, "databases/2_proteins_extracellular_cell_membrane_with_pdb.txt")
+output_file = os.path.join(data_dir, "databases/target_data/2_proteins_extracellular_cell_membrane_with_pdb.txt")
 result_df.to_csv(output_file, sep="\t", index=False)
 
 print(f"Results saved to {output_file}")

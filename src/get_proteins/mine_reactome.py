@@ -15,7 +15,7 @@ pathways = {
 data_dir = os.path.abspath("/srv/data1/general/immunopeptides_data/")
 
 input_file = os.path.join(
-    data_dir, "databases/0_uniprot2reactome_all_levels_2024_02_04.txt"
+    data_dir, "databases/target_data/0_uniprot2reactome_all_levels_2024_02_04.txt"
 )
 
 print(input_file)
@@ -116,14 +116,14 @@ print(extracellular_df)
 extracellular_df.to_csv(
     os.path.join(
         data_dir,
-        "databases/1_uniprot2reactome_all_levels_2024_02_04_extracellular_cell_membrane.txt",
+        "databases/target_data/1_uniprot2reactome_all_levels_2024_02_04_extracellular_cell_membrane.txt",
     ),
     index=False,
     sep="\t",
 )
 
 info_df.to_csv(
-    os.path.join(data_dir, "databases/1_proteins_extracellular_cell_membrane.txt"),
+    os.path.join(data_dir, "databases/target_data/1_proteins_extracellular_cell_membrane.txt"),
     index=False,
     sep="\t",
 )

@@ -2,6 +2,7 @@ import requests
 import concurrent.futures
 import os
 import pandas as pd
+import time
 
 RCSB_GRAPHQL_URL = "https://data.rcsb.org/graphql"
 
@@ -20,10 +21,11 @@ query molecule($id: String!) {
 
 def is_peptide_like(ligand_id):
     try:
+        time.sleep(5)  # let's be polite
         response = requests.post(
             RCSB_GRAPHQL_URL,
             json={"query": GRAPHQL_QUERY, "variables": {"id": ligand_id}},
-            timeout=10,
+            timeout=50,
         )
         response.raise_for_status()
         data = response.json()
@@ -63,12 +65,12 @@ def process_ligands(df):
             else:
                 non_peptide_like_ligands.append((ligand_id, chem_type))
             print(
-                f"Processed {index + 1}/{total_ligands} ligands - {ligand_id} is {'peptide-like' if is_peptide else 'not peptide-like'}",
+                f"Processed {index + 1}/{total_ligands} ligands - {ligand_id}",
                 end="\r",
             )
 
     peptide_like_df = pd.DataFrame(
-        peptide_like_ligands, columns=["Ligand name", "Type"]
+        peptide_like_ligands, columns=["Ligand name", "Type"] # Why do we only save ligand name and type?
     )
     non_peptide_like_df = pd.DataFrame(
         non_peptide_like_ligands, columns=["Ligand name", "Type"]
@@ -119,7 +121,7 @@ def main():
     data_dir = os.path.abspath("/srv/data1/general/immunopeptides_data/")
 
     input_file = os.path.join(
-        data_dir, "databases/refined-set/index/INDEX_refined_set.2020"
+        data_dir, "databases/benchmark_data/INDEX_refined_set.2020"
     )
     output_file_peptide = os.path.join(
         data_dir, "databases/benchmark_data/peptide_like_ligands.csv"
@@ -139,8 +141,11 @@ def main():
 
     peptide_like_df.to_csv(output_file_peptide, index=False)
     non_peptide_like_df.to_csv(output_file_non_peptide, index=False)
+
     merged_df.to_csv(
-        os.path.join(data_dir, "output_data/merged_peptide_like_ligands.csv"),
+        os.path.join(
+            data_dir, "databases/benchmark_data/merged_peptide_like_ligands.csv"
+        ),
         index=False,
     )
 
