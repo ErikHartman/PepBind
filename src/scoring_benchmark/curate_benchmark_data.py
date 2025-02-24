@@ -5,14 +5,54 @@ from concurrent.futures import ThreadPoolExecutor
 import pandas as pd
 
 from Bio import PDB
+from Bio.PDB import PDBParser
 from Bio.PDB.Polypeptide import is_aa
+import numpy as np
+
+def is_peptide_cyclic(pdb_file, cutoff=1.7):
+    """
+    Detect if the peptide (specified by chain ID) in the given PDB file is cyclic.
+    Checks if there's a covalent bond (distance < cutoff Å) between the
+    C-terminal carbonyl carbon and N-terminal nitrogen atoms.
+
+    :param pdb_file: Path to PDB file
+    :param peptide_chain_id: Chain ID of the peptide
+    :param cutoff: Maximum distance (in Å) to consider atoms covalently bonded
+    :return: True if cyclic, False otherwise
+    """
+    parser = PDBParser(QUIET=True)
+    structure = parser.get_structure("peptide", pdb_file)
+    model = structure[0]
+
+
+    chain = model["B"]
+
+    residues = [res for res in chain if is_aa(res, standard=True)]
+
+    # N-terminal residue N atom
+    n_term_res = residues[0]
+    n_atom = n_term_res['N'] if 'N' in n_term_res else None
+
+    # C-terminal residue C atom
+    c_term_res = residues[-1]
+    c_atom = c_term_res['C'] if 'C' in c_term_res else None
+
+    if n_atom is None or c_atom is None:
+        # Missing backbone atoms, cannot confirm cyclicity
+        return False
+
+    distance = np.linalg.norm(n_atom.coord - c_atom.coord)
+
+    # Typical covalent bond distances C-N ~1.3-1.5Å, using 1.7Å as generous cutoff
+    is_cyclic = distance <= cutoff
+    return is_cyclic
 
 
 def has_peptide_and_protein(pdb_contents, peptide_max_length=40):
     """
     Checks whether the PDB (provided as a string) contains exactly two polypeptide chains:
-      1) One chain with fewer than `peptide_max_length` amino acids (a "peptide"),
-      2) One chain with >= `peptide_max_length` amino acids (a "protein").
+      1) One chain with fewer than `peptide_max_length` amino acids,
+      2) One chain with >= `peptide_max_length` amino acids.
 
     Returns:
       (bool, str): 
@@ -51,6 +91,7 @@ def download_and_check_pdb(pdb_id, output_dir, peptide_max_length=40):
     """
     Downloads a PDB from RCSB, checks if it has exactly two chains
     (peptide+protein) using `has_peptide_and_protein`.
+    Also checks if the peptide is cyclic. If so, it is not saved.
     If it meets the condition, saves it to `output_dir`.
 
     :param pdb_id: PDB code (e.g. '1ABC')
@@ -66,7 +107,8 @@ def download_and_check_pdb(pdb_id, output_dir, peptide_max_length=40):
         if response.status_code == 200:
             pdb_text = response.text
             passes, reason = has_peptide_and_protein(pdb_text, peptide_max_length=peptide_max_length)
-            if passes: # Only save if passes criterion
+            is_cyclic = is_peptide_cyclic(io.StringIO(pdb_text))
+            if passes and (not is_cyclic): # Only save if passes criterion
                 file_path = os.path.join(output_dir, f'{pdb_id}.pdb')
                 with open(file_path, 'w') as file:
                     file.write(pdb_text)
@@ -153,5 +195,5 @@ if __name__ == "__main__":
         pdb_ids=peptides_to_parse,
         output_dir=output_dir,
         peptide_max_length=40,
-        max_workers=5
+        max_workers=12
     )
