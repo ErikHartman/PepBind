@@ -25,7 +25,12 @@ def process_pdb(pdb_path):
             traceback.print_exc()
         return None
 
+
+
+
 # Main file to run scoring benchmark
+
+
 
 
 
@@ -50,21 +55,5 @@ if __name__ == "__main__":
     scores_df = pd.DataFrame(all_scores)
     scores_df.set_index('pdb', inplace=True)
 
-    output_dir = os.path.join(data_dir, "scores.csv")
+    output_dir = os.path.join(data_dir, "scores_sasa.csv")
     scores_df.to_csv(output_dir)
-
-
-# Single file processing, to test the process_pdb function which is currently not working
-
-# if __name__ == "__main__":
-#     data_dir = os.path.abspath(
-#         "/srv/data1/general/immunopeptides_data/databases/benchmark_data"
-#     )
-#     pdb_dir = os.path.join(data_dir, "pdbs/6gd5.pdb")
-#     single_score = process_pdb(pdb_dir)
-
-#     if single_score is not None:
-#         single_score_df = pd.DataFrame([single_score])
-#         single_score_df.set_index('pdb', inplace=True)
-#         single_output_path = os.path.join(data_dir, "single_score.csv")
-#         single_score_df.to_csv(single_output_path)
