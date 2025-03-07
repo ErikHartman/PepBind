@@ -40,15 +40,14 @@ if __name__ == "__main__":
 
         from bopep import Docker
         from bopep.docking.utils import extract_sequence_from_pdb
+        from .utils import remove_peptide_from_pdb, compare_binding_site
 
         scorer = Scorer()
         for pdb in pdbs:
-            protein_sequence = extract_sequence_from_pdb(pdb, chain_id="A")
             peptide_sequence = extract_sequence_from_pdb(pdb, chain_id="B")
 
             # We have to remove the peptide from the protein chain to use this as a template when folding with ColabFold
-            protein_template = remove_peptide_from_pdb(pdb, protein_chain="A", peptide_chain="B")
-
+            protein_template = remove_peptide_from_pdb(pdb, protein_chain="A") # implemented in utils
 
             docker_kwargs = {} # Look at implementation in BoPep for how to set this up
             docker = Docker(docker_kwargs)
@@ -60,9 +59,10 @@ if __name__ == "__main__":
             scores = scorer.score(..., colab_path = dock_dir)
 
             # Check if the peptide was docked in the same binding site as the original peptide
-            in_same_binding_site = compare_binding_site(pdb, docking_dir) # Not implemented yet
+            in_same_binding_site, overlap = compare_binding_site(pdb, pdb_docked) # Implemented in utils
 
             scores['in_same_binding_site'] = in_same_binding_site
+            scores['overlap'] = overlap
 
     """
     data_dir = os.path.abspath(
