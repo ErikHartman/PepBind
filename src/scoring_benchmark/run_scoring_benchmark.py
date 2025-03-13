@@ -44,12 +44,12 @@ def benchmark(pdb_path):
     
     docker_kwargs = {
         "num_models": 5,
-        "num_recycles": 3,
-        "recycle_early_stop_tolerance": 0.5,
+        "num_recycles": 10,
+        "recycle_early_stop_tolerance": 0.1,
         "amber": True,
-        "num_relax": 2,
+        "num_relax": 1,
         "pdb_dir": "/srv/data1/general/immunopeptides_data/databases/benchmark_data/pdbs/docked_peptides",
-        "gpu_ids": ["0"],
+        "gpu_ids": ["1"],
         "overwrite_results": False
     }
     docker = Docker(docker_kwargs)
@@ -103,7 +103,10 @@ if __name__ == "__main__":
     
     pdb_files = [os.path.join(data_dir, f) for f in os.listdir(data_dir) if f.endswith('.pdb')]
     for pdb in pdb_files:
-        benchmark(pdb)
+        scores = benchmark(pdb)
+        if scores:
+            scores_df = pd.DataFrame([scores])
+            scores_df.to_csv("benchmark_scores.csv", mode='a', header=not os.path.exists("benchmark_scores.csv"), index=False)
         
 
 
