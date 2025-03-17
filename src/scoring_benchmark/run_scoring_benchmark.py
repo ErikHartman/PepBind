@@ -5,6 +5,7 @@ from bopep.docking.docker import Docker
 from bopep.docking.utils import extract_sequence_from_pdb
 import pandas as pd
 from utils import remove_peptide_from_complex, compare_binding_site
+import re
 
 # Set up logging
 logging.basicConfig(
@@ -87,8 +88,16 @@ def run_benchmark(pdb_path):
             scores_to_include=["interface_sasa", "rosetta_score"], colab_dir=dock_dir
         )
 
+        pdb_pattern = re.compile(
+                r".*_relaxed_rank_001_.*\.pdb"
+            )  
+        docked_top_pdb_file = os.path.join(
+            dock_dir,
+            [f for f in os.listdir(dock_dir) if pdb_pattern.search(f)][0],
+        )
+
         # Compare binding sites
-        in_same_binding_site, overlap = compare_binding_site(pdb_path, dock_dir)
+        in_same_binding_site, overlap = compare_binding_site(pdb_path, docked_top_pdb_file)
         scores["in_same_binding_site"] = in_same_binding_site
         scores["overlap"] = overlap
         scores["pdb_file"] = os.path.basename(pdb_path)
