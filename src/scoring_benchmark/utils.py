@@ -1,6 +1,4 @@
 from Bio.PDB import PDBParser, PDBIO, Select
-import os
-
 
 def remove_peptide_from_complex(pdb_path, output_pdb_path, protein_chain="A"):
     """
@@ -21,7 +19,6 @@ def remove_peptide_from_complex(pdb_path, output_pdb_path, protein_chain="A"):
                 return True  # include
             return False  # exclude
 
-    # Use PDBIO to write out the selected structure
     io = PDBIO()
     io.set_structure(structure)
     io.save(output_pdb_path, select=PeptideRemoverSelect())
@@ -112,8 +109,6 @@ def compare_binding_site(
         overlap_fraction = 0.0
     else:
         overlap_fraction = len(intersection) / len(union)
-
-    # Decide if they're "the same binding site"
     same_site = overlap_fraction >= overlap_threshold
 
     return same_site, overlap_fraction
