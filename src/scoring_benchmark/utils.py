@@ -49,11 +49,9 @@ def get_contact_residues(
         if not residue.id[0] == " ":  # Standard residues have id[0] == " "
             continue
         for atom in residue:
-            # If any atom of this residue is within cutoff of any peptide atom, mark contact
             for pep_atom in peptide_atoms:
                 dist = atom - pep_atom  # operator- gives distance
                 if dist <= cutoff:
-                    # We store (chain_id, (resname, resseq, icode)) or something simpler
                     contact_residues.add((protein_chain_id, residue.id[1]))
                     # Break to avoid double-counting the same residue
                     break
@@ -112,3 +110,28 @@ def compare_binding_site(
     same_site = overlap_fraction >= overlap_threshold
 
     return same_site, overlap_fraction
+
+def get_interface_residues_in_pdb(
+    pdb_path,
+    protein_chain="A",
+    peptide_chain="B",
+    cutoff=4.0
+):
+    """
+    Given a PDB file with a protein (chain A) and a peptide (chain B),
+    return the residue indices on the protein chain within 'cutoff'
+    angstroms of the peptide.
+    """
+    parser = PDBParser(QUIET=True)
+    structure = parser.get_structure("complex", pdb_path)
+
+    contact_residues = get_contact_residues(
+        structure, 
+        protein_chain_id=protein_chain, 
+        peptide_chain_id=peptide_chain, 
+        cutoff=cutoff
+    )
+    
+    residue_indices = sorted([res_id for (_, res_id) in contact_residues])
+    
+    return residue_indices
