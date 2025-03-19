@@ -64,58 +64,11 @@ def get_contact_residues(
     return contact_residues
 
 
-def compare_binding_site(
-    pdb1_path,
-    pdb2_path,
-    protein_chain="A",
-    peptide_chain="B",
-    distance_cutoff=4.0,
-    overlap_threshold=0.5,
-):
-    """
-    Compare the binding sites of two complexes (same sequences, different poses).
-    We define "binding site" as the set of protein residues within 'distance_cutoff'
-    angstroms of the peptide.
-
-    Then we compare the overlap of these residues in structure 1 vs. structure 2.
-    """
-
-    # Parse PDB structures
-    parser = PDBParser(QUIET=True)
-    structure1 = parser.get_structure("complex1", pdb1_path)
-    structure2 = parser.get_structure("complex2", pdb2_path)
-
-    # Identify contact residues in each structure
-    contact_residues_1 = get_contact_residues(
-        structure1,
-        protein_chain_id=protein_chain,
-        peptide_chain_id=peptide_chain,
-        cutoff=distance_cutoff,
-    )
-    contact_residues_2 = get_contact_residues(
-        structure2,
-        protein_chain_id=protein_chain,
-        peptide_chain_id=peptide_chain,
-        cutoff=distance_cutoff,
-    )
-
-    # Compute overlap
-    intersection = contact_residues_1.intersection(contact_residues_2)
-    union = contact_residues_1.union(contact_residues_2)
-
-    if len(union) == 0:
-        overlap_fraction = 0.0
-    else:
-        overlap_fraction = len(intersection) / len(union)
-    same_site = overlap_fraction >= overlap_threshold
-
-    return same_site, overlap_fraction
-
 def get_interface_residues_in_pdb(
     pdb_path,
     protein_chain="A",
     peptide_chain="B",
-    cutoff=4.0
+    cutoff=5.0
 ):
     """
     Given a PDB file with a protein (chain A) and a peptide (chain B),

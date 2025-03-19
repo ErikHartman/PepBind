@@ -6,10 +6,8 @@ from bopep.docking.utils import extract_sequence_from_pdb
 import pandas as pd
 from utils import (
     remove_peptide_from_complex,
-    compare_binding_site,
     get_interface_residues_in_pdb,
 )
-import re
 
 # Set up logging
 logging.basicConfig(
@@ -85,13 +83,10 @@ def run_benchmark(pdb_path):
         docker = Docker(docker_kwargs)
         docker.set_target_structure(protein_template_path)
         dock_dir = docker.dock_peptides([peptide_sequence])[0]
-        pdb_pattern = re.compile(r".*_relaxed_rank_001_.*\.pdb")
-        docked_top_pdb_file = os.path.join(
-            dock_dir,
-            [f for f in os.listdir(dock_dir) if pdb_pattern.search(f)][0],
-        )
 
         binding_site_residues = get_interface_residues_in_pdb(pdb_path)
+        # I realized that we actually don't need the compare_binding_sites function!
+        # Since we can use the in_binding_site with the binding_site_residues in the scorer :) 
 
         # Score results
         scorer = Scorer()
@@ -101,13 +96,6 @@ def run_benchmark(pdb_path):
             binding_site_residue_indices=binding_site_residues,
         )
         scores = scores[peptide_sequence]
-
-        # Compare binding sites
-        in_same_binding_site, overlap = compare_binding_site(
-            pdb_path, docked_top_pdb_file
-        )
-        scores["in_same_binding_site"] = in_same_binding_site
-        scores["overlap"] = overlap
         scores["pdb_file"] = os.path.basename(pdb_path)
         scores["peptide_sequence"] = peptide_sequence
 
