@@ -88,3 +88,32 @@ def get_interface_residues_in_pdb(
     residue_indices = sorted([res_id for (_, res_id) in contact_residues])
     
     return residue_indices
+
+
+def ensure_peptide_is_chain_b(pdb_path, output_pdb_path):
+    parser = PDBParser(QUIET=True)
+    structure = parser.get_structure("complex", pdb_path)
+    model = structure[0]
+    
+    # Determine chain lengths (only counting standard residues)
+    chain_lengths = {}
+    for chain in model:
+        length = sum(1 for r in chain.get_residues() if r.id[0] == " ")
+        chain_lengths[chain.id] = length
+    
+    # Identify shortest chain as new 'B' and another chain as 'A'
+    sorted_chains = sorted(chain_lengths.items(), key=lambda x: x[1])
+    peptide_chain_id = sorted_chains[0][0]
+    protein_chain_id = sorted_chains[-1][0]
+    
+    # Rename chain IDs if needed
+    for chain in model:
+        if chain.id == peptide_chain_id:
+            chain.id = "B"
+        elif chain.id == protein_chain_id:
+            chain.id = "A"
+            
+    io = PDBIO()
+    io.set_structure(structure)
+    io.save(output_pdb_path)
+    return output_pdb_path
