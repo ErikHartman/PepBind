@@ -4,7 +4,7 @@
 
 ### SLURM PARAMETERS ###
 
-#SBATCH --account=er8813ha
+#SBATCH --account=ma7631si
 #SBATCH --job-name="scoring_benchmark"
 #SBATCH --output="scoring_benchmark.out"
 #SBATCH --error="scoring_benchmark.err"
@@ -17,4 +17,4 @@
 
 ### RUN COMMAND ###
 # Add more commands here for the main script if necessary.
-/srv/data1/general/immunopeptides_data/erik-venv/bin/python /home/er8813ha/immunopeptides/src/scoring_benchmark/run_scoring_benchmark.py
+/srv/data1/general/immunopeptides_data/erik-venv/bin/python /home/ma7631si/immunopeptides/src/scoring_benchmark/run.py

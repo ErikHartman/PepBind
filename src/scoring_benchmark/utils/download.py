@@ -10,14 +10,8 @@ from Bio.PDB import PDBParser
 from Bio.PDB.Polypeptide import is_aa
 import numpy as np
 
-try: 
-    load_dotenv()
-    DATA_DIR = os.getenv("DATA_DIR")
-except:
-    raise Exception("Please set the DATA_DIR environment variable.")
+from ..run import output_dir, INDEX_dir
 
-INDEX_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "index"))
-output_dir = os.path.abspath(os.path.join(DATA_DIR, "databases/benchmark_data/new_run"))
 
 
 
@@ -74,7 +68,7 @@ def filter_large_binders(df, max_length=40):
         if "(" in ligand_name and "-mer)" in ligand_name:
             try:
                 x = int(ligand_name.split("-mer")[0].split("(")[-1])
-                return x <= 40
+                return x <= max_length
             except ValueError:
                 return True
         return True

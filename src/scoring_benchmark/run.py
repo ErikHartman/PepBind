@@ -4,54 +4,52 @@ import pandas as pd
 from dotenv import load_dotenv
 
 from utils.plots import plot_peptide_lengths
-from utils.preprocessing import clean_pdbs
-from utils.download import {
-    download_pdbs
-    load_files
-}
+from utils.preprocessing import preprocess_pdbs
+from utils.download import (
+    load_files, 
+    download_pdbs    
+)
+from utils.scoring import run_benchmark
+from utils.lasso import run_lasso
 
-# Loads path to the data directory specified by the user in the .env file
+# Loads path to the data directory specified by the user in the .env file. Otherwise defaults to the specified path.
 try: 
     load_dotenv()
-    DATA_DIR = os.getenv("DATA_DIR")
+    DATA_DIR = os.getenv("DATA_DIR", "/srv/data1/general/immunopeptides_data/")
 except:
     raise Exception("Please set the DATA_DIR environment variable.")
 
 INDEX_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "index"))
 output_dir = os.path.abspath(os.path.join(DATA_DIR, "databases/benchmark_data/new_run"))
+unprocessed_dir = os.path.join(output_dir, "0_unprocessed")
+preprocessed_dir = os.path.join(output_dir, "1_preprocessed")
+scored_dir = os.path.join(output_dir, "2_scored")
 
+max_peptide_length = 40
 
+def main():
+    df_filtered = load_files()
+    pdbs_dir = download_pdbs(df_filtered, max_peptide_length)
+    print(f"Downloaded PDB files and removed peptides longer than {max_peptide_length} amino acids.")
 
-def preprocess_pdbs_dir(pdbs_dir):
-    clean_pdbs(pdbs_dir)
-    print("PDB files downloaded and preprocessed.")
+    print("Commencing preprocessing of PDB files...")
+    
+    preprocess_pdbs(unprocessed_dir, preprocessed_dir)
+    print("Preprocessing completed.")
     print(f"Number of PDB files: {len(os.listdir(pdbs_dir))}")
+    plot_peptide_lengths(preprocessed_dir)
+    print("Peptide length distribution plot saved.")
+
+    print("Commencing docking and scoring benchmark...")
+    run_benchmark(preprocessed_dir, output_dir) 
+    print("Benchmark completed.")
+
+    run_lasso(scored_dir, output_dir) # Only stub for now
+    print("LASSO model completed.")
+
+
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run the scoring benchmark workflow.")
-    parser.add_argument('-d', '--download', action='store_true', help='Parse INDEX files and downloads the PDB files')
-    parser.add_argument('-plt', '--plot', action='store_true', help='Plot peptide lengths')
-    parser.add_argument('--skip_preprocess', action='store_true', help='Skip preprocessing of PDB files')
+    main()
+    
 
-    args = parser.parse_args()
-
-    if args.download:
-        df_filtered = load_files()
-        pdbs_dir = download_pdbs(df_filtered)
-    if not args.skip_preprocess:
-        if 'pdbs_dir' not in locals():
-            if 'df_filtered' not in locals():
-                df_filtered = load_files()
-            pdbs_dir = download_pdbs(df_filtered)
-        preprocess_pdbs_dir(pdbs_dir)
-    if args.plot:
-        pdbs_dir = os.path.join(output_dir, "pdbs")
-        if pdbs_dir is None:
-            raise Exception("PDB directory is empty.")
-        plot_peptide_lengths(pdbs_dir)
-
-    if not any(vars(args).values()):
-        df_filtered = load_files()
-        pdbs_dir = download_pdbs(df_filtered)
-        preprocess_pdbs_dir(pdbs_dir)
-        plot_peptide_lengths(pdbs_dir)
