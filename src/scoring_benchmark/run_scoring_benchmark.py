@@ -4,7 +4,7 @@ from bopep import Scorer
 from bopep.docking.docker import Docker
 from bopep.docking.utils import extract_sequence_from_pdb
 import pandas as pd
-from utils import (
+from utils.scoring import (
     remove_peptide_from_complex,
     get_interface_residues_in_pdb,
 )

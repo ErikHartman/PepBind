@@ -3,13 +3,21 @@ import io
 import requests
 from concurrent.futures import ThreadPoolExecutor
 import pandas as pd
+from dotenv import load_dotenv
 
 from Bio import PDB
 from Bio.PDB import PDBParser
 from Bio.PDB.Polypeptide import is_aa
 import numpy as np
 
+try: 
+    load_dotenv()
+    DATA_DIR = os.getenv("DATA_DIR")
+except:
+    raise Exception("Please set the DATA_DIR environment variable.")
 
+INDEX_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "index"))
+output_dir = os.path.abspath(os.path.join(DATA_DIR, "databases/benchmark_data/new_run"))
 
 
 
@@ -152,7 +160,7 @@ def has_peptide_and_protein(pdb_contents, peptide_max_length=40):
     return True, "meets_condition"
 
 
-def download_and_check_pdb(pdb_id, output_dir, peptide_max_length=40):
+def rcsb_pdb_downloader(pdb_id, output_dir, peptide_max_length=40):
     """
     Downloads a PDB from RCSB, checks if it has exactly two chains
     (peptide+protein) using `has_peptide_and_protein`.
@@ -188,7 +196,7 @@ def download_and_check_pdb(pdb_id, output_dir, peptide_max_length=40):
         return False, f"download_exception_{str(e)}"
 
 
-def download_pdbs_in_batch(pdb_ids, output_dir, peptide_max_length=40, max_workers=5, overwrite=False):
+def parallell_download(pdb_ids, output_dir, peptide_max_length=40, max_workers=5, overwrite=False):
     """
     Downloads multiple PDB IDs in parallel (up to `max_workers` threads),
     checks if each meets the "peptide+protein" condition, and saves only
@@ -211,7 +219,7 @@ def download_pdbs_in_batch(pdb_ids, output_dir, peptide_max_length=40, max_worke
         file_path = os.path.join(output_dir, f'{pdb_id}.pdb')
         if not overwrite and os.path.exists(file_path):
             return pdb_id, False, "already_exists"
-        did_save, reason = download_and_check_pdb(
+        did_save, reason = rcsb_pdb_downloader(
             pdb_id=pdb_id,
             output_dir=output_dir,
             peptide_max_length=peptide_max_length
@@ -239,4 +247,25 @@ def download_pdbs_in_batch(pdb_ids, output_dir, peptide_max_length=40, max_worke
 
 
 
+def load_files():
 
+    """ 
+    Loads the PDB-bind INDEX files and filters out large binders (> 40 residues).
+    """
+    protein_ligands = os.path.join(INDEX_dir, "INDEX_PL.2020")
+    protein_protein = os.path.join(INDEX_dir, "INDEX_PP.2020")
+    df_pl = convert_to_dataframe(protein_ligands)
+    df_pp = convert_to_dataframe(protein_protein)
+    df = pd.concat([df_pl, df_pp])
+    df_filtered = filter_large_binders(df)
+    print("Loaded INDEX files and removed large binders.")
+    print(df_filtered.head())
+    return df_filtered
+
+def download_pdbs(df_filtered):
+    pdbs_dir = os.path.join(output_dir, "pdbs")
+    if not os.listdir(pdbs_dir):
+        parallell_download(df_filtered["PDB code"], pdbs_dir)
+    else:
+        print(f"{pdbs_dir} is not empty. Skipping download.")
+    return pdbs_dir
