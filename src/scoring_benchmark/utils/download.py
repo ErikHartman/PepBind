@@ -10,7 +10,6 @@ from Bio.PDB import PDBParser
 from Bio.PDB.Polypeptide import is_aa
 import numpy as np
 
-from ..run import output_dir, INDEX_dir
 
 
 
@@ -241,25 +240,45 @@ def parallell_download(pdb_ids, output_dir, peptide_max_length=40, max_workers=5
 
 
 
-def load_files():
-
-    """ 
-    Loads the PDB-bind INDEX files and filters out large binders (> 40 residues).
+def download_pdbs(input_dir, output_dir, max_peptide_length=40):
     """
-    protein_ligands = os.path.join(INDEX_dir, "INDEX_PL.2020")
-    protein_protein = os.path.join(INDEX_dir, "INDEX_PP.2020")
+    Loads the PDB-bind INDEX files, filters out large binders (> 40 residues by default)
+    and downloads the filtered PDB files.
+    
+    Args:
+        input_dir: Directory containing the PDB-bind INDEX files
+        output_dir: Directory where PDB files should be saved
+        
+    """
+    # Load and filter INDEX files
+    protein_ligands = os.path.join(input_dir, "INDEX_PL.2020")
+    protein_protein = os.path.join(input_dir, "INDEX_PP.2020")
     df_pl = convert_to_dataframe(protein_ligands)
     df_pp = convert_to_dataframe(protein_protein)
     df = pd.concat([df_pl, df_pp])
-    df_filtered = filter_large_binders(df)
-    print("Loaded INDEX files and removed large binders.")
+    df_filtered = filter_large_binders(df, max_peptide_length)
+    print(f"Downloaded PDB files and removed peptides longer than {max_peptide_length} amino acids.")
     print(df_filtered.head())
-    return df_filtered
-
-def download_pdbs(df_filtered):
+    
+    
     pdbs_dir = os.path.join(output_dir, "pdbs")
+    os.makedirs(pdbs_dir, exist_ok=True)
+    
+
+    # Skip downloading if the pdbs_dir already has files and moves on to the next step
     if not os.listdir(pdbs_dir):
         parallell_download(df_filtered["PDB code"], pdbs_dir)
     else:
-        print(f"{pdbs_dir} is not empty. Skipping download.")
-    return pdbs_dir
+        print(f"{pdbs_dir} has files. Assuming download complete and skipping...")
+
+    
+    pdbs_dir_files = os.listdir(pdbs_dir)
+    pdb_codes_in_pdbs_dir = [f.split(".")[0] for f in pdbs_dir_files]
+    df_filtered = df_filtered[df_filtered["PDB code"].isin(pdb_codes_in_pdbs_dir)]
+    
+   
+    df_filtered.to_csv(os.path.join(output_dir, "pdbs.csv"), index=False)
+
+    return None
+    
+    
