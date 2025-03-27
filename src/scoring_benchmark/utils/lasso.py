@@ -1,5 +1,4 @@
-import os
-import lasso
+
 
 
 
@@ -11,7 +10,7 @@ import lasso
 
 
 #Not done yet
-def compute_lasso(data, target, alpha, max_iter=1000, tol=1e-4):
+def run_lasso(data, target, alpha, max_iter=1000, tol=1e-4):
     """
     Compute Lasso regression with given data and target.
 
