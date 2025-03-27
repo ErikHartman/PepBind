@@ -131,8 +131,8 @@ def benchmark_pdb(pdb_path, output_dir):
     """
     try:
         # Define output directories
-        protein_template_dir = os.path.join(output_dir, "/pdbs/stripped_protein_templates")
-        docked_peptides_dir = os.path.join(output_dir, "/pdbs/docked_peptides")
+        protein_template_dir = os.path.join(output_dir, "pdbs/stripped_protein_templates")
+        docked_peptides_dir = os.path.join(output_dir, "pdbs/docked_peptides")
 
         # Ensure directories exist
         ensure_dir_exists(protein_template_dir)
@@ -184,8 +184,12 @@ def benchmark_pdb(pdb_path, output_dir):
 
         # Score results
         scorer = Scorer()
+        # Get all available scores except distance_to_peptide
+        scores_to_include = [score for score in scorer.available_scores if score != "distance_score"]
+        
+        # Score results with the filtered list
         scores = scorer.score(
-            scores_to_include=scorer.available_scores,
+            scores_to_include=scores_to_include,
             colab_dir=dock_dir,
             binding_site_residue_indices=binding_site_residues,
         )
