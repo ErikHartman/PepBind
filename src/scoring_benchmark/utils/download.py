@@ -167,6 +167,7 @@ def rcsb_pdb_downloader(pdb_id, output_dir, peptide_max_length=40):
              did_save is True if PDB was saved, False otherwise.
              reason is "meets_condition" or the reason for exclusion.
     """
+    
     url = f'https://files.rcsb.org/download/{pdb_id}.pdb'
     try:
         response = requests.get(url)
@@ -201,6 +202,7 @@ def parallell_download(pdb_ids, output_dir, peptide_max_length=40, max_workers=5
     :param max_workers: number of parallel downloads
     :param overwrite: if False, skip downloading PDBs that already exist in output_dir
     """
+
     os.makedirs(output_dir, exist_ok=True)
     results = []
 
@@ -265,7 +267,7 @@ def download_pdbs(input_dir, output_dir, max_peptide_length=40):
     os.makedirs(pdbs_dir, exist_ok=True)
     
 
-    # Skip downloading if the pdbs_dir already has files and moves on to the next step
+    
     if not os.listdir(pdbs_dir):
         parallell_download(df_filtered["PDB code"], pdbs_dir)
     else:

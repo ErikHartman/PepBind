@@ -57,6 +57,10 @@ def select_first_model(input_folder, output_folder):
 
 
 def ensure_peptide_is_chain_b(pdb_path, output_pdb_path):
+    from Bio.PDB.Structure import Structure
+    from Bio.PDB.Model import Model
+    from Bio.PDB.Chain import Chain
+    
     parser = PDBParser(QUIET=True)
     structure = parser.get_structure("complex", pdb_path)
     model = structure[0]
@@ -72,15 +76,29 @@ def ensure_peptide_is_chain_b(pdb_path, output_pdb_path):
     peptide_chain_id = sorted_chains[0][0]
     protein_chain_id = sorted_chains[-1][0]
     
-    # Rename chain IDs if needed
+    # Create a new structure with renamed chains
+    new_structure = Structure("complex")
+    new_model = Model(0)
+    new_structure.add(new_model)
+    
     for chain in model:
+        new_chain = Chain("")
         if chain.id == peptide_chain_id:
-            chain.id = "B"
+            new_chain.id = "B"
         elif chain.id == protein_chain_id:
-            chain.id = "A"
+            new_chain.id = "A"
+        else:
+            # Skip or assign a different ID if needed
+            continue
             
+        # Copy all residues to the new chain
+        for residue in chain:
+            new_chain.add(residue.copy())
+            
+        new_model.add(new_chain)
+    
     io = PDBIO()
-    io.set_structure(structure)
+    io.set_structure(new_structure)
     io.save(output_pdb_path)
     return output_pdb_path
 
@@ -149,6 +167,13 @@ def preprocess_pdbs(input_dir, output_dir):
     
     valid_count = len([f for f in error_files if not f])
     error_count = len([f for f in error_files if f])
+
+
+    # Ensure peptide is in chain B
+    for pdb_file in pdb_files:
+        output_pdb_path = os.path.join(output_pdb_folder, os.path.basename(pdb_file))
+        ensure_peptide_is_chain_b(pdb_file, output_pdb_path)
+
 
     # Using the pdbs.csv from the input directory, filter out the files that are not in the output directory and output the new file to the output directory
     # This is to ensure that the pdbs.csv file is in sync with the PDB files in the output directory
