@@ -6,7 +6,7 @@ from utils.plots import plot_peptide_lengths
 from utils.preprocessing import preprocess_pdbs
 from utils.download import download_pdbs    
 from utils.scoring import run_benchmark
-from utils.lasso import run_lasso
+
 
 # Loads path to the data directory specified by the user in the .env file. Otherwise defaults to the specified path.
 try: 
@@ -38,7 +38,7 @@ def main():
     print("Peptide length distribution plot saved.")
 
     print("Commencing docking and scoring benchmark...")
-    # run_benchmark(preprocessed_dir, scored_dir) 
+    run_benchmark(os.path.join(preprocessed_dir, 'pdbs'), scored_dir) 
     print("Benchmark completed.")
 
     # run_lasso(scored_dir, output_dir) # Only stub for now
