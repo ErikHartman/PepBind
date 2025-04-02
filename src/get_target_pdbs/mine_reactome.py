@@ -12,13 +12,14 @@ pathways = {
     "TNFR2 non-canonical NF-kB pathway": "R-HSA-5668541",
 }
 
-data_dir = os.path.abspath("/srv/data1/general/immunopeptides_data/")
+data_dir = os.path.abspath("/srv/data1/general/immunopeptides_data")
+output_dir = os.path.abspath(os.path.join(data_dir, "outputs/target_data"))
+
+os.makedirs(output_dir, exist_ok=True)
 
 input_file = os.path.join(
-    data_dir, "databases/target_data/0_uniprot2reactome_all_levels_2024_02_04.txt"
+    data_dir, "inputs/0_uniprot2reactome_all_levels_2024_02_04.txt"
 )
-
-print(input_file)
 
 uniprot2reactome = pd.read_csv(
     input_file,
@@ -97,10 +98,6 @@ for uid in tqdm(uniprot_ids, desc="Processing UniProt IDs"):
             uniProtkbIds.append(uniProtkbId)
     # time.sleep(0.1)
 
-print("Extracellular proteins:")
-print(uniProtkbIds)
-
-
 info_df = pd.DataFrame(
     {"uniprot": extracellular_ids, "fullName": fullNames, "uniProtkbId": uniProtkbIds}
 )
@@ -115,15 +112,15 @@ print(extracellular_df)
 
 extracellular_df.to_csv(
     os.path.join(
-        data_dir,
-        "databases/target_data/1_uniprot2reactome_all_levels_2024_02_04_extracellular_cell_membrane.txt",
+        output_dir,
+        "1_uniprot2reactome_all_levels_2024_02_04_extracellular_cell_membrane.txt",
     ),
     index=False,
     sep="\t",
 )
 
 info_df.to_csv(
-    os.path.join(data_dir, "databases/target_data/1_proteins_extracellular_cell_membrane.txt"),
+    os.path.join(output_dir, "1_proteins_extracellular_cell_membrane.txt"),
     index=False,
     sep="\t",
 )
