@@ -1,37 +1,47 @@
 import os
 import pyrosetta
 from concurrent.futures import ThreadPoolExecutor
+from typing import List, Optional, Tuple
 from Bio.PDB import PDBParser, PDBIO
+from Bio.PDB.Structure import Structure
+from Bio.PDB.Model import Model
+from Bio.PDB.Chain import Chain
+
+"""
+Utils for preprocessing PDB files for PyRosetta compatibility.
+This includes selecting the first model from NMR structures,
+checking for PyRosetta errors, and ensuring peptide chains are correctly labeled.
+"""
 
 
-
-def is_rosetta_error(pdb_file):
+def is_rosetta_error(pdb_file: str) -> bool:
     """ 
-    
     Checks if the PDB file throws an error when loaded with PyRosetta 
     
-    :param pdb_file: Path to the PDB file
-    :return: True if an error is thrown, False otherwise
-
+    Args:
+        pdb_file: Path to the PDB file
+    
+    Returns:
+        True if an error is thrown, False otherwise
     """
     # Initialize PyRosetta with mute option to suppress all output. Turn on if needed for debugging.
-    pyrosetta.init(options="-mute all")
+    
     try:
         pyrosetta.pose_from_file(pdb_file)
         return False
-    except Exception as e:
+    except Exception:
         return True
 
 
-def select_first_model(input_folder, output_folder):
+def select_first_model(input_folder: str, output_folder: Optional[str] = None) -> None:
     """
     Selects the first model from NMR structures in the PDB files if multiple,
     and writes the result to the output folder instead of modifying original files.
 
-    :param input_folder: Path to the folder containing the PDB files
-    :param output_folder: Path to the folder where processed files will be saved
-                         
-    :return: None
+    Args:
+        input_folder: Path to the folder containing the PDB files
+        output_folder: Path to the folder where processed files will be saved
+                      (defaults to a new folder to avoid overwriting)
     """
     # Create a default output folder to avoid overwriting input files
     if output_folder is None or output_folder == input_folder:
@@ -51,16 +61,20 @@ def select_first_model(input_folder, output_folder):
                 if line.startswith("ENDMDL"):
                     break
                 file.write(line)
-    return None
 
 
-
-
-def ensure_peptide_is_chain_b(pdb_path, output_pdb_path):
-    from Bio.PDB.Structure import Structure
-    from Bio.PDB.Model import Model
-    from Bio.PDB.Chain import Chain
+def ensure_peptide_is_chain_b(pdb_path: str, output_pdb_path: str) -> str:
+    """
+    Ensures that the shortest chain is labeled as chain B (peptide) and
+    the longest chain is labeled as chain A (protein).
     
+    Args:
+        pdb_path: Path to the input PDB file
+        output_pdb_path: Path to save the output PDB file
+    
+    Returns:
+        Path to the output PDB file
+    """
     parser = PDBParser(QUIET=True)
     structure = parser.get_structure("complex", pdb_path)
     model = structure[0]
@@ -68,8 +82,8 @@ def ensure_peptide_is_chain_b(pdb_path, output_pdb_path):
     # Determine chain lengths (only counting standard residues)
     chain_lengths = {}
     for chain in model:
-        length = sum(1 for r in chain.get_residues() if r.id[0] == " ")
-        chain_lengths[chain.id] = length
+        residue_count = sum(1 for residue in chain.get_residues() if residue.id[0] == " ")
+        chain_lengths[chain.id] = residue_count
     
     # Identify shortest chain as new 'B' and another chain as 'A'
     sorted_chains = sorted(chain_lengths.items(), key=lambda x: x[1])
@@ -103,31 +117,16 @@ def ensure_peptide_is_chain_b(pdb_path, output_pdb_path):
     return output_pdb_path
 
 
-
-def preprocess_pdbs(input_dir, output_dir):
+def process_pdbs(input_dir: str, output_dir: str) -> None:
     """
     Preprocess PDB files by selecting the first NMR model from each file and checking for Rosetta compatibility.
     This function takes PDB files from the input directory, extracts the first model from each file,
     saves these models to the output directory, and then removes any files that cause errors when processed
     with Rosetta.
     
-    Parameters:
-    ----------
-    input_dir : str
-        Path to the input directory containing a "pdbs" subdirectory with PDB files to process.
-    output_dir : str
-        Path to the directory where processed PDB files will be saved in a "pdbs" subdirectory.
-    
-    Returns:
-    -------
-    None
-        The function doesn't return any value but prints information about the processing results.
-    
-    Notes:
-    -----
-    - Uses multithreading (up to 72 workers) to check Rosetta compatibility in parallel
-    - Removes PDB files that cause Rosetta errors
-    - Prints summary statistics of valid and error files
+    Args:
+        input_dir: Path to the input directory containing a "pdbs" subdirectory with PDB files to process
+        output_dir: Path to the directory where processed PDB files will be saved in a "pdbs" subdirectory
     """
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
@@ -139,57 +138,60 @@ def preprocess_pdbs(input_dir, output_dir):
     select_first_model(input_pdb_folder, output_pdb_folder)
     print("First models selected from all cleaned PDB files")
 
-    # Dumps single model PDBs to output directory where we then check for Rosetta compatibility
-
+    # Find all PDB files in output directory
     pdb_files = [
-        os.path.join(output_pdb_folder, f)
-        for f in os.listdir(output_pdb_folder)
-        if f.endswith(".pdb")
+        os.path.join(output_pdb_folder, filename)
+        for filename in os.listdir(output_pdb_folder)
+        if filename.endswith(".pdb")
     ]
     
-    # Check for Rosetta compatibility
-
-
+    # Check for Rosetta compatibility in parallel
     with ThreadPoolExecutor(max_workers=72) as executor:
-        
-        error_files = list(executor.map(is_rosetta_error, pdb_files))
+        error_results = list(executor.map(is_rosetta_error, pdb_files))
         print("Files that Rosetta throws an error for:")
-        for pdb_file, is_error in zip(pdb_files, error_files):
-            if is_error:
+        for pdb_file, has_error in zip(pdb_files, error_results):
+            if has_error:
                 print(pdb_file)
-
     
-    
-    for pdb_file, is_error in zip(pdb_files, error_files):
-        if is_error:
+    # Remove files with Rosetta errors
+    for pdb_file, has_error in zip(pdb_files, error_results):
+        if has_error:
             os.remove(pdb_file)
             print(f"Removed {pdb_file}")
     
-    valid_count = len([f for f in error_files if not f])
-    error_count = len([f for f in error_files if f])
+    valid_count = len([result for result in error_results if not result])
+    error_count = len([result for result in error_results if result])
 
-
-    # Ensure peptide is in chain B
-    for pdb_file in pdb_files:
+    # Ensure peptide is in chain B for all remaining files
+    remaining_pdb_files = [
+        os.path.join(output_pdb_folder, filename)
+        for filename in os.listdir(output_pdb_folder)
+        if filename.endswith(".pdb")
+    ]
+    
+    for pdb_file in remaining_pdb_files:
         output_pdb_path = os.path.join(output_pdb_folder, os.path.basename(pdb_file))
         ensure_peptide_is_chain_b(pdb_file, output_pdb_path)
 
-
-    # Using the pdbs.csv from the input directory, filter out the files that are not in the output directory and output the new file to the output directory
-    # This is to ensure that the pdbs.csv file is in sync with the PDB files in the output directory
+    # Update pdbs.csv file to reflect only valid PDB files
     pdbs_csv_path = os.path.join(input_dir, "pdbs.csv")
     if os.path.exists(pdbs_csv_path):
         with open(pdbs_csv_path, "r") as f:
-            pdbs_csv = f.readlines()
-        pdbs_csv = [line for line in pdbs_csv if line.strip().split(",")[0] + ".pdb" in os.listdir(output_pdb_folder)]
+            pdbs_csv_lines = f.readlines()
+        
+        valid_pdb_filenames = set(os.listdir(output_pdb_folder))
+        filtered_csv_lines = [
+            line for line in pdbs_csv_lines 
+            if line.strip().split(",")[0] + ".pdb" in valid_pdb_filenames
+        ]
+        
         with open(os.path.join(output_dir, "pdbs.csv"), "w") as f:
-            f.writelines(pdbs_csv)
+            f.writelines(filtered_csv_lines)
     else:
         print(f"No pdbs.csv file found in {input_dir}")
 
     # Report results
     print(f"Kept {valid_count} valid files in {output_pdb_folder}")
     print(f"Removed {error_count} files with Rosetta errors")
-    return None
 
 
