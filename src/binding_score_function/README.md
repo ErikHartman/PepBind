@@ -22,7 +22,7 @@ The data used in this benchmark is based on the collection on <http://www.pdbbin
 
 ### Project Structure
 
-- `complete_run.py`: Main script that orchestrates the entire workflow
+- `get_target_pdbs.py`: Main script that orchestrates the entire workflow
 - `utils/`: Directory containing utility modules:
   - `download_pdbs.py`: Functions for downloading PDB files
   - `preprocessing.py`: Functions for preprocessing PDB files
