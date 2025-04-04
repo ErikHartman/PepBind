@@ -328,5 +328,7 @@ def download_pdbs(
     
     df_downloaded = df_filtered[df_filtered["PDB code"].isin(downloaded_pdb_codes)]
     df_downloaded.to_csv(os.path.join(output_pdb_dir, "pdbs.csv"), index=False)
+
+    print(f"Filtered PDB files saved to {os.path.join(output_pdb_dir, 'pdbs.csv')}")
     
     print(f"Successfully downloaded {len(downloaded_pdb_codes)} PDB files.")

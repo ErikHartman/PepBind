@@ -6,7 +6,8 @@ from bopep import Scorer
 from bopep.docking.docker import Docker
 from bopep.docking.utils import extract_sequence_from_pdb
 import pandas as pd
-
+from concurrent.futures import ThreadPoolExecutor
+import threading
 
 """
 Utils for scoring and peptide-protein docking
@@ -237,13 +238,16 @@ def dock_and_score_all_pdbs(
     docking_config: Dict[str, Any]
 ) -> None:
     """
-    Run the docking and scoring on all PDB files in the specified directory.
+    Run the docking and scoring on all PDB files in the specified directory,
+    utilizing multiple GPUs for parallel processing.
 
     Args:
         input_pdb_dir: Path to the directory containing PDB files to process
         processed_file_dir: Path to the output directory for processed files
         docking_config: Configuration parameters for the docking process
+                       (including gpu_ids for parallel processing)
     """
+
     if not os.path.exists(input_pdb_dir):
         logger.error(f"Data directory does not exist: {input_pdb_dir}")
         exit(1)
@@ -258,18 +262,47 @@ def dock_and_score_all_pdbs(
     ]
     logger.info(f"Number of PDB files to dock and score: {len(pdb_files)}")
 
-    for i, pdb_file in enumerate(pdb_files):
-        logger.info(f"Processing file {i+1}/{len(pdb_files)}: {os.path.basename(pdb_file)}")
-        scores = score_pdb(pdb_file, processed_file_dir, docking_config)
-        if scores:
-            scores_df = pd.DataFrame([scores])
-            scores_df.to_csv(
-                results_file,
-                mode="a",
-                header=not os.path.exists(results_file),
-                index=False,
-            )
-        else:
-            logger.warning(f"No scores obtained for {pdb_file}")
+    gpu_ids = docking_config.get("gpu_ids", ["0"])
+    num_gpus = len(gpu_ids)
+    logger.info(f"Using {num_gpus} GPUs for parallel processing: {gpu_ids}")
 
-    logger.info("Scoring completed")
+    # Create a lock for thread-safe CSV writing
+    results_lock = threading.Lock()
+
+    # Process a single PDB file with a specific GPU
+    def process_file(args):
+        idx, pdb_file = args
+        gpu_id = gpu_ids[idx % num_gpus]
+        
+        gpu_docking_config = docking_config.copy()
+        gpu_docking_config["gpu_ids"] = [gpu_id]
+        
+        logger.info(f"Processing file {idx+1}/{len(pdb_files)}: {os.path.basename(pdb_file)} on GPU {gpu_id}")
+        try:
+            scores = score_pdb(pdb_file, processed_file_dir, gpu_docking_config)
+            if scores:
+                with results_lock:
+                    scores_df = pd.DataFrame([scores])
+                    scores_df.to_csv(
+                        results_file,
+                        mode="a",
+                        header=not os.path.exists(results_file),
+                        index=False,
+                    )
+                return True
+            else:
+                logger.warning(f"No scores obtained for {pdb_file}")
+                return False
+        except Exception as e:
+            logger.error(f"Error processing {os.path.basename(pdb_file)} on GPU {gpu_id}: {str(e)}", exc_info=True)
+            return False
+
+    successful_files = 0
+    with ThreadPoolExecutor(max_workers=num_gpus) as executor:
+        tasks = [(i, pdb_file) for i, pdb_file in enumerate(pdb_files)]
+        
+        for result in executor.map(process_file, tasks):
+            if result:
+                successful_files += 1
+    
+    logger.info(f"Scoring completed: {successful_files}/{len(pdb_files)} files processed successfully")

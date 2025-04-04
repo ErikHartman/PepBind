@@ -1,7 +1,7 @@
 import os
 import pyrosetta
 from concurrent.futures import ThreadPoolExecutor
-from typing import List, Optional, Tuple
+from typing import Optional
 from Bio.PDB import PDBParser, PDBIO
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Model import Model
@@ -172,25 +172,51 @@ def process_pdbs(input_dir: str, output_dir: str) -> None:
     for pdb_file in remaining_pdb_files:
         output_pdb_path = os.path.join(output_pdb_folder, os.path.basename(pdb_file))
         ensure_peptide_is_chain_b(pdb_file, output_pdb_path)
+        
 
     # Update pdbs.csv file to reflect only valid PDB files
     pdbs_csv_path = os.path.join(input_dir, "pdbs.csv")
     if os.path.exists(pdbs_csv_path):
         with open(pdbs_csv_path, "r") as f:
             pdbs_csv_lines = f.readlines()
-        
+        header = pdbs_csv_lines[0]
         valid_pdb_filenames = set(os.listdir(output_pdb_folder))
         filtered_csv_lines = [
             line for line in pdbs_csv_lines 
             if line.strip().split(",")[0] + ".pdb" in valid_pdb_filenames
         ]
-        
+        header = header.strip() + ",protein_sequence,peptide_sequence\n"
+
+        residue_map = {
+            "ALA":"A","ARG":"R","ASN":"N","ASP":"D","CYS":"C","GLN":"Q","GLU":"E","GLY":"G",
+            "HIS":"H","ILE":"I","LEU":"L","LYS":"K","MET":"M","PHE":"F","PRO":"P","SER":"S",
+            "THR":"T","TRP":"W","TYR":"Y","VAL":"V"
+        }
+
         with open(os.path.join(output_dir, "pdbs.csv"), "w") as f:
-            f.writelines(filtered_csv_lines)
+            f.write(header)
+            for line in filtered_csv_lines:
+                pdb_id = line.strip().split(",")[0]
+                pdb_path = os.path.join(output_pdb_folder, pdb_id + ".pdb")
+                parser = PDBParser(QUIET=True)
+                structure = parser.get_structure("complex", pdb_path)
+                model = structure[0]
+
+                protein_sequence, peptide_sequence = "", ""
+                for chain in model:
+                    seq = "".join(residue_map.get(res.resname, "X")
+                                  for res in chain if res.id[0] == " ")
+                    if chain.id == "A":
+                        protein_sequence = seq
+                    elif chain.id == "B":
+                        peptide_sequence = seq
+
+                f.write(line.strip() + f",{protein_sequence},{peptide_sequence}\n")
     else:
         print(f"No pdbs.csv file found in {input_dir}")
 
     # Report results
+    print(f"Wrote {len(pdb_files)} PDB files to {pdbs_csv_path}")
     print(f"Kept {valid_count} valid files in {output_pdb_folder}")
     print(f"Removed {error_count} files with Rosetta errors")
 

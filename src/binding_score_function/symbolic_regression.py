@@ -90,13 +90,13 @@ def perform_symbolic_regression(
         unary_operators = ["square", "cube", "exp", "log", "abs", "sqrt"]
 
     model = PySRRegressor(
-        model_selection="accuracy",
+        model_selection="best",
         niterations=niterations,
         binary_operators=binary_operators,
         unary_operators=unary_operators,
         populations=50,
-        population_size=50,
-        maxsize=50,
+        population_size=100,
+        maxsize=40,
         verbosity=1,
     )
     model.fit(X, y)
@@ -126,12 +126,16 @@ def analyze_symbolic_models(
         if rank >= num_equations:
             break
 
-        # 'eq_index' is the original row in model.equations_.
         original_idx = eq["eq_index"]
         y_pred = model.predict(X, original_idx)
 
-        mse = mean_squared_error(y, y_pred)
-        r2 = r2_score(y, y_pred)
+        valid_mask = np.isfinite(y_pred)
+        if not valid_mask.all():
+            print(f"Skipping equation {rank+1} due to invalid predictions.")
+            continue
+
+        mse = mean_squared_error(y[valid_mask], y_pred[valid_mask])
+        r2 = r2_score(y[valid_mask], y_pred[valid_mask])
         results.append(
             {
                 "Equation": eq["equation"],
@@ -161,6 +165,8 @@ def analyze_symbolic_models(
     best_equations = pd.DataFrame(results)
     print("\nBest equations found:")
     print(best_equations)
+
+    best_equations.to_csv("best_equations.csv", index=False)
 
     return best_equations
 
@@ -203,7 +209,7 @@ def run_symbolic_regression_analysis(
 if __name__ == "__main__":
     # Modify these values as needed
     fraction_threshold = 0.5
-    iterations = 75
+    iterations = 100
     num_equations = 20
 
     model, equations = run_symbolic_regression_analysis(
