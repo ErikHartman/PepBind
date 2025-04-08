@@ -374,3 +374,7 @@ def run_analysis():
 
 if __name__ == "__main__":
     run_analysis()
+    
+    chmod_dir(paths["output_dir"])
+    logger.info("All output files are now globally accessible.")
+    
