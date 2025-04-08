@@ -22,31 +22,81 @@ The data used in this benchmark is based on the collection on <http://www.pdbbin
 
 ### Project Structure
 
-- `complete_run.py`: Main script that orchestrates the entire workflow
-- `utils/`: Directory containing utility modules:
-  - `download_pdbs.py`: Functions for downloading PDB files
-  - `preprocessing.py`: Functions for preprocessing PDB files
-  - `scoring.py`: Functions for docking and scoring peptides
+The project has been refactored to provide a cleaner, more modular design:
 
-### Generating the data
-
-By executing the following command, the complete benchmark will be run:
-
-```bash
-python download_dock_and_score.py 
-```
+- `main.py`: Entry point with three main functions:
+  - `generate_data`: Download PDBs, create stripped templates
+  - `dock_and_score`: Dock peptides to templates and score
+  - `generate_and_score_decoys`: Create and score decoys
+- `data_generation.py`: Functions for data generation
+- `docking.py`: Functions for docking and scoring
+- `decoys.py`: Functions for decoy generation and scoring
+- `utils.py`: Common utility functions
+- `utils/`: Directory containing detailed implementation modules
 
 ### Pipeline Steps
 
-1. **Download**: Parse the index files and download the PDB files.
-2. **Preprocess**: Extract the protein and peptide sequences.
-3. **Dock and Score**: Dock the peptide to the protein and score the interaction.
-4. **Analysis**: Train regression models to predict binding affinity (see `lasso.py`).
+The pipeline consists of three main steps:
+
+1. **Data Generation**: Downloads PDB files based on PDBBind INDEX files, processes them to ensure correct chain labeling, and creates stripped protein templates.
+
+2. **Docking and Scoring**: Takes the processed data and docks the peptides to the corresponding protein templates. The resulting complexes are scored using various metrics.
+
+3. **Decoy Generation and Scoring**: Creates decoy peptides by shuffling the sequences of real peptides, docks them to protein templates, and scores them. These serve as negative examples in the benchmark.
+
+### Decoy Generation
+
+The pipeline can generate decoy peptides by shuffling the amino acid sequences of real peptides. These decoys maintain the same amino acid composition but disrupt the sequence-specific binding properties.
+
+Decoy configuration parameters:
+
+- `n_templates`: Number of protein templates to use
+- `n_decoys_per_template`: Number of decoy peptides per template
+- `min_peptide_length`/`max_peptide_length`: Length constraints for peptides
+- `random_seed`: Random seed for reproducibility
 
 ### Data Output Structure
 
 The benchmark generates output in a staged directory structure:
 
-- `0_unprocessed/`: Raw downloaded PDB files
-- `1_processed/`: Preprocessed PDB files ready for docking
-- `2_scored/`: Docking results and scores
+- `0_complexes/`: Original PDB complexes, stripped templates, and metadata
+- `1_docked/`: All docking results and scores (both real and decoy peptides)
+
+The final combined dataset is saved as `all_scores.csv` in the docked directory, with an `is_decoy` column to distinguish between real and decoy peptides.
+
+## Usage
+
+You can run the pipeline with various command-line arguments:
+
+```bash
+# Run the complete pipeline
+python main.py --all
+
+# Only generate data
+python main.py --generate-data
+
+# Only dock and score real peptides
+python main.py --dock-score
+
+# Only generate and score decoys
+python main.py --decoys
+
+# Customize peptide length range
+python main.py --all --min-length 7 --max-length 30
+
+# Force redownloading of PDB files
+python main.py --generate-data --force-redownload
+
+# Force re-docking of already processed complexes
+python main.py --dock-score --no-skip
+```
+
+### Resuming Interrupted Runs
+
+The code is designed to be resumable and will skip already processed files by default:
+
+- When generating data, it checks if files already exist before downloading
+- When docking, it skips complexes that have already been processed
+- When generating decoys, it can reuse existing decoy configuration files
+
+To force reprocessing, use the `--force-redownload` or `--no-skip` flags.

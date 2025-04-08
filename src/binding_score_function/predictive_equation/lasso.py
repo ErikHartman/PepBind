@@ -272,7 +272,7 @@ def run_analysis():
     dotenv.load_dotenv()
     DATA_DIR = os.getenv("DATA_DIR", "/srv/data1/general/immunopeptides_data/")
     scores_path = os.path.join(
-        DATA_DIR, "databases/benchmark_data/new_run/2_scored/scores_and_affinity.csv"
+        DATA_DIR, "outputs/binding_score_function/2_scored/scores_and_affinity.csv"
     )
 
     X, y, feature_cols = preprocess_data(scores_path)

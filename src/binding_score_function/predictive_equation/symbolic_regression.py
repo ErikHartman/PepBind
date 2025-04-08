@@ -87,7 +87,7 @@ def perform_symbolic_regression(
     if binary_operators is None:
         binary_operators = ["+", "-", "*", "/"]
     if unary_operators is None:
-        unary_operators = ["square", "cube", "exp", "log", "abs", "sqrt"]
+        unary_operators = ["square", "exp", "log", "sqrt"]
 
     model = PySRRegressor(
         model_selection="best",
