@@ -9,15 +9,11 @@ logger = logging.getLogger(__name__)
 
 def dock_complexes(
     processed_df: pd.DataFrame,
-    docking_dir: str,
     docking_config: Dict[str, Any],
 ) -> None:
     """
     Dock peptides to protein templates and score the interactions.
     """
-    docked_pdbs_dir = os.path.join(docking_dir, "docked_pdbs")
-    os.makedirs(docked_pdbs_dir, exist_ok=True)
-
     docking_tasks = []
     for _, row in processed_df.iterrows():
         pdb_code = row["PDB code"]
@@ -27,7 +23,6 @@ def dock_complexes(
     logger.info(f"Found {len(docking_tasks)} complexes to dock and score")
 
     parallel_config = docking_config.copy()
-    parallel_config["pdb_dir"] = docked_pdbs_dir
     gpu_ids = docking_config.get("gpu_ids", ["0"])
     num_gpus = len(gpu_ids)
 

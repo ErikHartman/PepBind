@@ -47,6 +47,7 @@ def main():
         "num_relax": 1,
         "gpu_ids": ["2", "3"],
         "overwrite_results": False,
+        "output_dir": os.path.join(paths["2_docked"], "decoy_pdbs"),
     }
 
     # Process based on arguments
@@ -68,7 +69,6 @@ def main():
         if args.dock_score or args.all:
             dock_complexes(
                 processed_df = processed_downloaded_df,
-                docking_dir=paths["2_docked"],
                 docking_config=docking_config,
             )
             scores_df = score_pdbs_in_dir(
@@ -82,8 +82,13 @@ def main():
             decoys_df = generate_decoy_dataset(
                 docking_dir=paths["2_docked"], n_decoys=200
             )
-            dock_complexes()  # dock decoys
-            decoy_scores_df = score_pdbs_in_dir() # score decoys
+            dock_complexes(decoys_df, docking_config=decoy_docking_config)  # dock decoys
+            decoy_scores_df = score_pdbs_in_dir(
+                docking_dir=decoy_docking_config["output_dir"],
+                output_csv_path=os.path.join(paths["3_scores"], "decoy_scores.csv"),
+                binding_residue_distance_cutoff=5.0,
+                max_workers=4,
+            )
 
         # Set permissions on output files
         set_permissions_to_777(paths["output_dir"])
