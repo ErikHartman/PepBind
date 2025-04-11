@@ -52,7 +52,7 @@ def main():
     # Process based on arguments
     try:
         if args.generate_data or args.all:
-            download_pdbs(
+            downloaded_df = download_pdbs(
                 pdbbind_index_files_path=paths["index_dir"],
                 output_pdb_dir=paths["0_complexes"],
                 min_peptide_length=args.min_length,
@@ -60,22 +60,18 @@ def main():
                 overwrite=args.force_redownload,
             )
 
-            process_pdbs(
-                raw_pdbs_dir=os.path.join(paths["0_complexes"], "pdbs"),
-                processed_dir=paths["1_processed_complexes"],
+            processed_downloaded_df = process_pdbs(
+                raw_pdbs_dir=os.path.join(paths["0_complexes"], "pdbs")
             )
             logger.info("Data generation completed")
-            # Now we have raw_pdbs_dir/pdbs and raw_pdbs_dir/pdb.csv
-            # as well as processed_pdbs_dir/pdbs and processed_pdbs_dir/pdb.csv
-            # Time to dock the complexes in processed_pdbs_dir/pdbs
 
         if args.dock_score or args.all:
             dock_complexes(
-                processed_dir=paths["1_processed_complexes"],
+                processed_df = processed_downloaded_df,
                 docking_dir=paths["2_docked"],
                 docking_config=docking_config,
             )
-            score_pdbs_in_dir(
+            scores_df = score_pdbs_in_dir(
                 docking_dir=docking_config["output_dir"],
                 output_csv_path=os.path.join(paths["3_scores"], "scores.csv"),
                 binding_residue_distance_cutoff=5.0,
@@ -87,10 +83,10 @@ def main():
                 docking_dir=paths["2_docked"], n_decoys=200
             )
             dock_complexes()  # dock decoys
+            decoy_scores_df = score_pdbs_in_dir() # score decoys
 
         # Set permissions on output files
         set_permissions_to_777(paths["output_dir"])
-
         logger.info("Pipeline completed successfully")
 
     except Exception as e:
@@ -136,8 +132,6 @@ def parse_arguments():
 def setup_directory_structure() -> Dict[str, str]:
     load_dotenv()
     base_dir = os.getenv("DATA_DIR", "/srv/data1/general/immunopeptides_data/")
-
-    # Define primary directories
     paths = {
         "base_dir": base_dir,
         "index_dir": os.path.abspath(
@@ -177,9 +171,6 @@ def setup_directory_structure() -> Dict[str, str]:
 
 
 def set_permissions_to_777(directory: str) -> None:
-    """
-    Recursively sets read/write/execute permissions (777) on all files and subdirectories.
-    """
     for root, dirs, files in os.walk(directory):
         for d in dirs:
             try:
@@ -194,15 +185,6 @@ def set_permissions_to_777(directory: str) -> None:
                 logger.warning(f"Could not set permissions for {f}: {str(e)}")
 
     logger.info(f"Set permissions to 777 for all files in {directory}")
-
-
-def ensure_dir_exists(directory: str) -> None:
-    """
-    Ensure that a directory exists, creating it if necessary.
-    """
-    if not os.path.exists(directory):
-        logger.info(f"Creating directory: {directory}")
-        os.makedirs(directory, exist_ok=True)
 
 
 if __name__ == "__main__":

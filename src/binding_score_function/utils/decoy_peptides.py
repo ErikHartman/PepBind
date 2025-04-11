@@ -4,6 +4,11 @@ import pandas as pd
 import logging
 import os
 
+# Todo: add docking of decoys here. Could re-use from util docking, but in 
+# that case I need to change the structure of that function.
+# Decoy dockings should be saved in the same dir as the real dockings, but with suffix _decoy
+# so e.g. 2_docked/pdbs_decoy/ for the pdbs  and scores_decoy.csv for the results
+
 logger = logging.getLogger(__name__)
 
 def shuffle_sequence(sequence: str) -> str:

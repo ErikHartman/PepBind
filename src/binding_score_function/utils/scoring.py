@@ -13,7 +13,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-
 def score_pdb(
     docking_pdb_path: str,
     binding_residue_distance_cutoff: float = 5.0,
@@ -79,9 +78,7 @@ def score_pdbs_in_dir(
 
     # Convert scores to a DataFrame and save to CSV
     scores_df = pd.DataFrame(scores)
-    scores_df.to_csv(output_csv_path, index=False)
-
-    logger.info(f"Scoring completed. Results saved to {output_csv_path}")
+    return scores_df
 
 
 if __name__ == "__main__":

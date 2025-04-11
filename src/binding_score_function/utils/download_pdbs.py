@@ -40,12 +40,12 @@ def convert_to_index_file_to_dataframe(input_file: str) -> pd.DataFrame:
     df = pd.DataFrame(
         data,
         columns=[
-            "PDB code",
-            "Resolution",
-            "Release year",
-            "Binding data",
-            "Reference",
-            "Ligand name",
+            "pdb_code",
+            "resolution",
+            "release_year",
+            "binding_data",
+            "reference",
+            "ligand_name",
         ],
     )
     return df
@@ -56,13 +56,6 @@ def remove_long_and_short_binders(
 ) -> pd.DataFrame:
     """
     Filters out large binders using the specification in the PDB-bind INDEX file.
-
-    Args:
-        df: DataFrame with PDB-bind data
-        max_length: Maximum length of the binder
-
-    Returns:
-        DataFrame with large binders removed
     """
 
     def is_valid_ligand(ligand_name: str) -> bool:
@@ -80,7 +73,7 @@ def remove_long_and_short_binders(
                 return True
         return True
 
-    return df[df["Ligand name"].apply(is_valid_ligand)]
+    return df[df["ligand_name"].apply(is_valid_ligand)]
 
 
 def is_peptide_cyclic(pdb_file: Union[str, io.StringIO], cutoff: float = 1.7) -> bool:
@@ -258,7 +251,7 @@ def download_pdbs(
 
     if not os.listdir(pdbs_dir):
         parallell_download(
-            pdb_ids=df_filtered["PDB code"].tolist(),
+            pdb_ids=df_filtered["pdb_code"].tolist(),
             output_dir=pdbs_dir,
             peptide_max_length=max_peptide_length,
             max_workers=10,
@@ -276,9 +269,6 @@ def download_pdbs(
         if filename.endswith(".pdb")
     ]
 
-    df_downloaded = df_filtered[df_filtered["PDB code"].isin(downloaded_pdb_codes)]
-    df_downloaded.to_csv(os.path.join(complexes_dir, "pdbs.csv"), index=False)
-
-    print(f"Filtered PDB files saved to {os.path.join(complexes_dir, 'pdbs.csv')}")
-    print(f"Successfully downloaded {len(downloaded_pdb_codes)} PDB files.")
+    df_downloaded = df_filtered[df_filtered["pdb_code"].isin(downloaded_pdb_codes)]
+    return df_downloaded
 

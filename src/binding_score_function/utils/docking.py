@@ -8,7 +8,7 @@ from bopep import Docker
 logger = logging.getLogger(__name__)
 
 def dock_complexes(
-    processed_dir: str,
+    processed_df: pd.DataFrame,
     docking_dir: str,
     docking_config: Dict[str, Any],
 ) -> None:
@@ -16,11 +16,10 @@ def dock_complexes(
     Dock peptides to protein templates and score the interactions.
     """
     docked_pdbs_dir = os.path.join(docking_dir, "docked_pdbs")
-    processed_complexes_df = pd.read_csv(os.path.join(processed_dir, "pdbs.csv"))
     os.makedirs(docked_pdbs_dir, exist_ok=True)
 
     docking_tasks = []
-    for _, row in processed_complexes_df.iterrows():
+    for _, row in processed_df.iterrows():
         pdb_code = row["PDB code"]
         peptide_sequence = row.get("peptide_sequence")
         docking_tasks.append((pdb_code, peptide_sequence))
