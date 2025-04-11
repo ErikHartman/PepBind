@@ -15,15 +15,6 @@ checking for PyRosetta errors, and ensuring peptide chains are correctly labeled
 
 
 def is_rosetta_error(pdb_file: str) -> bool:
-    """ 
-    Checks if the PDB file throws an error when loaded with PyRosetta 
-    
-    Args:
-        pdb_file: Path to the PDB file
-    
-    Returns:
-        True if an error is thrown, False otherwise
-    """
     # Initialize PyRosetta with mute option to suppress all output. Turn on if needed for debugging.
     
     try:
@@ -33,47 +24,10 @@ def is_rosetta_error(pdb_file: str) -> bool:
         return True
 
 
-def select_first_model(input_folder: str, output_folder: Optional[str] = None) -> None:
-    """
-    Selects the first model from NMR structures in the PDB files if multiple,
-    and writes the result to the output folder instead of modifying original files.
-
-    Args:
-        input_folder: Path to the folder containing the PDB files
-        output_folder: Path to the folder where processed files will be saved
-                      (defaults to a new folder to avoid overwriting)
-    """
-    # Create a default output folder to avoid overwriting input files
-    if output_folder is None or output_folder == input_folder:
-        output_folder = os.path.join(os.path.dirname(input_folder), "first_model_pdbs")
-        print(f"Warning: Using {output_folder} to avoid overwriting original files")
-    
-    # Create output directory if it doesn't exist
-    os.makedirs(output_folder, exist_ok=True)
-    
-    pdb_files = [f for f in os.listdir(input_folder) if f.endswith(".pdb")]
-    for filename in pdb_files:
-        with open(os.path.join(input_folder, filename), "r") as file:
-            lines = file.readlines()
-
-        with open(os.path.join(output_folder, filename), "w") as file:
-            for line in lines:
-                if line.startswith("ENDMDL"):
-                    break
-                file.write(line)
-
-
 def ensure_peptide_is_chain_b(pdb_path: str, output_pdb_path: str) -> str:
     """
     Ensures that the shortest chain is labeled as chain B (peptide) and
     the longest chain is labeled as chain A (protein).
-    
-    Args:
-        pdb_path: Path to the input PDB file
-        output_pdb_path: Path to save the output PDB file
-    
-    Returns:
-        Path to the output PDB file
     """
     parser = PDBParser(QUIET=True)
     structure = parser.get_structure("complex", pdb_path)
@@ -117,31 +71,11 @@ def ensure_peptide_is_chain_b(pdb_path: str, output_pdb_path: str) -> str:
     return output_pdb_path
 
 
-def process_pdbs(input_dir: str, output_dir: str) -> None:
-    """
-    Preprocess PDB files by selecting the first NMR model from each file and checking for Rosetta compatibility.
-    This function takes PDB files from the input directory, extracts the first model from each file,
-    saves these models to the output directory, and then removes any files that cause errors when processed
-    with Rosetta.
-    
-    Args:
-        input_dir: Path to the input directory containing a "pdbs" subdirectory with PDB files to process
-        output_dir: Path to the directory where processed PDB files will be saved in a "pdbs" subdirectory
-    """
-    # Create output directory if it doesn't exist
-    os.makedirs(output_dir, exist_ok=True)
-    
-    input_pdb_folder = os.path.join(input_dir, "pdbs")
-    output_pdb_folder = os.path.join(output_dir, "pdbs")
-    os.makedirs(output_pdb_folder, exist_ok=True)
-
-    select_first_model(input_pdb_folder, output_pdb_folder)
-    print("First models selected from all cleaned PDB files")
-
-    # Find all PDB files in output directory
+def process_pdbs(raw_pdbs_dir: str, processed_dir: str) -> None:
+    # Find all PDB files in raw_pdbs_dir
     pdb_files = [
-        os.path.join(output_pdb_folder, filename)
-        for filename in os.listdir(output_pdb_folder)
+        os.path.join(raw_pdbs_dir, filename)
+        for filename in os.listdir(raw_pdbs_dir)
         if filename.endswith(".pdb")
     ]
     
@@ -164,23 +98,22 @@ def process_pdbs(input_dir: str, output_dir: str) -> None:
 
     # Ensure peptide is in chain B for all remaining files
     remaining_pdb_files = [
-        os.path.join(output_pdb_folder, filename)
-        for filename in os.listdir(output_pdb_folder)
+        os.path.join(raw_pdbs_dir, filename)
+        for filename in os.listdir(raw_pdbs_dir)
         if filename.endswith(".pdb")
     ]
     
     for pdb_file in remaining_pdb_files:
-        output_pdb_path = os.path.join(output_pdb_folder, os.path.basename(pdb_file))
+        output_pdb_path = os.path.join(raw_pdbs_dir, os.path.basename(pdb_file))
         ensure_peptide_is_chain_b(pdb_file, output_pdb_path)
         
-
     # Update pdbs.csv file to reflect only valid PDB files
-    pdbs_csv_path = os.path.join(input_dir, "pdbs.csv")
+    pdbs_csv_path = os.path.join(raw_pdbs_dir, "pdbs.csv")
     if os.path.exists(pdbs_csv_path):
         with open(pdbs_csv_path, "r") as f:
             pdbs_csv_lines = f.readlines()
         header = pdbs_csv_lines[0]
-        valid_pdb_filenames = set(os.listdir(output_pdb_folder))
+        valid_pdb_filenames = set(os.listdir(raw_pdbs_dir))
         filtered_csv_lines = [
             line for line in pdbs_csv_lines 
             if line.strip().split(",")[0] + ".pdb" in valid_pdb_filenames
@@ -193,14 +126,14 @@ def process_pdbs(input_dir: str, output_dir: str) -> None:
             "THR":"T","TRP":"W","TYR":"Y","VAL":"V"
         }
 
-        with open(os.path.join(output_dir, "pdbs.csv"), "w") as f:
+        with open(os.path.join(processed_dir, "pdbs.csv"), "w") as f:
             f.write(header)
             for line in filtered_csv_lines:
                 pdb_id = line.strip().split(",")[0]
-                pdb_path = os.path.join(output_pdb_folder, pdb_id + ".pdb")
+                pdb_path = os.path.join(raw_pdbs_dir, pdb_id + ".pdb")
                 parser = PDBParser(QUIET=True)
                 structure = parser.get_structure("complex", pdb_path)
-                model = structure[0]
+                model = structure[0] # this gets the first model
 
                 protein_sequence, peptide_sequence = "", ""
                 for chain in model:
@@ -213,11 +146,11 @@ def process_pdbs(input_dir: str, output_dir: str) -> None:
 
                 f.write(line.strip() + f",{protein_sequence},{peptide_sequence}\n")
     else:
-        print(f"No pdbs.csv file found in {input_dir}")
+        print(f"No pdbs.csv file found in {raw_pdbs_dir}")
 
     # Report results
-    print(f"Wrote {len(pdb_files)} PDB files to {pdbs_csv_path}")
-    print(f"Kept {valid_count} valid files in {output_pdb_folder}")
+    print(f"Wrote {len(pdb_files)} PDB files to {processed_dir}")
+    print(f"Kept {valid_count} valid files in {raw_pdbs_dir}")
     print(f"Removed {error_count} files with Rosetta errors")
 
 
