@@ -3,12 +3,13 @@ import logging
 import argparse
 from typing import Dict
 from dotenv import load_dotenv
+import pandas as pd
 import pyrosetta
-from binding_score_function.utils.decoy_peptides import generate_decoy_dataset
-from binding_score_function.utils.docking import dock_complexes
-from binding_score_function.utils.download_pdbs import download_pdbs
-from binding_score_function.utils.preprocessing import process_pdbs
-from binding_score_function.utils.scoring import score_pdbs_in_dir
+from utils.decoy_peptides import generate_decoy_dataset
+from utils.docking import dock_complexes
+from utils.download_pdbs import download_pdbs
+from utils.process import process_pdbs
+from utils.scoring import score_pdbs_in_dir
 
 logging.basicConfig(
     level=logging.INFO,
@@ -39,6 +40,9 @@ def main():
         "output_dir": os.path.join(paths["2_docked"], "pdbs"),
     }
 
+    n_decoy_shuffle = 100
+    n_decoy_random = 100
+
     decoy_docking_config = {
         "num_models": 5,
         "num_recycles": 10,
@@ -50,9 +54,16 @@ def main():
         "output_dir": os.path.join(paths["2_docked"], "decoy_pdbs"),
     }
 
+    processed_downloaded_df = pd.DataFrame()
+    downloaded_df = pd.DataFrame()
+    decoys_df = pd.DataFrame()
+    scores_df = pd.DataFrame()
+    decoy_scores_df = pd.DataFrame()
+
     # Process based on arguments
     try:
         if args.generate_data or args.all:
+            logger.info("Downloading pdbs")
             downloaded_df = download_pdbs(
                 pdbbind_index_files_path=paths["index_dir"],
                 output_pdb_dir=paths["0_complexes"],
@@ -61,33 +72,87 @@ def main():
                 overwrite=args.force_redownload,
             )
 
+            logger.info("Processing pdbs")
             processed_downloaded_df = process_pdbs(
-                raw_pdbs_dir=os.path.join(paths["0_complexes"], "pdbs")
+                raw_pdbs_dir=os.path.join(paths["0_complexes"], "pdbs"),
+                pdb_csv_dir=os.path.join(paths["0_complexes"], "pdbs.csv"),
+            )
+            downloaded_df.to_csv(os.path.join(paths["0_complexes"], "pdbs.csv"))
+
+            logger.info(f"Processed PDBs (n={len(processed_downloaded_df.index)}):")
+            logger.info(f"{processed_downloaded_df.head(5)}")
+            processed_downloaded_df.to_csv(
+                os.path.join(paths["1_processed_complexes"], "processed_pdbs.csv"),
             )
             logger.info("Data generation completed")
 
-        if args.dock_score or args.all:
+        if args.dock or args.all:
+            logger.info("Starting docking")
+            if processed_downloaded_df.empty:
+                processed_downloaded_df = pd.read_csv(
+                    os.path.join(paths["1_processed_complexes"], "processed_pdbs.csv")
+                )
             dock_complexes(
-                processed_df = processed_downloaded_df,
+                template_pdb_dir=os.path.join(paths["0_complexes"], "pdbs"),
+                processed_df=processed_downloaded_df,
                 docking_config=docking_config,
             )
+            logger.info("Docking completed")
+
+        if args.score or args.all:
+            logger.info("Starting scoring")
             scores_df = score_pdbs_in_dir(
                 docking_dir=docking_config["output_dir"],
-                output_csv_path=os.path.join(paths["3_scores"], "scores.csv"),
+                complexes_dir=os.path.join(paths["0_complexes"], "pdbs"),
                 binding_residue_distance_cutoff=5.0,
-                max_workers=4,
+                max_workers=20,
             )
+            scores_df["is_decoy"] = False
+            scores_df.to_csv(os.path.join(paths["3_scores"], "scores.csv"), index=False)
+            logger.info("Scoring completed")
 
         if args.decoys or args.all:
-            decoys_df = generate_decoy_dataset(
-                docking_dir=paths["2_docked"], n_decoys=200
-            )
-            dock_complexes(decoys_df, docking_config=decoy_docking_config)  # dock decoys
+            logger.info("Generating decoy dataset")
+            if len(os.listdir(paths["2_docked_decoy"])) == (
+                n_decoy_random + n_decoy_shuffle
+            ):
+                logger.info("Decoy dataset already exists, skipping generation")
+            else:
+                decoys_df_shuffle = generate_decoy_dataset(
+                    docking_dir=paths["2_docked"],
+                    n_decoys=n_decoy_shuffle,
+                    decoy_method="shuffle",
+                )
+                decoys_df_random = generate_decoy_dataset(
+                    docking_dir=paths["2_docked"],
+                    n_decoys=n_decoy_random,
+                    decoy_method="random",
+                    min_length=args.min_length,
+                    max_length=args.max_length,
+                )
+
+                decoys_df = pd.concat([decoys_df_shuffle, decoys_df_random], ignore_index=True)
+                decoys_df.to_csv(
+                    os.path.join(paths["1_processed_complexes"], "decoys.csv"),
+                    index=False,
+                )
+                logger.info("Docking decoy dataset")
+                dock_complexes(
+                    template_pdb_dir=os.path.join(paths["0_complexes"], "pdbs"),
+                    processed_df=decoys_df,
+                    docking_config=decoy_docking_config,
+                )
+
+            logger.info("Scoring decoy dataset")
             decoy_scores_df = score_pdbs_in_dir(
                 docking_dir=decoy_docking_config["output_dir"],
-                output_csv_path=os.path.join(paths["3_scores"], "decoy_scores.csv"),
+                complexes_dir=os.path.join(paths["0_complexes"], "pdbs"),
                 binding_residue_distance_cutoff=5.0,
-                max_workers=4,
+                max_workers=20,
+            )
+            decoy_scores_df["is_decoy"] = True
+            decoy_scores_df.to_csv(
+                os.path.join(paths["3_scores"], "decoy_scores.csv"), index=False
             )
 
         # Set permissions on output files
@@ -108,8 +173,9 @@ def parse_arguments():
         "--generate-data", action="store_true", help="Download and process PDB files"
     )
     parser.add_argument(
-        "--dock-score", action="store_true", help="Dock peptides to templates and score"
+        "--dock", action="store_true", help="Dock peptides to templates and score"
     )
+    parser.add_argument("--score", action="store_true", help="Score docked peptides")
     parser.add_argument(
         "--decoys", action="store_true", help="Generate and score decoy peptides"
     )
@@ -163,6 +229,13 @@ def setup_directory_structure() -> Dict[str, str]:
             os.path.join(base_dir, "outputs/binding_score_function/4_processed_scores")
         ),
     }
+    paths.update(
+        {
+            "2_docked_pdbs": os.path.join(paths["2_docked"], "pdbs"),
+            "2_docked_decoy": os.path.join(paths["2_docked"], "decoy_pdbs"),
+
+        }
+    )
 
     for path_name, path_value in paths.items():
         if not os.path.exists(path_value):

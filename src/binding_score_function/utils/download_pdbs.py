@@ -5,10 +5,13 @@ from concurrent.futures import ThreadPoolExecutor
 import pandas as pd
 from typing import Dict, List, Tuple, Union
 import numpy as np
+import logging
 
 from Bio import PDB
 from Bio.PDB import PDBParser
 from Bio.PDB.Polypeptide import is_aa
+
+logger = logging.getLogger(__name__)
 
 def convert_to_index_file_to_dataframe(input_file: str) -> pd.DataFrame:
     """
@@ -110,12 +113,12 @@ def is_peptide_cyclic(pdb_file: Union[str, io.StringIO], cutoff: float = 1.7) ->
 
 
 def has_peptide_and_protein(
-    pdb_contents: str, peptide_max_length: int = 40
+    pdb_contents: str, max_peptide_length: int = 40
 ) -> Tuple[bool, str]:
     """
     Checks whether the PDB (provided as a string) contains exactly two polypeptide chains:
-      1) One chain with fewer than `peptide_max_length` amino acids,
-      2) One chain with >= `peptide_max_length` amino acids.
+      1) One chain with fewer than `max_peptide_length` amino acids,
+      2) One chain with >= `max_peptide_length` amino acids.
     """
     parser = PDB.PDBParser(QUIET=True)
 
@@ -137,16 +140,16 @@ def has_peptide_and_protein(
         return False, "not_two_chains"
 
     chain_residue_counts.sort()
-    if chain_residue_counts[0] >= peptide_max_length:
+    if chain_residue_counts[0] >= max_peptide_length:
         return False, "no_peptide"
-    if chain_residue_counts[1] < peptide_max_length:
+    if chain_residue_counts[1] < max_peptide_length:
         return False, "no_protein"
 
     return True, "meets_condition"
 
 
 def download_pdb_from_rcsb(
-    pdb_id: str, output_dir: str, peptide_max_length: int = 40
+    pdb_code: str, output_dir: str, max_peptide_length: int = 40
 ) -> Tuple[bool, str]:
     """
     Downloads a PDB from RCSB, checks if it has exactly two chains
@@ -155,25 +158,25 @@ def download_pdb_from_rcsb(
     If it meets the condition, saves it to `output_dir`.
     """
 
-    url = f"https://files.rcsb.org/download/{pdb_id}.pdb"
+    url = f"https://files.rcsb.org/download/{pdb_code}.pdb"
     try:
         response = requests.get(url)
         if response.status_code == 200:
             pdb_text = response.text
             meets_criteria, reason = has_peptide_and_protein(
-                pdb_text, peptide_max_length=peptide_max_length
+                pdb_text, max_peptide_length=max_peptide_length
             )
             is_cyclic = is_peptide_cyclic(io.StringIO(pdb_text))
 
             if meets_criteria and (not is_cyclic):  # Only save if passes criterion
-                file_path = os.path.join(output_dir, f"{pdb_id}.pdb")
+                file_path = os.path.join(output_dir, f"{pdb_code}.pdb")
                 with open(file_path, "w") as file:
                     file.write(pdb_text)
-                print(f"{pdb_id}.pdb was downloaded", end="\r")
+                logger.info(f"{pdb_code}.pdb was downloaded", end="\r")
                 return True, reason
             else:
                 rejection_reason = reason if not meets_criteria else "cyclic_peptide"
-                print(f"{pdb_id}.pdb wasn't downloaded: {rejection_reason}", end="\r")
+                logger.info(f"{pdb_code}.pdb wasn't downloaded: {rejection_reason}", end="\r")
                 return False, rejection_reason
         else:
             return False, f"download_failed_{response.status_code}"
@@ -182,9 +185,9 @@ def download_pdb_from_rcsb(
 
 
 def parallell_download(
-    pdb_ids: List[str],
+    pdb_codes: List[str],
     output_dir: str,
-    peptide_max_length: int = 40,
+    max_peptide_length: int = 40,
     max_workers: int = 5,
     overwrite: bool = False,
 ) -> None:
@@ -194,45 +197,45 @@ def parallell_download(
     those that pass.
     """
     results = []
-    total_attempts = len(pdb_ids)
-    print(f"Total PDBs to download: {total_attempts}")
+    total_attempts = len(pdb_codes)
+    logger.info(f"Total PDBs to download: {total_attempts}")
     saved_count = 0
     reason_counts: Dict[str, int] = {}
 
-    def worker(pdb_id: str) -> Tuple[str, bool, str]:
-        file_path = os.path.join(output_dir, f"{pdb_id}.pdb")
+    def worker(pdb_code: str) -> Tuple[str, bool, str]:
+        file_path = os.path.join(output_dir, f"{pdb_code}.pdb")
         if not overwrite and os.path.exists(file_path):
-            return pdb_id, False, "already_exists"
+            return pdb_code, False, "already_exists"
         did_save, reason = download_pdb_from_rcsb(
-            pdb_id=pdb_id, output_dir=output_dir, peptide_max_length=peptide_max_length
+            pdb_code=pdb_code, output_dir=output_dir, max_peptide_length=max_peptide_length
         )
-        return pdb_id, did_save, reason
+        return pdb_code, did_save, reason
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        for pdb_id, did_save, reason in executor.map(worker, pdb_ids):
-            results.append((pdb_id, did_save, reason))
+        for pdb_code, did_save, reason in executor.map(worker, pdb_codes):
+            results.append((pdb_code, did_save, reason))
 
-    for pdb_id, did_save, reason in results:
+    for pdb_code, did_save, reason in results:
         if did_save:
             saved_count += 1
         reason_counts[reason] = reason_counts.get(reason, 0) + 1
 
-    print(f"PDBs saved (pass criterion): {saved_count}")
-    print("Reasons for skip/failure:")
+    logger.info(f"PDBs saved (pass criterion): {saved_count}")
+    logger.info("Reasons for skip/failure:")
     for reason, count in reason_counts.items():
         if reason != "meets_condition":
-            print(f"  {reason}: {count}")
+            logger.info(f"  {reason}: {count}")
 
-    print(f"  meets_condition: {reason_counts.get('meets_condition', 0)}")
+    logger.info(f"  meets_condition: {reason_counts.get('meets_condition', 0)}")
 
 
 def download_pdbs(
     pdbbind_index_files_path: str,
-    complexes_dir: str,
+    output_pdb_dir: str,
     min_peptide_length: int = 7,
     max_peptide_length: int = 40,
     overwrite: bool = False,
-) -> None:
+) -> pd.DataFrame:
     """
     Loads the PDB-bind INDEX files, filters out large binders,
     and downloads the filtered PDB files.
@@ -247,18 +250,18 @@ def download_pdbs(
     df_filtered = remove_long_and_short_binders(
         df_combined, min_peptide_length, max_peptide_length
     )
-    pdbs_dir = os.path.join(complexes_dir, "pdbs")
+    pdbs_dir = os.path.join(output_pdb_dir, "pdbs")
 
     if not os.listdir(pdbs_dir):
         parallell_download(
-            pdb_ids=df_filtered["pdb_code"].tolist(),
+            pdb_codes=df_filtered["pdb_code"].tolist(),
             output_dir=pdbs_dir,
-            peptide_max_length=max_peptide_length,
+            max_peptide_length=max_peptide_length,
             max_workers=10,
             overwrite=overwrite,
         )
     else:
-        print(
+        logger.info(
             f"{pdbs_dir} already has files. Assuming download complete and skipping..."
         )
 

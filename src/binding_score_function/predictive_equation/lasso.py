@@ -370,11 +370,3 @@ def run_analysis():
     plot_predictions_and_residuals(
         svr_results["y_test"], svr_results["y_pred_test"], model_name="SVR"
     )
-
-
-if __name__ == "__main__":
-    run_analysis()
-    
-    chmod_dir(paths["output_dir"])
-    logger.info("All output files are now globally accessible.")
-    

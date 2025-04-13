@@ -8,6 +8,7 @@ from bopep import Docker
 logger = logging.getLogger(__name__)
 
 def dock_complexes(
+    template_pdb_dir: str,
     processed_df: pd.DataFrame,
     docking_config: Dict[str, Any],
 ) -> None:
@@ -16,11 +17,11 @@ def dock_complexes(
     """
     docking_tasks = []
     for _, row in processed_df.iterrows():
-        pdb_code = row["PDB code"]
+        pdb_code = row["pdb_code"]
         peptide_sequence = row.get("peptide_sequence")
         docking_tasks.append((pdb_code, peptide_sequence))
 
-    logger.info(f"Found {len(docking_tasks)} complexes to dock and score")
+    logger.info(f"Found {len(docking_tasks)} complexes to dock")
 
     parallel_config = docking_config.copy()
     gpu_ids = docking_config.get("gpu_ids", ["0"])
@@ -35,25 +36,31 @@ def dock_complexes(
         this_config = parallel_config.copy()
         this_config["gpu_ids"] = [gpu_id]
 
+        if not docking_config["overwrite_results"]:
+            output_path = os.path.join(
+                docking_config["output_dir"], f"{pdb_code}_{peptide_sequence}.pdb"
+            )
+            if os.path.exists(output_path):
+                logger.info(f"Skipping {pdb_code}_{peptide_sequence}.pdb: already docked")
+                return False
+
         logger.info(
             f"Processing {idx+1}/{len(docking_tasks)}: {pdb_code} on GPU {gpu_id}"
         )
         try:
-
+            target_structure_path = os.path.join(template_pdb_dir, f"{pdb_code}.pdb")
             docker = Docker(docker_kwargs=this_config)
             docker.set_target_structure(
-                target_structure_path=pdb_code,
+                target_structure_path=target_structure_path,
                 strip_template=True,
                 get_first_model=True,
                 keep_chains="A",
             )
             docker.dock_peptides([peptide_sequence])
-
             return True
 
         except Exception as e:
             logger.warning(f"Could not score existing docking for {pdb_code}: {e}")
-
             return False
 
     # Run tasks in parallel
