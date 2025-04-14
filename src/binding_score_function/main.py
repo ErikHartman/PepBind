@@ -62,7 +62,7 @@ def main():
 
     # Process based on arguments
     try:
-        if args.generate_data or args.all:
+        if args.download_pdbs or args.all:
             logger.info("Downloading pdbs")
             downloaded_df = download_pdbs(
                 pdbbind_index_files_path=paths["index_dir"],
@@ -70,25 +70,37 @@ def main():
                 min_peptide_length=args.min_length,
                 max_peptide_length=args.max_length,
                 overwrite=args.force_redownload,
+                manual_csv_path=paths["manually_curated_pdbs"],
             )
+            downloaded_df.to_csv(os.path.join(paths["0_complexes"], "pdbs.csv"))
 
+        if args.process or args.all:
             logger.info("Processing pdbs")
             processed_downloaded_df = process_pdbs(
                 raw_pdbs_dir=os.path.join(paths["0_complexes"], "pdbs"),
                 pdb_csv_dir=os.path.join(paths["0_complexes"], "pdbs.csv"),
+                manual_csv_path=paths["manually_curated_pdbs"],
             )
-            downloaded_df.to_csv(os.path.join(paths["0_complexes"], "pdbs.csv"))
+            processed_downloaded_df["peptide_length"] = processed_downloaded_df[
+                "peptide_sequence"
+            ].apply(len)
+            processed_downloaded_df = processed_downloaded_df[
+                (processed_downloaded_df["peptide_length"] >= args.min_length)
+                & (processed_downloaded_df["peptide_length"] <= args.max_length)
+            ]
 
             logger.info(f"Processed PDBs (n={len(processed_downloaded_df.index)}):")
             logger.info(f"{processed_downloaded_df.head(5)}")
             processed_downloaded_df.to_csv(
                 os.path.join(paths["1_processed_complexes"], "processed_pdbs.csv"),
             )
-            logger.info("Data generation completed")
 
         if args.dock or args.all:
             logger.info("Starting docking")
             if processed_downloaded_df.empty:
+                logger.info(
+                    "Reading processed PDBs from CSV since not processed in this run"
+                )
                 processed_downloaded_df = pd.read_csv(
                     os.path.join(paths["1_processed_complexes"], "processed_pdbs.csv")
                 )
@@ -131,7 +143,9 @@ def main():
                     max_length=args.max_length,
                 )
 
-                decoys_df = pd.concat([decoys_df_shuffle, decoys_df_random], ignore_index=True)
+                decoys_df = pd.concat(
+                    [decoys_df_shuffle, decoys_df_random], ignore_index=True
+                )
                 decoys_df.to_csv(
                     os.path.join(paths["1_processed_complexes"], "decoys.csv"),
                     index=False,
@@ -170,10 +184,13 @@ def parse_arguments():
     )
 
     parser.add_argument(
-        "--generate-data", action="store_true", help="Download and process PDB files"
+        "--download-pdbs", action="store_true", help="Download and process PDB files"
     )
     parser.add_argument(
-        "--dock", action="store_true", help="Dock peptides to templates and score"
+        "--process", action="store_true", help="Process downloaded PDB files"
+    )
+    parser.add_argument(
+        "--dock", action="store_true", help="Dock peptides to templates"
     )
     parser.add_argument("--score", action="store_true", help="Score docked peptides")
     parser.add_argument(
@@ -205,6 +222,9 @@ def setup_directory_structure() -> Dict[str, str]:
     base_dir = os.getenv("DATA_DIR", "/srv/data1/general/immunopeptides_data/")
     paths = {
         "base_dir": base_dir,
+        "manually_curated_pdbs": os.path.abspath(
+            os.path.join(base_dir, "inputs/manually_curated_pdbs.csv")
+        ),
         "index_dir": os.path.abspath(
             os.path.join(base_dir, "inputs/pdbbind_index_files")
         ),
@@ -233,7 +253,6 @@ def setup_directory_structure() -> Dict[str, str]:
         {
             "2_docked_pdbs": os.path.join(paths["2_docked"], "pdbs"),
             "2_docked_decoy": os.path.join(paths["2_docked"], "decoy_pdbs"),
-
         }
     )
 

@@ -13,6 +13,7 @@ from Bio.PDB.Polypeptide import is_aa
 
 logger = logging.getLogger(__name__)
 
+
 def convert_to_index_file_to_dataframe(input_file: str) -> pd.DataFrame:
     """
     Converts the PDB-bind INDEX file to a pandas DataFrame
@@ -79,41 +80,8 @@ def remove_long_and_short_binders(
     return df[df["ligand_name"].apply(is_valid_ligand)]
 
 
-def is_peptide_cyclic(pdb_file: Union[str, io.StringIO], cutoff: float = 1.7) -> bool:
-    """
-    Detect if the peptide (chain B) in the given PDB file is cyclic.
-    Checks if there's a covalent bond (distance < cutoff Å) between the
-    C-terminal carbonyl carbon and N-terminal nitrogen atoms.
-    """
-    parser = PDBParser(QUIET=True)
-    structure = parser.get_structure("peptide", pdb_file)
-    model = structure[0]
-    try:
-        chain = model["B"]
-    except KeyError:
-        return False
-
-    residues = [res for res in chain if is_aa(res, standard=True)]
-
-    # N-terminal residue N atom
-    n_term_res = residues[0]
-    n_atom = n_term_res["N"] if "N" in n_term_res else None
-
-    # C-terminal residue C atom
-    c_term_res = residues[-1]
-    c_atom = c_term_res["C"] if "C" in c_term_res else None
-
-    if n_atom is None or c_atom is None:
-        return False
-
-    distance = np.linalg.norm(n_atom.coord - c_atom.coord)
-
-    is_cyclic = distance <= cutoff
-    return is_cyclic
-
-
 def has_peptide_and_protein(
-    pdb_contents: str, max_peptide_length: int = 40
+    pdb_contents: str, max_peptide_length: int = 40, min_peptide_length: int = 7
 ) -> Tuple[bool, str]:
     """
     Checks whether the PDB (provided as a string) contains exactly two polypeptide chains:
@@ -142,19 +110,54 @@ def has_peptide_and_protein(
     chain_residue_counts.sort()
     if chain_residue_counts[0] >= max_peptide_length:
         return False, "no_peptide"
+    if chain_residue_counts[0] < min_peptide_length:
+        return False, "too_short_peptide"
     if chain_residue_counts[1] < max_peptide_length:
         return False, "no_protein"
 
     return True, "meets_condition"
 
 
+def load_manually_curated_pdbs(manual_csv_path: str) -> pd.DataFrame:
+    """
+    Load manually curated PDB-peptide pairs with binding data
+    """
+    if not os.path.exists(manual_csv_path):
+        logger.info(f"No manually curated PDBs found at {manual_csv_path}")
+        return pd.DataFrame()
+
+    df = pd.read_csv(manual_csv_path)
+
+    # Standardize column names to match the PDBBind data format
+    df["pdb_code"] = df["pdb_code"].str.replace(".pdb", "")
+
+    # Ensure required columns exist
+    if "binding_data" not in df.columns or "peptide_sequence" not in df.columns:
+        logger.warning("Manually curated CSV missing required columns")
+        return pd.DataFrame()
+
+    # Add other required columns that might be used in the pipeline
+    if "resolution" not in df.columns:
+        df["resolution"] = "NA"
+    if "release_year" not in df.columns:
+        df["release_year"] = "NA"
+    if "reference" not in df.columns:
+        df["reference"] = "manually_curated"
+    if "ligand_name" not in df.columns:
+        df["ligand_name"] = df["peptide_sequence"].apply(lambda x: f"({len(x)}-mer)")
+
+    return df
+
+
 def download_pdb_from_rcsb(
-    pdb_code: str, output_dir: str, max_peptide_length: int = 40
+    pdb_code: str,
+    output_dir: str,
+    max_peptide_length: int = 40,
+    min_peptide_length: int = 7,
 ) -> Tuple[bool, str]:
     """
     Downloads a PDB from RCSB, checks if it has exactly two chains
     (peptide+protein) using `has_peptide_and_protein`.
-    Also checks if the peptide is cyclic. If so, it is not saved.
     If it meets the condition, saves it to `output_dir`.
     """
 
@@ -164,11 +167,12 @@ def download_pdb_from_rcsb(
         if response.status_code == 200:
             pdb_text = response.text
             meets_criteria, reason = has_peptide_and_protein(
-                pdb_text, max_peptide_length=max_peptide_length
+                pdb_text,
+                max_peptide_length=max_peptide_length,
+                min_peptide_length=min_peptide_length,
             )
-            is_cyclic = is_peptide_cyclic(io.StringIO(pdb_text))
 
-            if meets_criteria and (not is_cyclic):  # Only save if passes criterion
+            if meets_criteria:  # Only save if passes criterion
                 file_path = os.path.join(output_dir, f"{pdb_code}.pdb")
                 with open(file_path, "w") as file:
                     file.write(pdb_text)
@@ -176,7 +180,9 @@ def download_pdb_from_rcsb(
                 return True, reason
             else:
                 rejection_reason = reason if not meets_criteria else "cyclic_peptide"
-                logger.info(f"{pdb_code}.pdb wasn't downloaded: {rejection_reason}", end="\r")
+                logger.info(
+                    f"{pdb_code}.pdb wasn't downloaded: {rejection_reason}", end="\r"
+                )
                 return False, rejection_reason
         else:
             return False, f"download_failed_{response.status_code}"
@@ -188,6 +194,7 @@ def parallell_download(
     pdb_codes: List[str],
     output_dir: str,
     max_peptide_length: int = 40,
+    min_peptide_length: int = 7,
     max_workers: int = 5,
     overwrite: bool = False,
 ) -> None:
@@ -207,7 +214,10 @@ def parallell_download(
         if not overwrite and os.path.exists(file_path):
             return pdb_code, False, "already_exists"
         did_save, reason = download_pdb_from_rcsb(
-            pdb_code=pdb_code, output_dir=output_dir, max_peptide_length=max_peptide_length
+            pdb_code=pdb_code,
+            output_dir=output_dir,
+            max_peptide_length=max_peptide_length,
+            min_peptide_length=min_peptide_length,
         )
         return pdb_code, did_save, reason
 
@@ -235,29 +245,61 @@ def download_pdbs(
     min_peptide_length: int = 7,
     max_peptide_length: int = 40,
     overwrite: bool = False,
+    manual_csv_path: str = None,
 ) -> pd.DataFrame:
     """
-    Loads the PDB-bind INDEX files, filters out large binders,
-    and downloads the filtered PDB files.
+    Loads the PDB-bind INDEX files and manual curated data,
+    filters out large binders, and downloads the filtered PDB files.
     """
-    protein_ligands_path = os.path.join(pdbbind_index_files_path, "INDEX_PL.2020")
-    protein_protein_path = os.path.join(pdbbind_index_files_path, "INDEX_PP.2020")
+    # Load PDBBind data
+    protein_ligands_path = os.path.join(
+        pdbbind_index_files_path, "INDEX_PL.2020"
+    )  # protein ligand
+    protein_protein_path = os.path.join(
+        pdbbind_index_files_path, "INDEX_PP.2020"
+    )  # protein peptide
 
     df_pl = convert_to_index_file_to_dataframe(protein_ligands_path)
     df_pp = convert_to_index_file_to_dataframe(protein_protein_path)
-
     df_combined = pd.concat([df_pl, df_pp])
+
+    # Load manually curated data if provided
+    if manual_csv_path and os.path.exists(manual_csv_path):
+        df_manual = load_manually_curated_pdbs(manual_csv_path)
+        logger.info(f"Loaded {len(df_manual)} manually curated PDB entries")
+
+        # Get unique PDB codes from manual data to download templates
+        unique_manual_pdbs = df_manual["pdb_code"].unique()
+
+        # Combine with PDBBind data
+        df_combined = pd.concat([df_combined, df_manual])
+    else:
+        unique_manual_pdbs = []
+
+    # Filter by peptide length
     df_filtered = remove_long_and_short_binders(
         df_combined, min_peptide_length, max_peptide_length
     )
-    pdbs_dir = os.path.join(output_pdb_dir, "pdbs")
 
-    if not os.listdir(pdbs_dir):
+    # Create output directory if it doesn't exist
+    pdbs_dir = os.path.join(output_pdb_dir, "pdbs")
+    os.makedirs(pdbs_dir, exist_ok=True)
+
+    if not os.listdir(pdbs_dir) or overwrite:
+        # Ensure we download all manually curated PDBs first
+        all_pdb_codes = df_filtered["pdb_code"].tolist()
+
+        # Move manually curated PDBs to the front of the list
+        for pdb in unique_manual_pdbs:
+            if pdb in all_pdb_codes:
+                all_pdb_codes.remove(pdb)
+            all_pdb_codes.insert(0, pdb)
+
         parallell_download(
-            pdb_codes=df_filtered["pdb_code"].tolist(),
+            pdb_codes=all_pdb_codes,
             output_dir=pdbs_dir,
             max_peptide_length=max_peptide_length,
-            max_workers=10,
+            max_workers=20,
             overwrite=overwrite,
         )
     else:
@@ -265,6 +307,7 @@ def download_pdbs(
             f"{pdbs_dir} already has files. Assuming download complete and skipping..."
         )
 
+    # Return the filtered dataframe of successfully downloaded PDBs
     pdb_filenames = set(os.listdir(pdbs_dir))
     downloaded_pdb_codes = [
         filename.split(".")[0]
@@ -274,4 +317,3 @@ def download_pdbs(
 
     df_downloaded = df_filtered[df_filtered["pdb_code"].isin(downloaded_pdb_codes)]
     return df_downloaded
-

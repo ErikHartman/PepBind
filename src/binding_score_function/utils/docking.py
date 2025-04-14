@@ -19,6 +19,11 @@ def dock_complexes(
     for _, row in processed_df.iterrows():
         pdb_code = row["pdb_code"]
         peptide_sequence = row.get("peptide_sequence")
+
+        if len(peptide_sequence) < 7 or len(peptide_sequence) > 40:
+            logger.warning(f"Skipping {pdb_code} - peptide length ({len(peptide_sequence)}) outside 7-40 range")
+            continue
+        
         docking_tasks.append((pdb_code, peptide_sequence))
 
     logger.info(f"Found {len(docking_tasks)} complexes to dock")
@@ -30,6 +35,10 @@ def dock_complexes(
     # Process a single docking task
     def process_task(args):
         idx, (pdb_code, peptide_sequence) = args
+        if peptide_sequence == '' or peptide_sequence is None or peptide_sequence == "nan":
+            raise ValueError(f"Peptide sequence is empty for {idx} {pdb_code}")
+        
+        
         gpu_id = gpu_ids[idx % num_gpus]
 
         # Configure for this specific GPU
@@ -45,7 +54,7 @@ def dock_complexes(
                 return False
 
         logger.info(
-            f"Processing {idx+1}/{len(docking_tasks)}: {pdb_code} on GPU {gpu_id}"
+            f"Processing {idx+1}/{len(docking_tasks)}: {pdb_code} {peptide_sequence} on GPU {gpu_id}"
         )
         try:
             target_structure_path = os.path.join(template_pdb_dir, f"{pdb_code}.pdb")
