@@ -41,11 +41,9 @@ if __name__ == "__main__":
         y_train,
         X_test,
         y_test,
-        niterations=100,
+        niterations=200,
         populations=50,
-        population_size=50,
-        maxsize=40,
-        maxdepth=10,
+        population_size=100,
         model_selection="best",
         select_k_features=15,
     )

@@ -218,8 +218,6 @@ def perform_symbolic_regression(
     niterations: int = 200,
     populations: int = 50,
     population_size: int = 100,
-    maxsize: int = 40,
-    maxdepth: int = 10,
     select_k_features: int = 10,
     binary_operators: List[str] = None,
     unary_operators: List[str] = None,
@@ -241,13 +239,8 @@ def perform_symbolic_regression(
         unary_operators=unary_operators,
         populations=populations,
         population_size=population_size,
-        maxsize=maxsize,
         select_k_features=select_k_features,
-        maxdepth=maxdepth,
         verbosity=0,
-        random_state=42,
-        deterministic=True,
-        parallelism='serial'
     )
     model.fit(X_train_scaled, y_train, variable_names=list(X_train.columns))
     

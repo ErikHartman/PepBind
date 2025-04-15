@@ -270,8 +270,6 @@ def perform_symbolic_classification(
     niterations: int = 200,
     populations: int = 50,
     population_size: int = 100,
-    maxsize: int = 40,
-    maxdepth: int = 10,
     binary_operators: List[str] = None,
     unary_operators: List[str] = None,
     model_selection: str = "accuracy" ,
@@ -302,13 +300,8 @@ def perform_symbolic_classification(
         unary_operators=unary_operators,
         populations=populations,
         population_size=population_size,
-        maxsize=maxsize,
         select_k_features = select_k_features,
-        maxdepth=maxdepth,
-        verbosity=0,
-        random_state=42,
-        deterministic=True,
-        parallelism='serial'
+        verbosity=0
     )
     
     # Fit on the scaled training data, with y in {0,1}
