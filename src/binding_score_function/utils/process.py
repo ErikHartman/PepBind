@@ -10,7 +10,7 @@ import pandas as pd
 import logging
 import numpy as np
 from Bio.PDB.Polypeptide import is_aa
-import io
+
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +61,10 @@ def is_peptide_cyclic(pdb_file, cutoff: float = 1.7) -> bool:
         return False
 
     residues = [res for res in chain if is_aa(res, standard=True)]
+    
+    # Check if there are at least 2 residues (needed for cyclic check)
+    if len(residues) < 2:
+        return False
 
     # N-terminal residue N atom
     n_term_res = residues[0]
@@ -128,8 +132,9 @@ def ensure_peptide_is_chain_b(pdb_path: str, output_pdb_path: str) -> str:
 
 
 def process_pdbs(raw_pdbs_dir: str, pdb_csv_dir: str, manual_csv_path: str = None) -> pd.DataFrame:
-    # Find all PDB files in raw_pdbs_dir
-    pdb_files = [
+    pdbs_df = pd.read_csv(os.path.join(pdb_csv_dir))
+
+    pdb_files_in_raw_pdbs_dir = [
         os.path.join(raw_pdbs_dir, filename)
         for filename in os.listdir(raw_pdbs_dir)
         if filename.endswith(".pdb")
@@ -137,14 +142,14 @@ def process_pdbs(raw_pdbs_dir: str, pdb_csv_dir: str, manual_csv_path: str = Non
 
     # Check for Rosetta compatibility in parallel
     with ThreadPoolExecutor(max_workers=72) as executor:
-        error_results = list(executor.map(throws_rosetta_error, pdb_files))
+        error_results = list(executor.map(throws_rosetta_error, pdb_files_in_raw_pdbs_dir))
         logger.info("Files that Rosetta throws an error for:")
-        for pdb_file, has_error in zip(pdb_files, error_results):
+        for pdb_file, has_error in zip(pdb_files_in_raw_pdbs_dir, error_results):
             if has_error:
                 logger.info(pdb_file)
 
     # Remove files with Rosetta errors
-    for pdb_file, has_error in zip(pdb_files, error_results):
+    for pdb_file, has_error in zip(pdb_files_in_raw_pdbs_dir, error_results):
         if has_error:
             os.remove(pdb_file)
             logger.info(f"Removed {pdb_file}")
@@ -157,34 +162,33 @@ def process_pdbs(raw_pdbs_dir: str, pdb_csv_dir: str, manual_csv_path: str = Non
     ]
 
     for pdb_file in remaining_pdb_files:
-        output_pdb_path = os.path.join(raw_pdbs_dir, os.path.basename(pdb_file))
-        ensure_peptide_is_chain_b(pdb_file, output_pdb_path)
+        ensure_peptide_is_chain_b(pdb_file, pdb_file)
 
     for pdb_file in remaining_pdb_files:
         if is_peptide_cyclic(pdb_file):
             logger.info(f"File {pdb_file} is cyclic. Removing...")
             os.remove(pdb_file)
-            
 
-    # Load the CSV data
-    pdbs_df = pd.read_csv(os.path.join(pdb_csv_dir))
+    remaining_pdb_files = [
+        os.path.join(raw_pdbs_dir, filename)
+        for filename in os.listdir(raw_pdbs_dir)
+        if filename.endswith(".pdb")]
+            
     
     # Load manually curated data if provided
     manual_data = None
-    if manual_csv_path and os.path.exists(manual_csv_path):
+    if manual_csv_path:
         manual_data = pd.read_csv(manual_csv_path)
-        # Standardize column names
         manual_data['pdb_code'] = manual_data['pdb_code'].str.replace('.pdb', '')
         logger.info(f"Loaded {len(manual_data)} manually curated entries")
     
     # Filter to only valid PDB files
     valid_pdb_filenames = set(os.listdir(raw_pdbs_dir))
+
     pdbs_df = pdbs_df[
         pdbs_df["pdb_code"].apply(lambda x: f"{x}.pdb" in valid_pdb_filenames)
     ]
 
-    # Remove any manually curated PDB codes from the main dataframe 
-    # We'll handle them specially
     manual_pdb_codes = []
     if manual_data is not None:
         manual_pdb_codes = manual_data["pdb_code"].unique().tolist()
@@ -265,8 +269,6 @@ def process_pdbs(raw_pdbs_dir: str, pdb_csv_dir: str, manual_csv_path: str = Non
     
     # Final check - make sure all peptides meet length requirements
     pdbs_df = pdbs_df[pdbs_df["peptide_sequence"].apply(lambda x: len(x) >= 7 and len(x) <= 40)]
-    
-    # Clean up
     pdbs_df.dropna(subset=["protein_sequence", "peptide_sequence"], inplace=True)
     pdbs_df.reset_index(drop=True, inplace=True)
     

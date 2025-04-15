@@ -140,6 +140,9 @@ def split_and_save_decoys(decoys : pd.DataFrame):
     decoys.drop(
         columns=[
             "is_decoy",
+            "in_binding_site",
+            "in_binding_site_score",
+            "fraction_in_binding_site",
         ], inplace=True
     )
     print("Decoys columns")

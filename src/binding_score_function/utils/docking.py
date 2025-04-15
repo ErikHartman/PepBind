@@ -20,10 +20,14 @@ def dock_complexes(
         pdb_code = row["pdb_code"]
         peptide_sequence = row.get("peptide_sequence")
 
+        if peptide_sequence is None or pd.isna(peptide_sequence) or peptide_sequence == "":
+            logger.warning(f"Skipping {pdb_code} - missing peptide sequence")
+            continue
+
         if len(peptide_sequence) < 7 or len(peptide_sequence) > 40:
             logger.warning(f"Skipping {pdb_code} - peptide length ({len(peptide_sequence)}) outside 7-40 range")
             continue
-        
+
         docking_tasks.append((pdb_code, peptide_sequence))
 
     logger.info(f"Found {len(docking_tasks)} complexes to dock")

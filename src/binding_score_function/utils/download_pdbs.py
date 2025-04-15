@@ -55,7 +55,7 @@ def convert_to_index_file_to_dataframe(input_file: str) -> pd.DataFrame:
     return df
 
 
-def remove_long_and_short_binders(
+def remove_long_and_short_binders_from_dataframe(
     df: pd.DataFrame, min_length: int = 7, max_length: int = 40
 ) -> pd.DataFrame:
     """
@@ -107,12 +107,13 @@ def has_peptide_and_protein(
     if len(chain_residue_counts) != 2:
         return False, "not_two_chains"
 
-    chain_residue_counts.sort()
-    if chain_residue_counts[0] >= max_peptide_length:
+    # Since chain A might be peptide or protein and chain B might be peptide or protein,
+    chain_residue_counts.sort() # here [0] is the peptide and [1] is the protein
+    if chain_residue_counts[0] >= max_peptide_length: # peptide is too long
         return False, "no_peptide"
-    if chain_residue_counts[0] < min_peptide_length:
+    if chain_residue_counts[0] < min_peptide_length: # peptide is too short
         return False, "too_short_peptide"
-    if chain_residue_counts[1] < max_peptide_length:
+    if chain_residue_counts[1] < max_peptide_length: # protein is too short
         return False, "no_protein"
 
     return True, "meets_condition"
@@ -263,21 +264,16 @@ def download_pdbs(
     df_pp = convert_to_index_file_to_dataframe(protein_protein_path)
     df_combined = pd.concat([df_pl, df_pp])
 
-    # Load manually curated data if provided
     if manual_csv_path and os.path.exists(manual_csv_path):
         df_manual = load_manually_curated_pdbs(manual_csv_path)
         logger.info(f"Loaded {len(df_manual)} manually curated PDB entries")
-
-        # Get unique PDB codes from manual data to download templates
         unique_manual_pdbs = df_manual["pdb_code"].unique()
-
-        # Combine with PDBBind data
         df_combined = pd.concat([df_combined, df_manual])
     else:
         unique_manual_pdbs = []
 
     # Filter by peptide length
-    df_filtered = remove_long_and_short_binders(
+    df_filtered = remove_long_and_short_binders_from_dataframe(
         df_combined, min_peptide_length, max_peptide_length
     )
 
