@@ -1,13 +1,8 @@
-# regression.py
-import os
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from typing import Dict, List
-import seaborn as sns
 import logging
 
-from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 from sklearn.linear_model import Lasso, LassoCV
@@ -15,23 +10,10 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.svm import SVR
 from pysr import PySRRegressor
 
+from utils import scale_data
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
-
-def scale_data(X_train: pd.DataFrame, X_test: pd.DataFrame = None):
-    """
-    Scale features using StandardScaler.
-    """
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    
-    if X_test is not None:
-        X_test_scaled = scaler.transform(X_test)
-        return X_train_scaled, X_test_scaled, scaler
-    
-    return X_train_scaled, scaler
-
 
 def train_lasso(
     X_train: pd.DataFrame, 
@@ -40,11 +22,7 @@ def train_lasso(
     y_test: np.ndarray = None,
     cv: int = 5,
     n_alphas: int = 100,
-    output_dir: str = None
 ) -> Dict:
-    """
-    Train a Lasso regression model with automatic alpha selection.
-    """
     logger.info("Training Lasso regression model...")
     
     X_train_scaled, X_test_scaled, scaler = scale_data(X_train, X_test)
@@ -61,7 +39,10 @@ def train_lasso(
     
     feature_names = X_train.columns
     coef_df = pd.DataFrame({'Feature': feature_names, 'Coefficient': lasso.coef_})
-    coef_df = coef_df[coef_df['Coefficient'] != 0].sort_values(by='Coefficient', key=abs, ascending=False)
+    # Keep only non-zero coefficients
+    coef_df = coef_df[coef_df['Coefficient'] != 0].sort_values(
+        by='Coefficient', key=abs, ascending=False
+    )
     
     train_pred = lasso.predict(X_train_scaled)
     train_rmse = np.sqrt(mean_squared_error(y_train, train_pred))
@@ -91,34 +72,10 @@ def train_lasso(
             'test_mae': test_mae
         })
         
-        logger.info(f"Lasso Perf: Train RMSE={train_rmse:.4f}, R²={train_r2:.4f} | "
-                    f"Test RMSE={test_rmse:.4f}, R²={test_r2:.4f}, MAE={test_mae:.4f}")
-    
-    if output_dir:
-        os.makedirs(output_dir, exist_ok=True)
-        coef_df.to_csv(os.path.join(output_dir, 'lasso_coefficients.csv'), index=False)
-        
-        plt.figure(figsize=(6, 5))
-        plt.barh(coef_df['Feature'].values, coef_df['Coefficient'].values)
-        plt.xlabel('Coefficient Value')
-        plt.title('Lasso Regression Coefficients')
-        plt.tight_layout()
-        plt.savefig(os.path.join(output_dir, 'lasso_coefficients.png'), dpi=300)
-        plt.close()
-        
-        plt.figure(figsize=(4,4))
-        plt.scatter(y_train, train_pred, alpha=0.5, label='Train', s=5)
-        if X_test is not None:
-            plt.scatter(y_test, test_pred, alpha=0.5, label='Test', color='orange', s=10)
-        y_all = np.concatenate([y_train, y_test]) if y_test is not None else y_train
-        plt.plot([min(y_all), max(y_all)], [min(y_all), max(y_all)], 'k--')
-        plt.xlabel('Actual pKd')
-        plt.ylabel('Predicted pKd')
-        plt.title('Lasso: Actual vs. Predicted')
-        plt.legend()
-        plt.tight_layout()
-        plt.savefig(os.path.join(output_dir, 'lasso_prediction.png'), dpi=300)
-        plt.close()
+        logger.info(
+            f"Lasso Perf: Train RMSE={train_rmse:.4f}, R²={train_r2:.4f} | "
+            f"Test RMSE={test_rmse:.4f}, R²={test_r2:.4f}, MAE={test_mae:.4f}"
+        )
     
     return results
 
@@ -130,11 +87,7 @@ def train_random_forest(
     y_test: np.ndarray = None,
     cv: int = 5,
     param_grid: Dict = None,
-    output_dir: str = None
 ) -> Dict:
-    """
-    Train Random Forest Regressor with GridSearchCV.
-    """
     logger.info("Training Random Forest regressor...")
     
     if param_grid is None:
@@ -185,34 +138,10 @@ def train_random_forest(
             'test_r2': test_r2,
             'test_mae': test_mae
         })
-        logger.info(f"RF Perf: Train RMSE={train_rmse:.4f}, R²={train_r2:.4f} | "
-                    f"Test RMSE={test_rmse:.4f}, R²={test_r2:.4f}, MAE={test_mae:.4f}")
-    
-    if output_dir:
-        os.makedirs(output_dir, exist_ok=True)
-
-        feature_importance.to_csv(os.path.join(output_dir, 'rf_feature_importance.csv'), index=False)
-
-        plt.figure(figsize=(6,5))
-        sns.barplot(x='Importance', y='Feature', data=feature_importance.head(20))
-        plt.title('Random Forest Feature Importance (Top 20)')
-        plt.tight_layout()
-        plt.savefig(os.path.join(output_dir, 'rf_feature_importance.png'), dpi=300)
-        plt.close()
-        
-        plt.figure(figsize=(4,4))
-        plt.scatter(y_train, train_pred, alpha=0.5, label='Train', s=5)
-        if X_test is not None:
-            plt.scatter(y_test, test_pred, alpha=0.5, label='Test', color='orange', s=10)
-        y_all = np.concatenate([y_train, y_test]) if y_test is not None else y_train
-        plt.plot([min(y_all), max(y_all)], [min(y_all), max(y_all)], 'k--')
-        plt.xlabel('Actual pKd')
-        plt.ylabel('Predicted pKd')
-        plt.title('Random Forest: Actual vs. Predicted')
-        plt.legend()
-        plt.tight_layout()
-        plt.savefig(os.path.join(output_dir, 'rf_prediction.png'), dpi=300)
-        plt.close()
+        logger.info(
+            f"RF Perf: Train RMSE={train_rmse:.4f}, R²={train_r2:.4f} | "
+            f"Test RMSE={test_rmse:.4f}, R²={test_r2:.4f}, MAE={test_mae:.4f}"
+        )
     
     return results
 
@@ -224,7 +153,6 @@ def train_svr(
     y_test: np.ndarray = None,
     cv: int = 5,
     param_grid: Dict = None,
-    output_dir: str = None
 ) -> Dict:
     """
     Train SVR with GridSearchCV.
@@ -267,31 +195,17 @@ def train_svr(
         test_rmse = np.sqrt(mean_squared_error(y_test, test_pred))
         test_r2 = r2_score(y_test, test_pred)
         test_mae = mean_absolute_error(y_test, test_pred)
+        
         results.update({
             'test_pred': test_pred,
             'test_rmse': test_rmse,
             'test_r2': test_r2,
             'test_mae': test_mae
         })
-        logger.info(f"SVR Perf: Train RMSE={train_rmse:.4f}, R²={train_r2:.4f} | "
-                    f"Test RMSE={test_rmse:.4f}, R²={test_r2:.4f}, MAE={test_mae:.4f}")
-    
-    if output_dir:
-        os.makedirs(output_dir, exist_ok=True)
-
-        plt.figure(figsize=(4,4))
-        plt.scatter(y_train, train_pred, alpha=0.5, label='Train', s=5)
-        if X_test is not None:
-            plt.scatter(y_test, test_pred, alpha=0.5, label='Test', color='orange', s=10)
-        y_all = np.concatenate([y_train, y_test]) if y_test is not None else y_train
-        plt.plot([min(y_all), max(y_all)], [min(y_all), max(y_all)], 'k--')
-        plt.xlabel('Actual pKd')
-        plt.ylabel('Predicted pKd')
-        plt.title('SVR: Actual vs. Predicted')
-        plt.legend()
-        plt.tight_layout()
-        plt.savefig(os.path.join(output_dir, 'svr_prediction.png'), dpi=300)
-        plt.close()
+        logger.info(
+            f"SVR Perf: Train RMSE={train_rmse:.4f}, R²={train_r2:.4f} | "
+            f"Test RMSE={test_rmse:.4f}, R²={test_r2:.4f}, MAE={test_mae:.4f}"
+        )
     
     return results
 
@@ -306,13 +220,11 @@ def perform_symbolic_regression(
     population_size: int = 100,
     maxsize: int = 40,
     maxdepth: int = 10,
+    select_k_features: int = 10,
     binary_operators: List[str] = None,
     unary_operators: List[str] = None,
-    output_dir: str = None
+    model_selection: str = "best",
 ) -> Dict:
-    """
-    Perform symbolic regression to find mathematical expressions.
-    """
     logger.info("Performing Symbolic Regression...")
 
     if binary_operators is None:
@@ -323,26 +235,43 @@ def perform_symbolic_regression(
     X_train_scaled, X_test_scaled, scaler = scale_data(X_train, X_test)
     
     model = PySRRegressor(
-        model_selection="best",
+        model_selection=model_selection,
         niterations=niterations,
         binary_operators=binary_operators,
         unary_operators=unary_operators,
         populations=populations,
         population_size=population_size,
         maxsize=maxsize,
+        select_k_features=select_k_features,
         maxdepth=maxdepth,
-        verbosity=1,
-        random_state=42
+        verbosity=0,
+        random_state=42,
+        deterministic=True,
+        parallelism='serial'
     )
     model.fit(X_train_scaled, y_train, variable_names=list(X_train.columns))
     
+    # Get the best expression (according to your objective)
     best_expr = model.sympy()
     logger.info(f"Best expression: {best_expr}")
     
     train_pred = model.predict(X_train_scaled)
     train_rmse = np.sqrt(mean_squared_error(y_train, train_pred))
     train_r2 = r2_score(y_train, train_pred)
+
+    hall_of_fame = model.equations_
+
+    # You can either use this DataFrame directly or iterate over its rows:
+    top_eqs = []
+    for _, eq in hall_of_fame.iterrows():
+        top_eqs.append({
+            'equation': eq['equation'],      # String representation of the equation
+            'loss': eq['loss'],
+            'complexity': eq['complexity'],
+            'score': eq['score'],
+        })
     
+    # Prepare results dict
     results = {
         'model': model,
         'scaler': scaler,
@@ -350,6 +279,7 @@ def perform_symbolic_regression(
         'train_pred': train_pred,
         'train_rmse': train_rmse,
         'train_r2': train_r2,
+        'top_equations': pd.DataFrame(top_eqs),
     }
     
     if X_test is not None and y_test is not None:
@@ -364,81 +294,10 @@ def perform_symbolic_regression(
             'test_r2': test_r2,
             'test_mae': test_mae
         })
-        logger.info(f"Symbolic Reg Perf: Train RMSE={train_rmse:.4f}, R²={train_r2:.4f} | "
-                    f"Test RMSE={test_rmse:.4f}, R²={test_r2:.4f}, MAE={test_mae:.4f}")
+        logger.info(
+            f"Symbolic Reg Perf: Train RMSE={train_rmse:.4f}, R²={train_r2:.4f} | "
+            f"Test RMSE={test_rmse:.4f}, R²={test_r2:.4f}, MAE={test_mae:.4f}"
+        )
 
-    if output_dir:
-        os.makedirs(output_dir, exist_ok=True)
-        with open(os.path.join(output_dir, 'symbolic_expressions.txt'), 'w') as f:
-            f.write(f"Best expression: {best_expr}\n")
-            f.write("All equations:\n")
-            for i, eq in enumerate(model.equations_):
-                f.write(f"Eq {i}: {eq}\n")
-        
-        model.equations_.to_csv(os.path.join(output_dir, 'symbolic_hall_of_fame.csv'), index=False)
-        
-        plt.figure(figsize=(4,4))
-        plt.scatter(y_train, train_pred, alpha=0.5, label='Train', s=5)
-        if X_test is not None:
-            plt.scatter(y_test, test_pred, alpha=0.5, label='Test', color='orange', s=10)
-        y_all = np.concatenate([y_train, y_test]) if y_test is not None else y_train
-        plt.plot([min(y_all), max(y_all)], [min(y_all), max(y_all)], 'k--')
-        plt.xlabel('Actual pKd')
-        plt.ylabel('Predicted pKd')
-        plt.title('Symbolic Regression: Actual vs. Predicted')
-        plt.legend()
-        plt.tight_layout()
-        plt.savefig(os.path.join(output_dir, 'symbolic_prediction.png'), dpi=300)
-        plt.close()
-    
     return results
 
-
-def compare_models(results_dict: Dict, output_dir: str = None) -> pd.DataFrame:
-    """
-    Compare multiple regression model results in a DataFrame.
-    """
-    model_names = list(results_dict.keys())
-    
-    comparison = {
-        'Model': [],
-        'Train RMSE': [],
-        'Train R²': [],
-        'Test RMSE': [],
-        'Test R²': [],
-        'Test MAE': []
-    }
-    
-    for model_name, result in results_dict.items():
-        comparison['Model'].append(model_name)
-        comparison['Train RMSE'].append(result.get('train_rmse', np.nan))
-        comparison['Train R²'].append(result.get('train_r2', np.nan))
-        comparison['Test RMSE'].append(result.get('test_rmse', np.nan))
-        comparison['Test R²'].append(result.get('test_r2', np.nan))
-        comparison['Test MAE'].append(result.get('test_mae', np.nan))
-    
-    comparison_df = pd.DataFrame(comparison)
-    logger.info("\nRegression Model Comparison:\n" + comparison_df.to_string(index=False))
-    
-    if output_dir:
-        comparison_df.to_csv(os.path.join(output_dir, 'model_comparison.csv'), index=False)
-        
-        plt.figure(figsize=(10, 6))
-        x = np.arange(len(model_names))
-        width = 0.2
-        
-        plt.bar(x - width*1.5, comparison_df['Train RMSE'], width, label='Train RMSE')
-        plt.bar(x - width/2, comparison_df['Test RMSE'], width, label='Test RMSE')
-        plt.bar(x + width/2, comparison_df['Test MAE'], width, label='Test MAE')
-        plt.bar(x + width*1.5, comparison_df['Test R²'], width, label='Test R²')
-        
-        plt.xticks(x, model_names)
-        plt.xlabel('Model')
-        plt.ylabel('Metric Value')
-        plt.title('Regression Model Performance Comparison')
-        plt.legend()
-        plt.tight_layout()
-        plt.savefig(os.path.join(output_dir, 'model_comparison.png'), dpi=300)
-        plt.close()
-    
-    return comparison_df

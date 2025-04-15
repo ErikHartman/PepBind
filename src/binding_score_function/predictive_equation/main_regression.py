@@ -1,82 +1,157 @@
-# main_regression.py
 import os
-import logging
-import numpy as np
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 
 from regression import (
     train_lasso,
-    train_random_forest,
+    train_random_forest as train_rf,
     train_svr,
-    perform_symbolic_regression,
-    compare_models
+    perform_symbolic_regression as train_symbolic,
 )
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+from plotting import (
+    plot_regression_scatter,
+    plot_feature_importances,
+    plot_model_comparison,
+)
 
 if __name__ == "__main__":
     base_path = "/srv/data1/general/immunopeptides_data/"
-    scores_path = os.path.join(base_path, "outputs/binding_score_function/4_processed_scores/")
+    scores_path = os.path.join(
+        base_path, "outputs/binding_score_function/4_processed_scores/"
+    )
     output_dir = "./plots/regression"
     os.makedirs(output_dir, exist_ok=True)
 
-    # Load real docking data
-    X_real = pd.read_csv(os.path.join(scores_path, "real_X_train.csv")).set_index("complex_filename")
+    X_real = pd.read_csv(os.path.join(scores_path, "real_X_train.csv")).set_index(
+        "complex_filename"
+    )
     y_real = pd.read_csv(os.path.join(scores_path, "real_y_train.csv"))["pKd"].values
 
-    # Train/test split
-    X_train_reg, X_test_reg, y_train_reg, y_test_reg = train_test_split(
+    X_train, X_test, y_train, y_test = train_test_split(
         X_real, y_real, test_size=0.2, random_state=42
     )
 
-    # Lasso
-    lasso_results = train_lasso(
-        X_train_reg, y_train_reg,
-        X_test_reg, y_test_reg,
-        output_dir=os.path.join(output_dir, "lasso")
+    lasso_results = train_lasso(X_train, y_train, X_test, y_test)
+    rf_results = train_rf(X_train, y_train, X_test, y_test)
+    svr_results = train_svr(X_train, y_train, X_test, y_test)
+    symb_results = train_symbolic(
+        X_train,
+        y_train,
+        X_test,
+        y_test,
+        niterations=100,
+        populations=50,
+        population_size=50,
+        maxsize=40,
+        maxdepth=10,
+        model_selection="best",
+        select_k_features=15,
     )
 
-    # RF
-    rf_results = train_random_forest(
-        X_train_reg, y_train_reg,
-        X_test_reg, y_test_reg,
-        output_dir=os.path.join(output_dir, "rf")
+    train_preds_df = pd.DataFrame(
+        {
+            "y_train": y_train,
+            "lasso_pred": lasso_results["train_pred"],
+            "rf_pred": rf_results["train_pred"],
+            "svr_pred": svr_results["train_pred"],
+            "symbolic_pred": symb_results["train_pred"],
+        }
+    )
+    train_preds_df.to_csv(
+        os.path.join(output_dir, "train_predictions.csv"), index=False
     )
 
-    # SVR
-    svr_results = train_svr(
-        X_train_reg, y_train_reg,
-        X_test_reg, y_test_reg,
-        output_dir=os.path.join(output_dir, "svr")
+    test_preds_df = pd.DataFrame(
+        {
+            "y_test": y_test,
+            "lasso_pred": lasso_results["test_pred"],
+            "rf_pred": rf_results["test_pred"],
+            "svr_pred": svr_results["test_pred"],
+            "symbolic_pred": symb_results["test_pred"],
+        }
+    )
+    test_preds_df.to_csv(
+        os.path.join(output_dir, "test_predictions.csv"), index=False
     )
 
-    # Symbolic
-    symbolic_results = perform_symbolic_regression(
-        X_train_reg, y_train_reg,
-        X_test_reg, y_test_reg,
-        niterations=20,
-        populations=20,
-        population_size=20,
-        output_dir=os.path.join(output_dir, "symbolic")
+    plot_regression_scatter(
+        y_train,
+        lasso_results["train_pred"],
+        y_test,
+        lasso_results.get("test_pred", None),
+        model_name="Lasso",
+        output_path=os.path.join(output_dir, "lasso_scatter.png"),
     )
 
-    # Compare
-    model_dict = {
-        'Lasso': lasso_results,
-        'Random Forest': rf_results,
-        'SVR': svr_results,
-        'Symbolic': symbolic_results
+    plot_regression_scatter(
+        y_train,
+        rf_results["train_pred"],
+        y_test,
+        rf_results.get("test_pred", None),
+        model_name="Random Forest",
+        output_path=os.path.join(output_dir, "rf_scatter.png"),
+    )
+
+    plot_regression_scatter(
+        y_train,
+        svr_results["train_pred"],
+        y_test,
+        svr_results.get("test_pred", None),
+        model_name="SVR",
+        output_path=os.path.join(output_dir, "svr_scatter.png"),
+    )
+
+    plot_regression_scatter(
+        y_train,
+        symb_results["train_pred"],
+        y_test,
+        symb_results.get("test_pred", None),
+        model_name="Symbolic",
+        output_path=os.path.join(output_dir, "symbolic_scatter.png"),
+    )
+
+    plot_feature_importances(
+        lasso_results["coefficients"],
+        model_name="Lasso",
+        output_path=os.path.join(output_dir, "lasso_coef.png"),
+    )
+
+    plot_feature_importances(
+        rf_results["feature_importance"],
+        model_name="Random Forest",
+        output_path=os.path.join(output_dir, "rf_importance.png"),
+    )
+
+    results_dict = {
+        "Lasso": lasso_results,
+        "RF": rf_results,
+        "SVR": svr_results,
+        "Symbolic": symb_results,
     }
-    comparison_df = compare_models(model_dict, output_dir)
+    comparison = {
+        "Model": [],
+        "Train RMSE": [],
+        "Train R²": [],
+        "Test RMSE": [],
+        "Test R²": [],
+        "Test MAE": [],
+    }
 
-    if 'Test R²' in comparison_df.columns:
-        best_idx = comparison_df['Test R²'].idxmax()
-        best_model_name = comparison_df.loc[best_idx, 'Model']
-        best_r2 = comparison_df.loc[best_idx, 'Test R²']
-        logger.info(f"\nBest regression model: {best_model_name} (Test R²={best_r2:.4f})")
-        if best_model_name == 'Symbolic':
-            logger.info(f"Best symbolic expression: {symbolic_results['best_expr']}")
+    for model_name, result in results_dict.items():
+        comparison["Model"].append(model_name)
+        comparison["Train RMSE"].append(result.get("train_rmse", np.nan))
+        comparison["Train R²"].append(result.get("train_r2", np.nan))
+        comparison["Test RMSE"].append(result.get("test_rmse", np.nan))
+        comparison["Test R²"].append(result.get("test_r2", np.nan))
+        comparison["Test MAE"].append(result.get("test_mae", np.nan))
 
-    logger.info("Regression pipeline complete!")
+    comparison_df = pd.DataFrame(comparison)
+    comparison_df.to_csv(os.path.join(output_dir, "model_comparison.csv"), index=False)
+
+    plot_model_comparison(
+        comparison_df, output_path=os.path.join(output_dir, "model_comparison.png")
+    )
+
+    print("Regression pipeline complete!")

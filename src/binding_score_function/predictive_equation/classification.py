@@ -1,336 +1,385 @@
-# classification.py
-import os
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from typing import Dict
-import seaborn as sns
 import logging
+from typing import Dict, List
 
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import (
-    accuracy_score,
-    classification_report,
-    confusion_matrix
+    accuracy_score, f1_score, roc_auc_score
 )
-from sklearn.linear_model import LogisticRegressionCV
+from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
+
 from pysr import PySRRegressor
+
+from utils import scale_data
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
-def scale_data(X_train: pd.DataFrame, X_test: pd.DataFrame = None):
-    """
-    Scale features using StandardScaler.
-    """
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    
-    if X_test is not None:
-        X_test_scaled = scaler.transform(X_test)
-        return X_train_scaled, X_test_scaled, scaler
-    
-    return X_train_scaled, scaler
-
-
-def plot_confusion_matrix(cm, class_labels, title: str = 'Confusion Matrix', output_path: str = None):
-    """
-    Plot a confusion matrix using matplotlib.
-    """
-    plt.figure(figsize=(5, 4))
-    sns.heatmap(cm, annot=True, cmap='Blues', fmt='d',
-                xticklabels=class_labels, yticklabels=class_labels)
-    plt.title(title)
-    plt.xlabel('Predicted')
-    plt.ylabel('Actual')
-    plt.tight_layout()
-    if output_path:
-        plt.savefig(output_path, dpi=300)
-    plt.close()
-
-
-def train_logistic_regression_classifier(
-    X: pd.DataFrame,
-    y: np.ndarray,
-    cv_folds: int = 5,
-    output_dir: str = None
+def train_logistic_regression(
+    X_train: pd.DataFrame, 
+    y_train: np.ndarray, 
+    X_test: pd.DataFrame = None,
+    y_test: np.ndarray = None,
+    cv: int = 5,
+    param_grid: Dict = None,
 ) -> Dict:
     """
-    Multiclass logistic regression using one-vs-rest or multinomial.
+    Train a Logistic Regression model using GridSearchCV.
+    Returns train and test metrics and predictions.
     """
-    logger.info("Training Logistic Regression classifier (multiclass)...")
+    logger.info("Training Logistic Regression model...")
 
-    X_scaled, scaler = scale_data(X)
+    X_train_scaled, X_test_scaled, scaler = scale_data(X_train, X_test)
     
-    model_cv = LogisticRegressionCV(
-        Cs=10,
-        cv=cv_folds,
-        penalty='elasticnet',
-        multi_class='multinomial',
-        max_iter=10000,
-        random_state=42,
+    if param_grid is None:
+        param_grid = {
+            'C': [0.01, 0.1, 1, 10],
+        }
+
+    logreg = LogisticRegression(random_state=42, max_iter=1000, penalty='l2')
+    grid_search = GridSearchCV(
+        estimator=logreg,
+        param_grid=param_grid,
+        cv=cv,
+        scoring='accuracy',
+        n_jobs=-1
     )
-    model_cv.fit(X_scaled, y)
+    grid_search.fit(X_train_scaled, y_train)
 
-    train_pred = model_cv.predict(X_scaled)
-    train_acc = accuracy_score(y, train_pred)
+    best_logreg = grid_search.best_estimator_
+    logger.info(f"Logistic Regression best params: {grid_search.best_params_}")
 
-    logger.info(f"Logistic Regression (train) accuracy: {train_acc:.4f}")
-    cm = confusion_matrix(y, train_pred)
+    # Training predictions
+    train_pred = best_logreg.predict(X_train_scaled)
+    train_acc = accuracy_score(y_train, train_pred)
+    train_f1 = f1_score(y_train, train_pred, average='binary')
+    train_proba = best_logreg.predict_proba(X_train_scaled)[:, 1]
+    logger.info(f"Logistic Regression - Train Accuracy: {train_acc:.4f}, F1: {train_f1:.4f}")
+
+    # Create a nice dataframe with feature importance like the RF function does
+    feature_importances = pd.DataFrame({
+        'Feature': X_train.columns,
+        'Coefficient': best_logreg.coef_[0]
+    }).sort_values(by='Coefficient', key=abs, ascending=False)
 
     results = {
-        'model': model_cv,
+        'model': best_logreg,
         'scaler': scaler,
+        'best_params': grid_search.best_params_,
+        'train_pred': train_pred,
+        'train_proba': train_proba,
         'train_acc': train_acc,
-        'confusion_matrix': cm,
-        'class_report': classification_report(y, train_pred, output_dict=True)
+        'train_f1': train_f1,
+        'coefficients': feature_importances
     }
 
-    if output_dir:
-        os.makedirs(output_dir, exist_ok=True)
-        plot_confusion_matrix(
-            cm, 
-            class_labels=['Shuffled','Random','Real'], 
-            title='Logistic Regression Confusion Matrix',
-            output_path=os.path.join(output_dir, 'logreg_confusion_matrix.png')
-        )
-        cr_df = pd.DataFrame(results['class_report']).transpose()
-        cr_df.to_csv(os.path.join(output_dir, 'logreg_classification_report.csv'))
+    # Evaluate on test data
+    if X_test is not None and y_test is not None:
+        test_pred = best_logreg.predict(X_test_scaled)
+        test_acc = accuracy_score(y_test, test_pred)
+        test_f1 = f1_score(y_test, test_pred, average='binary')
+        test_proba = best_logreg.predict_proba(X_test_scaled)[:, 1]
+        test_auc = roc_auc_score(y_test, test_proba)    
 
+        
+        results.update({
+            'test_pred': test_pred,
+            'test_proba': test_proba,
+            'test_acc': test_acc,
+            'test_f1': test_f1,
+            'test_auc': test_auc
+        })
+        logger.info(
+            f"Logistic Regression - Test Accuracy: {test_acc:.4f}, "
+            f"F1: {test_f1:.4f}, AUC: {test_auc:.4f}"
+        )
+        
     return results
 
 
 def train_random_forest_classifier(
-    X: pd.DataFrame,
-    y: np.ndarray,
-    cv_folds: int = 5,
+    X_train: pd.DataFrame,
+    y_train: np.ndarray,
+    X_test: pd.DataFrame = None,
+    y_test: np.ndarray = None,
+    cv: int = 5,
     param_grid: Dict = None,
-    output_dir: str = None
 ) -> Dict:
     """
-    Multiclass Random Forest Classifier with grid search cross-validation.
+    Train a Random Forest Classifier with GridSearchCV.
+    Returns train and test metrics and predictions.
     """
-    logger.info("Training Random Forest classifier (multiclass)...")
-
-    X_scaled, scaler = scale_data(X)
+    logger.info("Training Random Forest classifier...")
 
     if param_grid is None:
         param_grid = {
             'n_estimators': [100, 200],
-            'max_depth': [None, 10],
+            'max_depth': [None, 10, 20],
             'min_samples_split': [2, 5],
             'min_samples_leaf': [1, 2]
         }
 
+    # No scaling strictly required for RF, but can be done for consistency
+    X_train_scaled, X_test_scaled, scaler = scale_data(X_train, X_test)
+    
     rf = RandomForestClassifier(random_state=42)
     grid_search = GridSearchCV(
-        rf,
-        param_grid,
-        cv=cv_folds,
+        rf, 
+        param_grid=param_grid, 
+        cv=cv, 
         scoring='accuracy',
-        n_jobs=-1,
-        refit=True
+        n_jobs=-1
     )
-    grid_search.fit(X_scaled, y)
-    best_model = grid_search.best_estimator_
-    logger.info(f"RF best params: {grid_search.best_params_}")
+    grid_search.fit(X_train_scaled, y_train)
 
-    train_pred = best_model.predict(X_scaled)
-    train_acc = accuracy_score(y, train_pred)
-    logger.info(f"Random Forest (train) accuracy: {train_acc:.4f}")
+    best_rf = grid_search.best_estimator_
+    logger.info(f"RF best parameters: {grid_search.best_params_}")
 
-    cm = confusion_matrix(y, train_pred)
-    
-    feat_names = X.columns if isinstance(X, pd.DataFrame) else [f'x{i}' for i in range(X.shape[1])]
-    feature_importance = pd.DataFrame({
-        'Feature': feat_names,
-        'Importance': best_model.feature_importances_
+    # Training predictions
+    train_pred = best_rf.predict(X_train_scaled)
+    train_acc = accuracy_score(y_train, train_pred)
+    train_f1 = f1_score(y_train, train_pred, average='binary')
+    train_proba = best_rf.predict_proba(X_train_scaled)[:, 1]
+    logger.info(f"RF - Train Accuracy: {train_acc:.4f}, F1: {train_f1:.4f}")
+
+    feature_importances = pd.DataFrame({
+        'Feature': X_train.columns,
+        'Importance': best_rf.feature_importances_
     }).sort_values(by='Importance', ascending=False)
 
     results = {
-        'model': best_model,
+        'model': best_rf,
         'scaler': scaler,
         'best_params': grid_search.best_params_,
+        'feature_importance': feature_importances,
+        'train_pred': train_pred,
+        'train_proba': train_proba,
         'train_acc': train_acc,
-        'confusion_matrix': cm,
-        'class_report': classification_report(y, train_pred, output_dict=True),
-        'feature_importance': feature_importance
+        'train_f1': train_f1
     }
 
-    if output_dir:
-        os.makedirs(output_dir, exist_ok=True)
-        plot_confusion_matrix(
-            cm, 
-            class_labels=['Shuffled','Random','Real'], 
-            title='Random Forest Confusion Matrix',
-            output_path=os.path.join(output_dir, 'rf_confusion_matrix.png')
+    # Evaluate on test data
+    if X_test is not None and y_test is not None:
+        test_pred = best_rf.predict(X_test_scaled)
+        test_acc = accuracy_score(y_test, test_pred)
+        test_f1 = f1_score(y_test, test_pred, average='binary')
+        test_proba = best_rf.predict_proba(X_test_scaled)[:, 1]
+        test_auc = roc_auc_score(y_test, test_proba)
+
+
+        results.update({
+            'test_pred': test_pred,
+            'test_accuracy': test_acc,
+            'test_f1': test_f1,
+            'test_auc': test_auc,
+            'test_proba': test_proba
+        })
+        logger.info(
+            f"RF - Test Accuracy: {test_acc:.4f}, "
+            f"F1: {test_f1:.4f}, AUC: {test_auc:.4f}"
         )
-        feature_importance.to_csv(os.path.join(output_dir, 'rf_feature_importance.csv'), index=False)
-
-        plt.figure(figsize=(6,6))
-        sns.barplot(x='Importance', y='Feature', data=feature_importance.head(20))
-        plt.title('Top 20 Feature Importances (RF Classifier)')
-        plt.tight_layout()
-        plt.savefig(os.path.join(output_dir, 'rf_feature_importance.png'), dpi=300)
-        plt.close()
-
-        cr_df = pd.DataFrame(results['class_report']).transpose()
-        cr_df.to_csv(os.path.join(output_dir, 'rf_classification_report.csv'))
 
     return results
 
 
-def train_svc_classifier(
-    X: pd.DataFrame,
-    y: np.ndarray,
-    cv_folds: int = 5,
+def train_svm_classifier(
+    X_train: pd.DataFrame,
+    y_train: np.ndarray,
+    X_test: pd.DataFrame = None,
+    y_test: np.ndarray = None,
+    cv: int = 5,
     param_grid: Dict = None,
-    output_dir: str = None
 ) -> Dict:
     """
-    Multiclass SVC with grid search cross-validation.
+    Train an SVM Classifier with GridSearchCV.
+    Returns train and test metrics and predictions.
     """
-    logger.info("Training SVC classifier (multiclass)...")
-
-    X_scaled, scaler = scale_data(X)
-
+    logger.info("Training SVM classifier...")
+    
+    X_train_scaled, X_test_scaled, scaler = scale_data(X_train, X_test)
+    
     if param_grid is None:
         param_grid = {
-            'C': [0.1, 1, 10],
-            'gamma': ['scale', 'auto', 0.01],
+            'C': [0.1, 1, 10, 100],
+            'gamma': ['scale', 'auto', 0.1, 0.01],
             'kernel': ['rbf']
         }
-
-    svc = SVC(probability=True, random_state=42, decision_function_shape='ovr')
+    
+    svc = SVC(probability=True, random_state=42)  # probability=True for predict_proba
     grid_search = GridSearchCV(
         svc, 
         param_grid, 
-        cv=cv_folds, 
-        scoring='accuracy', 
-        n_jobs=-1, 
-        refit=True
+        cv=cv, 
+        scoring='accuracy',
+        n_jobs=-1
     )
-    grid_search.fit(X_scaled, y)
+    grid_search.fit(X_train_scaled, y_train)
+    
     best_svc = grid_search.best_estimator_
-    logger.info(f"SVC best params: {grid_search.best_params_}")
+    logger.info(f"SVM best params: {grid_search.best_params_}")
 
-    train_pred = best_svc.predict(X_scaled)
-    train_acc = accuracy_score(y, train_pred)
-    logger.info(f"SVC (train) accuracy: {train_acc:.4f}")
-
-    cm = confusion_matrix(y, train_pred)
+    train_pred = best_svc.predict(X_train_scaled)
+    train_acc = accuracy_score(y_train, train_pred)
+    train_f1 = f1_score(y_train, train_pred, average='binary')
+    train_proba = best_svc.predict_proba(X_train_scaled)[:, 1]
+    logger.info(f"SVM - Train Accuracy: {train_acc:.4f}, F1: {train_f1:.4f}")
 
     results = {
         'model': best_svc,
         'scaler': scaler,
         'best_params': grid_search.best_params_,
+        'train_pred': train_pred,
+        'train_proba': train_proba,
         'train_acc': train_acc,
-        'confusion_matrix': cm,
-        'class_report': classification_report(y, train_pred, output_dict=True),
+        'train_f1': train_f1
     }
 
-    if output_dir:
-        os.makedirs(output_dir, exist_ok=True)
-        plot_confusion_matrix(
-            cm,
-            class_labels=['Shuffled','Random','Real'],
-            title='SVC Confusion Matrix',
-            output_path=os.path.join(output_dir, 'svc_confusion_matrix.png')
-        )
-        cr_df = pd.DataFrame(results['class_report']).transpose()
-        cr_df.to_csv(os.path.join(output_dir, 'svc_classification_report.csv'))
+    if X_test is not None and y_test is not None:
+        test_pred = best_svc.predict(X_test_scaled)
+        test_acc = accuracy_score(y_test, test_pred)
+        test_f1 = f1_score(y_test, test_pred, average='binary')
 
+        # For AUC
+        test_proba = best_svc.predict_proba(X_test_scaled)[:, 1]
+        test_auc = roc_auc_score(y_test, test_proba)
+
+        results.update({
+            'test_pred': test_pred,
+            'test_accuracy': test_acc,
+            'test_f1': test_f1,
+            'test_auc': test_auc,
+            'test_proba': test_proba
+        })
+        logger.info(
+            f"SVM - Test Accuracy: {test_acc:.4f}, "
+            f"F1: {test_f1:.4f}, AUC: {test_auc:.4f}"
+        )
+    
     return results
 
 
-def train_symbolic_classifier(
-    X_real: pd.DataFrame,
-    X_fake: pd.DataFrame,
-    niterations: int = 50,
-    output_dir: str = None
+def perform_symbolic_classification(
+    X_train: pd.DataFrame,
+    y_train: np.ndarray,
+    X_test: pd.DataFrame = None,
+    y_test: np.ndarray = None,
+    niterations: int = 200,
+    populations: int = 50,
+    population_size: int = 100,
+    maxsize: int = 40,
+    maxdepth: int = 10,
+    binary_operators: List[str] = None,
+    unary_operators: List[str] = None,
+    model_selection: str = "accuracy" ,
+    select_k_features: int = 10,
 ) -> Dict:
     """
-    Binary symbolic classification (Real=1 vs. Fake=0).
+    Perform a *symbolic 'classification'* approach by:
+      1) Letting PySR model y as a continuous 0/1 variable (like regression).
+      2) Predicting a continuous output, then thresholding at 0.5 to get a class label.
+      3) Computing classification metrics (accuracy, F1, AUC, etc.) on the 0/1 predictions.
     """
-    logger.info("Training Symbolic Classifier for real vs. not real (binary).")
 
-    X_real_cp = X_real.copy()
-    X_fake_cp = X_fake.copy()
-    X_real_cp['label'] = 1
-    X_fake_cp['label'] = 0
+    logger.info("Performing Symbolic Classification via threshold=0.5 on continuous output...")
 
-    X_bin = pd.concat([X_real_cp, X_fake_cp], axis=0)
-    y_bin = X_bin.pop('label').values  
+    # Default operators if none are provided
+    if binary_operators is None:
+        binary_operators = ["+", "-", "*", "/"]
+    if unary_operators is None:
+        unary_operators = ["square", "log", "sqrt"]
 
-    X_train_bin, X_test_bin, y_train_bin, y_test_bin = train_test_split(
-        X_bin, y_bin, test_size=0.2, random_state=42, stratify=y_bin
-    )
-
-    X_train_scaled, X_test_scaled, scaler = scale_data(X_train_bin, X_test_bin)
+    # Scale the data
+    X_train_scaled, X_test_scaled, scaler = scale_data(X_train, X_test)
 
     model = PySRRegressor(
-        model_selection="best",
+        model_selection=model_selection,
         niterations=niterations,
-        binary_operators=["+", "-", "*", "/"],
-        unary_operators=["square", "log", "sqrt"],
-        populations=20,
-        population_size=50,
-        maxsize=30,
-        verbosity=1,
-        select_k_features=10,
-        parallelism="multithreading"
+        binary_operators=binary_operators,
+        unary_operators=unary_operators,
+        populations=populations,
+        population_size=population_size,
+        maxsize=maxsize,
+        select_k_features = select_k_features,
+        maxdepth=maxdepth,
+        verbosity=0,
+        random_state=42,
+        deterministic=True,
+        parallelism='serial'
     )
-    model.fit(X_train_scaled, y_train_bin, variable_names=list(X_train_bin.columns))
-
-    train_pred_cont = model.predict(X_train_scaled)
-    train_pred_label = (train_pred_cont >= 0.5).astype(int)
-    train_acc = accuracy_score(y_train_bin, train_pred_label)
-
-    test_pred_cont = model.predict(X_test_scaled)
-    test_pred_label = (test_pred_cont >= 0.5).astype(int)
-    test_acc = accuracy_score(y_test_bin, test_pred_label)
-
-    cm_train = confusion_matrix(y_train_bin, train_pred_label)
-    cm_test = confusion_matrix(y_test_bin, test_pred_label)
-
-    logger.info(f"Symbolic Classifier: train_acc={train_acc:.4f}, test_acc={test_acc:.4f}")
+    
+    # Fit on the scaled training data, with y in {0,1}
+    model.fit(X_train_scaled, y_train, variable_names=list(X_train.columns))
     best_expr = model.sympy()
+    logger.info(f"Best symbolic expression found: {best_expr}")
 
+    hall_of_fame = model.equations_
+    top_eqs = []
+    for _, eq in hall_of_fame.iterrows():
+        top_eqs.append({
+            'equation': eq['equation'],      # String representation of the equation
+            'loss': eq['loss'],
+            'complexity': eq['complexity'],
+            'score': eq['score'],
+        })
+
+    # Predict continuous values on training data
+    train_pred_cont = model.predict(X_train_scaled)
+    # Threshold at 0.5 to get class predictions (0 or 1)
+    train_pred = (train_pred_cont >= 0.5).astype(int)
+
+    # Compute training metrics
+    train_acc = accuracy_score(y_train, train_pred)
+    train_f1 = f1_score(y_train, train_pred, average='binary')
+    # If you want AUC on train, we can do it with the raw continuous output:
+    # (But keep in mind it might be <0 or >1)
+    train_auc = roc_auc_score(y_train, train_pred_cont)
+    # if it can't compute for some reason
+
+    logger.info(
+        f"Symbolic Classification (Train) - Accuracy: {train_acc:.4f}, "
+        f"F1: {train_f1:.4f}, AUC: {train_auc:.4f}"
+    )
+
+    # Prepare results dict
     results = {
         'model': model,
         'scaler': scaler,
         'best_expr': str(best_expr),
+        'train_pred_cont': train_pred_cont,  # continuous output
+        'train_pred': train_pred,           # thresholded
+        'train_proba': train_pred_cont,     # continuous output for AUC
         'train_acc': train_acc,
-        'test_acc': test_acc,
-        'confusion_matrix_train': cm_train,
-        'confusion_matrix_test': cm_test,
-        'classification_report_train': classification_report(y_train_bin, train_pred_label, output_dict=True),
-        'classification_report_test': classification_report(y_test_bin, test_pred_label, output_dict=True)
+        'train_f1': train_f1,
+        'train_auc': train_auc,
+        'top_equations': pd.DataFrame(top_eqs),
     }
 
-    if output_dir:
-        os.makedirs(output_dir, exist_ok=True)
-        plot_confusion_matrix(
-            cm_train, 
-            ['Fake','Real'], 
-            title='Symbolic Classifier Train Confusion', 
-            output_path=os.path.join(output_dir, 'symclf_confusion_train.png')
+    # Evaluate on test data (if provided)
+    if X_test is not None and y_test is not None:
+        test_pred_cont = model.predict(X_test_scaled)
+        test_pred = (test_pred_cont >= 0.5).astype(int)
+
+        test_acc = accuracy_score(y_test, test_pred)
+        test_f1 = f1_score(y_test, test_pred, average='binary')
+        test_auc = roc_auc_score(y_test, test_pred_cont)
+  
+
+        results.update({
+            'test_pred_cont': test_pred_cont,
+            'test_pred': test_pred,
+            'test_accuracy': test_acc,
+            'test_proba': test_pred_cont,
+            'test_f1': test_f1,
+            'test_auc': test_auc
+        })
+
+        logger.info(
+            f"Symbolic Classification (Test) - Accuracy: {test_acc:.4f}, "
+            f"F1: {test_f1:.4f}, AUC: {test_auc:.4f}"
         )
-        plot_confusion_matrix(
-            cm_test, 
-            ['Fake','Real'], 
-            title='Symbolic Classifier Test Confusion', 
-            output_path=os.path.join(output_dir, 'symclf_confusion_test.png')
-        )
-        with open(os.path.join(output_dir, 'symbolic_classifier_expr.txt'), 'w') as f:
-            f.write(f"Best expression: {best_expr}\n")
-        cr_train_df = pd.DataFrame(results['classification_report_train']).transpose()
-        cr_train_df.to_csv(os.path.join(output_dir, 'symclf_report_train.csv'))
-        cr_test_df = pd.DataFrame(results['classification_report_test']).transpose()
-        cr_test_df.to_csv(os.path.join(output_dir, 'symclf_report_test.csv'))
 
     return results
