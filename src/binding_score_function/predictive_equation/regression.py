@@ -165,7 +165,7 @@ def train_svr(
         param_grid = {
             'C': [0.1, 1, 10, 100],
             'gamma': ['scale', 'auto', 0.1, 0.01],
-            'kernel': ['rbf']
+            'kernel': ['linear', 'poly', 'rbf', 'sigmoid']
         }
     
     svr = SVR()
@@ -218,10 +218,10 @@ def perform_symbolic_regression(
     niterations: int = 200,
     populations: int = 50,
     population_size: int = 100,
-    select_k_features: int = 10,
     binary_operators: List[str] = None,
     unary_operators: List[str] = None,
-    model_selection: str = "best",
+    model_selection:str="accuracy",
+    select_k_features: int = None,
 ) -> Dict:
     logger.info("Performing Symbolic Regression...")
 
@@ -230,8 +230,6 @@ def perform_symbolic_regression(
     if unary_operators is None:
         unary_operators = ["square", "log", "sqrt"]
 
-    X_train_scaled, X_test_scaled, scaler = scale_data(X_train, X_test)
-    
     model = PySRRegressor(
         model_selection=model_selection,
         niterations=niterations,
@@ -240,46 +238,118 @@ def perform_symbolic_regression(
         populations=populations,
         population_size=population_size,
         select_k_features=select_k_features,
-        verbosity=0,
+        verbosity=0
     )
-    model.fit(X_train_scaled, y_train, variable_names=list(X_train.columns))
     
-    # Get the best expression (according to your objective)
-    best_expr = model.sympy()
-    logger.info(f"Best expression: {best_expr}")
+
+    model.fit(X_train, y_train)
     
-    train_pred = model.predict(X_train_scaled)
+    # Get equations dataframe
+    equations = model.equations_.reset_index().rename(columns={"index": "eq_index"})
+    equations = equations.sort_values(by="loss", ascending=True).reset_index(drop=True)
+    
+    # Get the best expression (according to loss)
+    best_expr = model.sympy(equations.iloc[0]['eq_index'])
+    logger.info(f"Best symbolic expression found: {best_expr}")
+
+    # Predict with best equation (lowest loss)
+    train_pred = model.predict(X_train.values, index=equations.iloc[0]['eq_index'])
     train_rmse = np.sqrt(mean_squared_error(y_train, train_pred))
     train_r2 = r2_score(y_train, train_pred)
-
-    hall_of_fame = model.equations_
-
-    # You can either use this DataFrame directly or iterate over its rows:
-    top_eqs = []
-    for _, eq in hall_of_fame.iterrows():
-        top_eqs.append({
-            'equation': eq['equation'],      # String representation of the equation
-            'loss': eq['loss'],
-            'complexity': eq['complexity'],
-            'score': eq['score'],
+    
+    # Get all equations and their metrics
+    all_eqs = []
+    for i, row in equations.iterrows():
+        eq_index = row['eq_index']
+        eq_str = str(model.sympy(eq_index))
+        complexity = row['complexity']
+        loss = row['loss']
+        score = row['score']
+        
+        # Calculate predictions for this specific equation
+        try:
+            eq_pred_train = model.predict(X_train.values, index=eq_index)
+            
+            # Safeguard against NaNs or Infs
+            valid_mask_train = np.isfinite(eq_pred_train)
+            if not valid_mask_train.all():
+                logger.warning(f"Equation {i}: {valid_mask_train.sum()}/{len(valid_mask_train)} valid predictions on train")
+                # Use only valid predictions for metrics
+                train_rmse_eq = np.sqrt(mean_squared_error(y_train[valid_mask_train], eq_pred_train[valid_mask_train])) if valid_mask_train.any() else np.nan
+                train_r2_eq = r2_score(y_train[valid_mask_train], eq_pred_train[valid_mask_train]) if valid_mask_train.any() else np.nan
+            else:
+                train_rmse_eq = np.sqrt(mean_squared_error(y_train, eq_pred_train))
+                train_r2_eq = r2_score(y_train, eq_pred_train)
+            
+            # Test metrics if test data provided
+            test_rmse_eq, test_r2_eq, test_mae_eq = np.nan, np.nan, np.nan
+            if X_test is not None and y_test is not None:
+                eq_pred_test = model.predict(X_test.values, index=eq_index)
+                
+                # Safeguard against NaNs in test predictions
+                valid_mask_test = np.isfinite(eq_pred_test)
+                if not valid_mask_test.all():
+                    logger.warning(f"Equation {i}: {valid_mask_test.sum()}/{len(valid_mask_test)} valid predictions on test")
+                    if valid_mask_test.any():
+                        test_rmse_eq = np.sqrt(mean_squared_error(y_test[valid_mask_test], eq_pred_test[valid_mask_test]))
+                        test_r2_eq = r2_score(y_test[valid_mask_test], eq_pred_test[valid_mask_test])
+                        test_mae_eq = mean_absolute_error(y_test[valid_mask_test], eq_pred_test[valid_mask_test])
+                else:
+                    test_rmse_eq = np.sqrt(mean_squared_error(y_test, eq_pred_test))
+                    test_r2_eq = r2_score(y_test, eq_pred_test)
+                    test_mae_eq = mean_absolute_error(y_test, eq_pred_test)
+        
+        except Exception as e:
+            logger.warning(f"Error calculating metrics for equation {i}: {str(e)}")
+            train_rmse_eq, train_r2_eq = np.nan, np.nan
+            test_rmse_eq, test_r2_eq, test_mae_eq = np.nan, np.nan, np.nan
+            
+        all_eqs.append({
+            'equation': eq_str,
+            'complexity': complexity,
+            'loss': loss,
+            'score': score,
+            'train_rmse': train_rmse_eq,
+            'train_r2': train_r2_eq,
+            'test_rmse': test_rmse_eq,
+            'test_r2': test_r2_eq,
+            'test_mae': test_mae_eq,
+            'equation_index': eq_index
         })
+    
+    # Calculate metrics for best model (safeguarded against NaNs)
+    valid_mask_train = np.isfinite(train_pred)
+    if not valid_mask_train.all():
+        logger.warning(f"Best model: {valid_mask_train.sum()}/{len(valid_mask_train)} valid predictions on train")
+        train_rmse = np.sqrt(mean_squared_error(y_train[valid_mask_train], train_pred[valid_mask_train])) if valid_mask_train.any() else np.nan
+        train_r2 = r2_score(y_train[valid_mask_train], train_pred[valid_mask_train]) if valid_mask_train.any() else np.nan
     
     # Prepare results dict
     results = {
         'model': model,
-        'scaler': scaler,
         'best_expr': str(best_expr),
         'train_pred': train_pred,
         'train_rmse': train_rmse,
         'train_r2': train_r2,
-        'top_equations': pd.DataFrame(top_eqs),
+        'all_equations': pd.DataFrame(all_eqs),
     }
     
     if X_test is not None and y_test is not None:
-        test_pred = model.predict(X_test_scaled)
+        test_pred = model.predict(X_test.values, index=equations.iloc[0]['eq_index'])
         test_rmse = np.sqrt(mean_squared_error(y_test, test_pred))
         test_r2 = r2_score(y_test, test_pred)
         test_mae = mean_absolute_error(y_test, test_pred)
+        
+        # Safeguard against NaNs in test predictions for best model
+        valid_mask_test = np.isfinite(test_pred)
+        if not valid_mask_test.all():
+            logger.warning(f"Best model: {valid_mask_test.sum()}/{len(valid_mask_test)} valid predictions on test")
+            if valid_mask_test.any():
+                test_rmse = np.sqrt(mean_squared_error(y_test[valid_mask_test], test_pred[valid_mask_test]))
+                test_r2 = r2_score(y_test[valid_mask_test], test_pred[valid_mask_test])
+                test_mae = mean_absolute_error(y_test[valid_mask_test], test_pred[valid_mask_test])
+            else:
+                test_rmse, test_r2, test_mae = np.nan, np.nan, np.nan
         
         results.update({
             'test_pred': test_pred,

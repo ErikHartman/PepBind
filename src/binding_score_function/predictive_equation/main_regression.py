@@ -14,6 +14,7 @@ from plotting import (
     plot_regression_scatter,
     plot_feature_importances,
     plot_model_comparison,
+    plot_symbolic_complexity_tradeoff,
 )
 
 if __name__ == "__main__":
@@ -45,7 +46,7 @@ if __name__ == "__main__":
         populations=50,
         population_size=100,
         model_selection="best",
-        select_k_features=15,
+        select_k_features=None,
     )
 
     train_preds_df = pd.DataFrame(
@@ -121,6 +122,29 @@ if __name__ == "__main__":
         model_name="Random Forest",
         output_path=os.path.join(output_dir, "rf_importance.png"),
     )
+
+    # Save top symbolic equations to CSV
+    if 'top_equations' in symb_results:
+        symb_results['top_equations'].to_csv(
+            os.path.join(output_dir, "symbolic_regression_equations.csv"), index=False
+        )
+        print(f"Saved top symbolic regression equations to {output_dir}/symbolic_regression_equations.csv")
+        
+    # Save all symbolic equations with metrics
+    if 'all_equations' in symb_results:
+        symb_results['all_equations'].to_csv(
+            os.path.join(output_dir, "symbolic_regression_all_equations.csv"), index=False
+        )
+        print(f"Saved all symbolic regression equations to {output_dir}/symbolic_regression_all_equations.csv")
+        
+        # Plot complexity vs accuracy tradeoff
+        plot_symbolic_complexity_tradeoff(
+            symb_results['all_equations'],
+            metric='test_r2',
+            model_type='regression',
+            output_path=os.path.join(output_dir, "symbolic_regression_complexity_tradeoff.png"),
+            lower_is_better=False
+        )
 
     results_dict = {
         "Lasso": lasso_results,

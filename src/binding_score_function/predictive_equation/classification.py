@@ -290,8 +290,6 @@ def perform_symbolic_classification(
     if unary_operators is None:
         unary_operators = ["square", "log", "sqrt"]
 
-    # Scale the data
-    X_train_scaled, X_test_scaled, scaler = scale_data(X_train, X_test)
 
     model = PySRRegressor(
         model_selection=model_selection,
@@ -305,55 +303,130 @@ def perform_symbolic_classification(
     )
     
     # Fit on the scaled training data, with y in {0,1}
-    model.fit(X_train_scaled, y_train, variable_names=list(X_train.columns))
-    best_expr = model.sympy()
+    model.fit(X_train, y_train)
+    
+    equations = model.equations_.reset_index().rename(columns={"index": "eq_index"})
+    equations = equations.sort_values(by="loss", ascending=True).reset_index(drop=True)
+    
+    # Get the best expression (according to your objective)
+    best_expr = model.sympy(equations.iloc[0]['eq_index'])
     logger.info(f"Best symbolic expression found: {best_expr}")
 
-    hall_of_fame = model.equations_
-    top_eqs = []
-    for _, eq in hall_of_fame.iterrows():
-        top_eqs.append({
-            'equation': eq['equation'],      # String representation of the equation
-            'loss': eq['loss'],
-            'complexity': eq['complexity'],
-            'score': eq['score'],
-        })
-
     # Predict continuous values on training data
-    train_pred_cont = model.predict(X_train_scaled)
+    train_pred_cont = model.predict(X_train, index=equations.iloc[0]['eq_index'])
     # Threshold at 0.5 to get class predictions (0 or 1)
     train_pred = (train_pred_cont >= 0.5).astype(int)
 
     # Compute training metrics
     train_acc = accuracy_score(y_train, train_pred)
     train_f1 = f1_score(y_train, train_pred, average='binary')
-    # If you want AUC on train, we can do it with the raw continuous output:
-    # (But keep in mind it might be <0 or >1)
     train_auc = roc_auc_score(y_train, train_pred_cont)
-    # if it can't compute for some reason
 
     logger.info(
         f"Symbolic Classification (Train) - Accuracy: {train_acc:.4f}, "
         f"F1: {train_f1:.4f}, AUC: {train_auc:.4f}"
     )
 
+    # Get all equations and their metrics
+    all_eqs = []
+    for i, row in equations.iterrows():
+        eq_index = row['eq_index']
+        eq_str = str(model.sympy(eq_index))
+        complexity = row['complexity']
+        loss = row['loss']
+        score = row['score']
+        
+        # Calculate predictions for this specific equation
+        try:
+            eq_pred_cont_train = model.predict(X_train, index=eq_index)
+            eq_pred_train = (eq_pred_cont_train >= 0.5).astype(int)
+            
+            # Safeguard against NaNs or Infs
+            valid_mask_train = np.isfinite(eq_pred_cont_train)
+            if not valid_mask_train.all():
+                logger.warning(f"Equation {i}: {valid_mask_train.sum()}/{len(valid_mask_train)} valid predictions on train")
+                # Use only valid predictions for metrics
+                if valid_mask_train.any():
+                    train_acc_eq = accuracy_score(y_train[valid_mask_train], eq_pred_train[valid_mask_train])
+                    train_f1_eq = f1_score(y_train[valid_mask_train], eq_pred_train[valid_mask_train], average='binary')
+                    train_auc_eq = roc_auc_score(y_train[valid_mask_train], eq_pred_cont_train[valid_mask_train])
+                else:
+                    train_acc_eq, train_f1_eq, train_auc_eq = np.nan, np.nan, np.nan
+            else:
+                train_acc_eq = accuracy_score(y_train, eq_pred_train)
+                train_f1_eq = f1_score(y_train, eq_pred_train, average='binary')
+                train_auc_eq = roc_auc_score(y_train, eq_pred_cont_train)
+            
+            # Test metrics if test data provided
+            test_acc_eq, test_f1_eq, test_auc_eq = np.nan, np.nan, np.nan
+            if X_test is not None and y_test is not None:
+                eq_pred_cont_test = model.predict(X_test, index=eq_index)
+                eq_pred_test = (eq_pred_cont_test >= 0.5).astype(int)
+                
+                # Safeguard against NaNs in test predictions
+                valid_mask_test = np.isfinite(eq_pred_cont_test)
+                if not valid_mask_test.all():
+                    logger.warning(f"Equation {i}: {valid_mask_test.sum()}/{len(valid_mask_test)} valid predictions on test")
+                    if valid_mask_test.any():
+                        test_acc_eq = accuracy_score(y_test[valid_mask_test], eq_pred_test[valid_mask_test])
+                        test_f1_eq = f1_score(y_test[valid_mask_test], eq_pred_test[valid_mask_test], average='binary')
+                        test_auc_eq = roc_auc_score(y_test[valid_mask_test], eq_pred_cont_test[valid_mask_test])
+                else:
+                    test_acc_eq = accuracy_score(y_test, eq_pred_test)
+                    test_f1_eq = f1_score(y_test, eq_pred_test, average='binary')
+                    test_auc_eq = roc_auc_score(y_test, eq_pred_cont_test)
+        
+        except Exception as e:
+            logger.warning(f"Error calculating metrics for equation {i}: {str(e)}")
+            train_acc_eq, train_f1_eq, train_auc_eq = np.nan, np.nan, np.nan
+            test_acc_eq, test_f1_eq, test_auc_eq = np.nan, np.nan, np.nan
+            
+        all_eqs.append({
+            'equation': eq_str,
+            'complexity': complexity,
+            'loss': loss,
+            'score': score,
+            'train_acc': train_acc_eq,
+            'train_f1': train_f1_eq,
+            'train_auc': train_auc_eq,
+            'test_acc': test_acc_eq,
+            'test_f1': test_f1_eq,
+            'test_auc': test_auc_eq,
+            'equation_index': eq_index
+        })
+    
+    # Recheck train predictions for best model (with NaN safeguards)
+    valid_mask_train = np.isfinite(train_pred_cont)
+    if not valid_mask_train.all():
+        logger.warning(f"Best model: {valid_mask_train.sum()}/{len(valid_mask_train)} valid train predictions")
+        if valid_mask_train.any():
+            # Recalculate metrics using only valid predictions
+            valid_train_pred = train_pred[valid_mask_train]
+            valid_train_pred_cont = train_pred_cont[valid_mask_train]
+            valid_y_train = y_train[valid_mask_train]
+            
+            train_acc = accuracy_score(valid_y_train, valid_train_pred)
+            train_f1 = f1_score(valid_y_train, valid_train_pred, average='binary')
+            train_auc = roc_auc_score(valid_y_train, valid_train_pred_cont)
+        else:
+            train_acc, train_f1, train_auc = np.nan, np.nan, np.nan
+    
     # Prepare results dict
     results = {
         'model': model,
-        'scaler': scaler,
         'best_expr': str(best_expr),
-        'train_pred_cont': train_pred_cont,  # continuous output
-        'train_pred': train_pred,           # thresholded
-        'train_proba': train_pred_cont,     # continuous output for AUC
+        'train_pred_cont': train_pred_cont,
+        'train_pred': train_pred,
+        'train_proba': train_pred_cont,
         'train_acc': train_acc,
         'train_f1': train_f1,
         'train_auc': train_auc,
-        'top_equations': pd.DataFrame(top_eqs),
+        'all_equations': pd.DataFrame(all_eqs),
     }
 
-    # Evaluate on test data (if provided)
+    # Evaluate on test data
     if X_test is not None and y_test is not None:
-        test_pred_cont = model.predict(X_test_scaled)
+        test_pred_cont = model.predict(X_test, index=equations.iloc[0]['eq_index'])
         test_pred = (test_pred_cont >= 0.5).astype(int)
 
         test_acc = accuracy_score(y_test, test_pred)
@@ -361,11 +434,27 @@ def perform_symbolic_classification(
         test_auc = roc_auc_score(y_test, test_pred_cont)
   
 
+        # Safeguard against NaNs in test predictions for best model
+        valid_mask_test = np.isfinite(test_pred_cont)
+        if not valid_mask_test.all():
+            logger.warning(f"Best model: {valid_mask_test.sum()}/{len(valid_mask_test)} valid test predictions")
+            if valid_mask_test.any():
+                # Recalculate metrics using only valid predictions
+                valid_test_pred = test_pred[valid_mask_test]
+                valid_test_pred_cont = test_pred_cont[valid_mask_test]
+                valid_y_test = y_test[valid_mask_test]
+                
+                test_acc = accuracy_score(valid_y_test, valid_test_pred)
+                test_f1 = f1_score(valid_y_test, valid_test_pred, average='binary')
+                test_auc = roc_auc_score(valid_y_test, valid_test_pred_cont)
+            else:
+                test_acc, test_f1, test_auc = np.nan, np.nan, np.nan
+        
         results.update({
             'test_pred_cont': test_pred_cont,
             'test_pred': test_pred,
-            'test_accuracy': test_acc,
             'test_proba': test_pred_cont,
+            'test_acc': test_acc,
             'test_f1': test_f1,
             'test_auc': test_auc
         })
