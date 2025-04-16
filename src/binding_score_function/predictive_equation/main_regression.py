@@ -30,9 +30,14 @@ if __name__ == "__main__":
     )
     y_real = pd.read_csv(os.path.join(scores_path, "real_y_train.csv"))["pKd"].values
 
+    print(f"X_real shape: {X_real.shape}")
+
     X_train, X_test, y_train, y_test = train_test_split(
         X_real, y_real, test_size=0.2, random_state=42
     )
+
+    print(f"X_train shape: {X_train.shape}")
+    print(f"X_test shape: {X_test.shape}")
 
     lasso_results = train_lasso(X_train, y_train, X_test, y_test)
     rf_results = train_rf(X_train, y_train, X_test, y_test)
@@ -42,11 +47,12 @@ if __name__ == "__main__":
         y_train,
         X_test,
         y_test,
-        niterations=200,
+        niterations=500,
         populations=50,
         population_size=100,
         model_selection="best",
-        select_k_features=None,
+        select_k_features=15,
+        scale_features=True,
     )
 
     train_preds_df = pd.DataFrame(

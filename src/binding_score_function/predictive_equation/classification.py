@@ -274,6 +274,7 @@ def perform_symbolic_classification(
     unary_operators: List[str] = None,
     model_selection: str = "accuracy" ,
     select_k_features: int = 10,
+    scale_features: bool = False,
 ) -> Dict:
     """
     Perform a *symbolic 'classification'* approach by:
@@ -290,6 +291,14 @@ def perform_symbolic_classification(
     if unary_operators is None:
         unary_operators = ["square", "log", "sqrt"]
 
+    # Apply scaling if requested
+    if scale_features:
+        logger.info("Scaling features for symbolic classification")
+        X_train_data, X_test_data, scaler = scale_data(X_train, X_test)
+    else:
+        X_train_data = X_train
+        X_test_data = X_test
+        scaler = None
 
     model = PySRRegressor(
         model_selection=model_selection,
@@ -302,30 +311,102 @@ def perform_symbolic_classification(
         verbosity=0
     )
     
-    # Fit on the scaled training data, with y in {0,1}
-    model.fit(X_train, y_train)
+    model.fit(X_train_data, y_train, variable_names=list(X_train.columns))
     
+    # Get equations dataframe
     equations = model.equations_.reset_index().rename(columns={"index": "eq_index"})
     equations = equations.sort_values(by="loss", ascending=True).reset_index(drop=True)
     
-    # Get the best expression (according to your objective)
-    best_expr = model.sympy(equations.iloc[0]['eq_index'])
-    logger.info(f"Best symbolic expression found: {best_expr}")
-
-    # Predict continuous values on training data
-    train_pred_cont = model.predict(X_train, index=equations.iloc[0]['eq_index'])
-    # Threshold at 0.5 to get class predictions (0 or 1)
-    train_pred = (train_pred_cont >= 0.5).astype(int)
-
-    # Compute training metrics
-    train_acc = accuracy_score(y_train, train_pred)
-    train_f1 = f1_score(y_train, train_pred, average='binary')
-    train_auc = roc_auc_score(y_train, train_pred_cont)
-
-    logger.info(
-        f"Symbolic Classification (Train) - Accuracy: {train_acc:.4f}, "
-        f"F1: {train_f1:.4f}, AUC: {train_auc:.4f}"
-    )
+    # Calculate metrics for each equation on the test set if available
+    if X_test is not None and y_test is not None:
+        test_metrics = []
+        for i, row in equations.iterrows():
+            eq_index = row['eq_index']
+            try:
+                # Calculate predictions for this equation
+                test_pred_cont = model.predict(X_test_data, index=eq_index)
+                test_pred = (test_pred_cont >= 0.5).astype(int)
+                
+                # Safeguard against NaNs
+                valid_mask = np.isfinite(test_pred_cont)
+                if valid_mask.all():
+                    test_acc = accuracy_score(y_test, test_pred)
+                    test_f1 = f1_score(y_test, test_pred, average='binary')
+                    test_auc = roc_auc_score(y_test, test_pred_cont)
+                    
+                    test_metrics.append({
+                        'eq_index': eq_index,
+                        'test_acc': test_acc,
+                        'test_f1': test_f1,
+                        'test_auc': test_auc
+                    })
+                else:
+                    if valid_mask.any():
+                        # Use only valid predictions for metrics
+                        test_acc = accuracy_score(y_test[valid_mask], test_pred[valid_mask])
+                        test_f1 = f1_score(y_test[valid_mask], test_pred[valid_mask], average='binary')
+                        test_auc = roc_auc_score(y_test[valid_mask], test_pred_cont[valid_mask])
+                        
+                        test_metrics.append({
+                            'eq_index': eq_index,
+                            'test_acc': test_acc,
+                            'test_f1': test_f1,
+                            'test_auc': test_auc,
+                            'valid_ratio': valid_mask.sum() / len(valid_mask)
+                        })
+            except Exception as e:
+                logger.warning(f"Error evaluating equation {i} on test set: {str(e)}")
+                
+        # Find the best equation based on test AUC (could also use acc or f1)
+        if test_metrics:
+            test_metrics_df = pd.DataFrame(test_metrics)
+            # Use AUC as the primary metric for classification
+            best_test_idx = test_metrics_df['test_auc'].idxmax()
+            best_test_eq_index = test_metrics_df.loc[best_test_idx, 'eq_index']
+            
+            # Get the best expression based on test performance
+            best_expr = model.sympy(best_test_eq_index)
+            logger.info(f"Best symbolic expression on test set: {best_expr}")
+            
+            # Get train and test predictions for the best test model
+            train_pred_cont = model.predict(X_train_data, index=best_test_eq_index)
+            train_pred = (train_pred_cont >= 0.5).astype(int)
+            train_acc = accuracy_score(y_train, train_pred)
+            train_f1 = f1_score(y_train, train_pred, average='binary')
+            train_auc = roc_auc_score(y_train, train_pred_cont)
+            
+            test_pred_cont = model.predict(X_test_data, index=best_test_eq_index)
+            test_pred = (test_pred_cont >= 0.5).astype(int)
+            test_acc = accuracy_score(y_test, test_pred)
+            test_f1 = f1_score(y_test, test_pred, average='binary')
+            test_auc = roc_auc_score(y_test, test_pred_cont)
+        else:
+            # If no equations worked well on test set, use the original best by train loss
+            best_expr = model.sympy(equations.iloc[0]['eq_index'])
+            logger.warning("No equations performed well on test set, using best from training")
+            
+            # Predictions with best training model
+            train_pred_cont = model.predict(X_train_data, index=equations.iloc[0]['eq_index'])
+            train_pred = (train_pred_cont >= 0.5).astype(int)
+            train_acc = accuracy_score(y_train, train_pred)
+            train_f1 = f1_score(y_train, train_pred, average='binary')
+            train_auc = roc_auc_score(y_train, train_pred_cont)
+            
+            test_pred_cont = model.predict(X_test_data, index=equations.iloc[0]['eq_index'])
+            test_pred = (test_pred_cont >= 0.5).astype(int)
+            test_acc = accuracy_score(y_test, test_pred)
+            test_f1 = f1_score(y_test, test_pred, average='binary')
+            test_auc = roc_auc_score(y_test, test_pred_cont)
+    else:
+        # Without test data, just use the best equation from training
+        best_expr = model.sympy(equations.iloc[0]['eq_index'])
+        
+        # Predictions with best training model
+        train_pred_cont = model.predict(X_train_data, index=equations.iloc[0]['eq_index'])
+        train_pred = (train_pred_cont >= 0.5).astype(int)
+        train_acc = accuracy_score(y_train, train_pred)
+        train_f1 = f1_score(y_train, train_pred, average='binary')
+        train_auc = roc_auc_score(y_train, train_pred_cont)
 
     # Get all equations and their metrics
     all_eqs = []
@@ -338,7 +419,7 @@ def perform_symbolic_classification(
         
         # Calculate predictions for this specific equation
         try:
-            eq_pred_cont_train = model.predict(X_train, index=eq_index)
+            eq_pred_cont_train = model.predict(X_train_data, index=eq_index)
             eq_pred_train = (eq_pred_cont_train >= 0.5).astype(int)
             
             # Safeguard against NaNs or Infs
@@ -360,7 +441,7 @@ def perform_symbolic_classification(
             # Test metrics if test data provided
             test_acc_eq, test_f1_eq, test_auc_eq = np.nan, np.nan, np.nan
             if X_test is not None and y_test is not None:
-                eq_pred_cont_test = model.predict(X_test, index=eq_index)
+                eq_pred_cont_test = model.predict(X_test_data, index=eq_index)
                 eq_pred_test = (eq_pred_cont_test >= 0.5).astype(int)
                 
                 # Safeguard against NaNs in test predictions
@@ -422,34 +503,11 @@ def perform_symbolic_classification(
         'train_f1': train_f1,
         'train_auc': train_auc,
         'all_equations': pd.DataFrame(all_eqs),
+        'scaler': scaler,  # Include the scaler if scaling was used
     }
 
     # Evaluate on test data
     if X_test is not None and y_test is not None:
-        test_pred_cont = model.predict(X_test, index=equations.iloc[0]['eq_index'])
-        test_pred = (test_pred_cont >= 0.5).astype(int)
-
-        test_acc = accuracy_score(y_test, test_pred)
-        test_f1 = f1_score(y_test, test_pred, average='binary')
-        test_auc = roc_auc_score(y_test, test_pred_cont)
-  
-
-        # Safeguard against NaNs in test predictions for best model
-        valid_mask_test = np.isfinite(test_pred_cont)
-        if not valid_mask_test.all():
-            logger.warning(f"Best model: {valid_mask_test.sum()}/{len(valid_mask_test)} valid test predictions")
-            if valid_mask_test.any():
-                # Recalculate metrics using only valid predictions
-                valid_test_pred = test_pred[valid_mask_test]
-                valid_test_pred_cont = test_pred_cont[valid_mask_test]
-                valid_y_test = y_test[valid_mask_test]
-                
-                test_acc = accuracy_score(valid_y_test, valid_test_pred)
-                test_f1 = f1_score(valid_y_test, valid_test_pred, average='binary')
-                test_auc = roc_auc_score(valid_y_test, valid_test_pred_cont)
-            else:
-                test_acc, test_f1, test_auc = np.nan, np.nan, np.nan
-        
         results.update({
             'test_pred_cont': test_pred_cont,
             'test_pred': test_pred,

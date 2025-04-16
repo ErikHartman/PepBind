@@ -177,7 +177,7 @@ def plot_distribution(real_X, shuffled_X, random_X, save_path=None):
         sns.histplot(x = shuffled_X[column].astype(float).values, ax=ax, color="red", label="Shuffled", kde=True, bins=50, alpha=.5)
         sns.histplot(x = random_X[column].astype(float).values, ax=ax, color="orange", label="Random", kde=True, bins=50, alpha=.5)
         ax.set_title(f"{column}")
-        ax.legend()
+        ax.legend(frameon=False)
     plt.savefig(save_path)
 
 

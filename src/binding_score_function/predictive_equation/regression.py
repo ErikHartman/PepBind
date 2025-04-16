@@ -222,6 +222,7 @@ def perform_symbolic_regression(
     unary_operators: List[str] = None,
     model_selection:str="accuracy",
     select_k_features: int = None,
+    scale_features: bool = False,
 ) -> Dict:
     logger.info("Performing Symbolic Regression...")
 
@@ -229,6 +230,17 @@ def perform_symbolic_regression(
         binary_operators = ["+", "-", "*", "/"]
     if unary_operators is None:
         unary_operators = ["square", "log", "sqrt"]
+
+    # Apply scaling if requested
+    if scale_features:
+        logger.info("Scaling features for symbolic regression")
+        X_train_scaled, X_test_scaled, scaler = scale_data(X_train, X_test)
+        X_train_data = X_train_scaled
+        X_test_data = X_test_scaled
+    else:
+        X_train_data = X_train
+        X_test_data = X_test
+        scaler = None
 
     model = PySRRegressor(
         model_selection=model_selection,
@@ -241,21 +253,98 @@ def perform_symbolic_regression(
         verbosity=0
     )
     
-
-    model.fit(X_train, y_train)
+    model.fit(X_train_data, y_train, variable_names=list(X_train.columns))
     
     # Get equations dataframe
     equations = model.equations_.reset_index().rename(columns={"index": "eq_index"})
     equations = equations.sort_values(by="loss", ascending=True).reset_index(drop=True)
     
-    # Get the best expression (according to loss)
-    best_expr = model.sympy(equations.iloc[0]['eq_index'])
-    logger.info(f"Best symbolic expression found: {best_expr}")
-
-    # Predict with best equation (lowest loss)
-    train_pred = model.predict(X_train.values, index=equations.iloc[0]['eq_index'])
-    train_rmse = np.sqrt(mean_squared_error(y_train, train_pred))
-    train_r2 = r2_score(y_train, train_pred)
+    # Calculate metrics for each equation on the test set
+    if X_test is not None and y_test is not None:
+        test_metrics = []
+        for i, row in equations.iterrows():
+            eq_index = row['eq_index']
+            try:
+                # Ensure we're passing numpy arrays, not trying to access .values on a numpy array
+                X_test_array = X_test_data if isinstance(X_test_data, np.ndarray) else X_test_data.values
+                test_pred = model.predict(X_test_array, index=eq_index)
+                
+                # Safeguard against NaNs
+                valid_mask = np.isfinite(test_pred)
+                if valid_mask.all():
+                    test_rmse = np.sqrt(mean_squared_error(y_test, test_pred))
+                    test_r2 = r2_score(y_test, test_pred)
+                    test_mae = mean_absolute_error(y_test, test_pred)
+                    
+                    test_metrics.append({
+                        'eq_index': eq_index,
+                        'test_rmse': test_rmse,
+                        'test_r2': test_r2,
+                        'test_mae': test_mae
+                    })
+                else:
+                    if valid_mask.any():
+                        # Use only valid predictions for metrics
+                        test_rmse = np.sqrt(mean_squared_error(y_test[valid_mask], test_pred[valid_mask]))
+                        test_r2 = r2_score(y_test[valid_mask], test_pred[valid_mask])
+                        test_mae = mean_absolute_error(y_test[valid_mask], test_pred[valid_mask])
+                        
+                        test_metrics.append({
+                            'eq_index': eq_index,
+                            'test_rmse': test_rmse,
+                            'test_r2': test_r2,
+                            'test_mae': test_mae,
+                            'valid_ratio': valid_mask.sum() / len(valid_mask)
+                        })
+            except Exception as e:
+                logger.warning(f"Error evaluating equation {i} on test set: {str(e)}")
+    
+        # Find the best equation based on test RMSE
+        if test_metrics:
+            test_metrics_df = pd.DataFrame(test_metrics)
+            best_test_idx = test_metrics_df['test_rmse'].idxmin()
+            best_test_eq_index = test_metrics_df.loc[best_test_idx, 'eq_index']
+            
+            # Get the best expression based on test performance
+            best_expr = model.sympy(best_test_eq_index)
+            logger.info(f"Best symbolic expression on test set: {best_expr}")
+            
+            # Get train and test predictions for the best test model
+            X_train_array = X_train_data if isinstance(X_train_data, np.ndarray) else X_train_data.values
+            train_pred = model.predict(X_train_array, index=best_test_eq_index)
+            train_rmse = np.sqrt(mean_squared_error(y_train, train_pred))
+            train_r2 = r2_score(y_train, train_pred)
+            
+            X_test_array = X_test_data if isinstance(X_test_data, np.ndarray) else X_test_data.values
+            test_pred = model.predict(X_test_array, index=best_test_eq_index)
+            test_rmse = np.sqrt(mean_squared_error(y_test, test_pred))
+            test_r2 = r2_score(y_test, test_pred)
+            test_mae = mean_absolute_error(y_test, test_pred)
+        else:
+            # If no equations worked well on test set, use the original best by train loss
+            best_expr = model.sympy(equations.iloc[0]['eq_index'])
+            logger.warning("No equations performed well on test set, using best from training")
+            
+            # Predictions with best training model
+            X_train_array = X_train_data if isinstance(X_train_data, np.ndarray) else X_train_data.values
+            train_pred = model.predict(X_train_array, index=equations.iloc[0]['eq_index'])
+            train_rmse = np.sqrt(mean_squared_error(y_train, train_pred))
+            train_r2 = r2_score(y_train, train_pred)
+            
+            X_test_array = X_test_data if isinstance(X_test_data, np.ndarray) else X_test_data.values
+            test_pred = model.predict(X_test_array, index=equations.iloc[0]['eq_index'])
+            test_rmse = np.sqrt(mean_squared_error(y_test, test_pred))
+            test_r2 = r2_score(y_test, test_pred)
+            test_mae = mean_absolute_error(y_test, test_pred)
+    else:
+        # Without test data, just use the best equation from training
+        best_expr = model.sympy(equations.iloc[0]['eq_index'])
+        
+        # Predictions with best training model
+        X_train_array = X_train_data if isinstance(X_train_data, np.ndarray) else X_train_data.values
+        train_pred = model.predict(X_train_array, index=equations.iloc[0]['eq_index'])
+        train_rmse = np.sqrt(mean_squared_error(y_train, train_pred))
+        train_r2 = r2_score(y_train, train_pred)
     
     # Get all equations and their metrics
     all_eqs = []
@@ -268,13 +357,14 @@ def perform_symbolic_regression(
         
         # Calculate predictions for this specific equation
         try:
-            eq_pred_train = model.predict(X_train.values, index=eq_index)
+            X_train_array = X_train_data if isinstance(X_train_data, np.ndarray) else X_train_data.values
+            eq_pred_train = model.predict(X_train_array, index=eq_index)
             
             # Safeguard against NaNs or Infs
             valid_mask_train = np.isfinite(eq_pred_train)
             if not valid_mask_train.all():
                 logger.warning(f"Equation {i}: {valid_mask_train.sum()}/{len(valid_mask_train)} valid predictions on train")
-                # Use only valid predictions for metrics
+
                 train_rmse_eq = np.sqrt(mean_squared_error(y_train[valid_mask_train], eq_pred_train[valid_mask_train])) if valid_mask_train.any() else np.nan
                 train_r2_eq = r2_score(y_train[valid_mask_train], eq_pred_train[valid_mask_train]) if valid_mask_train.any() else np.nan
             else:
@@ -284,7 +374,8 @@ def perform_symbolic_regression(
             # Test metrics if test data provided
             test_rmse_eq, test_r2_eq, test_mae_eq = np.nan, np.nan, np.nan
             if X_test is not None and y_test is not None:
-                eq_pred_test = model.predict(X_test.values, index=eq_index)
+                X_test_array = X_test_data if isinstance(X_test_data, np.ndarray) else X_test_data.values
+                eq_pred_test = model.predict(X_test_array, index=eq_index)
                 
                 # Safeguard against NaNs in test predictions
                 valid_mask_test = np.isfinite(eq_pred_test)
@@ -332,25 +423,10 @@ def perform_symbolic_regression(
         'train_rmse': train_rmse,
         'train_r2': train_r2,
         'all_equations': pd.DataFrame(all_eqs),
+        'scaler': scaler,
     }
     
     if X_test is not None and y_test is not None:
-        test_pred = model.predict(X_test.values, index=equations.iloc[0]['eq_index'])
-        test_rmse = np.sqrt(mean_squared_error(y_test, test_pred))
-        test_r2 = r2_score(y_test, test_pred)
-        test_mae = mean_absolute_error(y_test, test_pred)
-        
-        # Safeguard against NaNs in test predictions for best model
-        valid_mask_test = np.isfinite(test_pred)
-        if not valid_mask_test.all():
-            logger.warning(f"Best model: {valid_mask_test.sum()}/{len(valid_mask_test)} valid predictions on test")
-            if valid_mask_test.any():
-                test_rmse = np.sqrt(mean_squared_error(y_test[valid_mask_test], test_pred[valid_mask_test]))
-                test_r2 = r2_score(y_test[valid_mask_test], test_pred[valid_mask_test])
-                test_mae = mean_absolute_error(y_test[valid_mask_test], test_pred[valid_mask_test])
-            else:
-                test_rmse, test_r2, test_mae = np.nan, np.nan, np.nan
-        
         results.update({
             'test_pred': test_pred,
             'test_rmse': test_rmse,

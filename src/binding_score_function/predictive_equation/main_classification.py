@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import roc_curve, roc_auc_score
 
 from classification import (
     train_logistic_regression,
@@ -15,6 +16,7 @@ from plotting import (
     plot_feature_importances,
     plot_model_comparison,
     plot_symbolic_complexity_tradeoff,
+    plot_probability_histograms,
 )
 
 if __name__ == "__main__":
@@ -31,6 +33,9 @@ if __name__ == "__main__":
 
     X_fake = pd.concat([X_shuffled, X_random])
 
+    print(f"X_fake shape: {X_fake.shape}")
+    print(f"X_real shape: {X_real.shape}")  
+
     X_fake = X_fake.copy()
     X_real = X_real.copy()
     X_fake['label'] = 0
@@ -43,6 +48,9 @@ if __name__ == "__main__":
         X_all, y_all, test_size=0.2, random_state=42, stratify=y_all
     )
 
+    print(f"X_train shape: {X_train.shape}")
+    print(f"X_test shape: {X_test.shape}")
+
     logreg_results = train_logistic_regression(X_train, y_train, X_test, y_test)
     rf_results = train_random_forest_classifier(X_train, y_train, X_test, y_test)
     svc_results = train_svm_classifier(X_train, y_train, X_test, y_test)
@@ -51,11 +59,12 @@ if __name__ == "__main__":
         y_train,
         X_test,
         y_test,
-        niterations=200,
+        niterations=500,
         populations=50,
         population_size=100,
         model_selection="accuracy",
-        select_k_features=None
+        select_k_features=15,
+        scale_features=True
     )
 
     train_preds_df = pd.DataFrame(
@@ -116,6 +125,8 @@ if __name__ == "__main__":
         y_test,
         logreg_results["test_pred"],
         logreg_results["test_proba"],
+        y_train,
+        logreg_results["train_proba"],
         model_name="Logistic Regression",
         output_path=os.path.join(output_dir, "logreg_metrics.png"),
     )
@@ -124,6 +135,8 @@ if __name__ == "__main__":
         y_test,
         rf_results["test_pred"],
         rf_results["test_proba"],
+        y_train,
+        rf_results["train_proba"],
         model_name="Random Forest",
         output_path=os.path.join(output_dir, "rf_metrics.png"),
     )
@@ -132,13 +145,50 @@ if __name__ == "__main__":
         y_test,
         svc_results["test_pred"],
         svc_results["test_proba"],
+        y_train,
+        svc_results["train_proba"],
         model_name="SVC",
         output_path=os.path.join(output_dir, "svc_metrics.png"),
     )
 
-    plot_classification_metrics(y_test, symb_results["test_pred"], symb_results["test_proba"],
+    plot_classification_metrics(
+        y_test, 
+        symb_results["test_pred"], 
+        symb_results["test_proba"],
+        y_train,
+        symb_results["train_proba"],
         model_name="Symbolic",
-        output_path=os.path.join(output_dir, "symbolic_metrics.png"))
+        output_path=os.path.join(output_dir, "symbolic_metrics.png")
+    )
+
+    # Plot probability histograms for each model
+    plot_probability_histograms(
+        y_test,
+        logreg_results["test_proba"],
+        model_name="Logistic Regression",
+        output_path=os.path.join(output_dir, "logreg_proba_hist.png"),
+    )
+
+    plot_probability_histograms(
+        y_test,
+        rf_results["test_proba"],
+        model_name="Random Forest",
+        output_path=os.path.join(output_dir, "rf_proba_hist.png"),
+    )
+
+    plot_probability_histograms(
+        y_test,
+        svc_results["test_proba"],
+        model_name="SVC",
+        output_path=os.path.join(output_dir, "svc_proba_hist.png"),
+    )
+
+    plot_probability_histograms(
+        y_test,
+        symb_results["test_proba"],
+        model_name="Symbolic",
+        output_path=os.path.join(output_dir, "symbolic_proba_hist.png"),
+    )
 
     plot_feature_importances(
         logreg_results["coefficients"],
@@ -192,6 +242,8 @@ if __name__ == "__main__":
         "Test AUC": [],
     }
 
+    # Calculate ROC curves for each model
+    roc_data = {}
     for model_name, result in results_dict.items():
         comparison["Model"].append(model_name)
         comparison["Train Accuracy"].append(result.get("train_acc", np.nan))
@@ -200,12 +252,21 @@ if __name__ == "__main__":
         comparison["Test Accuracy"].append(result.get("test_acc", result.get("test_accuracy", np.nan)))
         comparison["Test F1"].append(result.get("test_f1", np.nan))
         comparison["Test AUC"].append(result.get("test_auc", np.nan))
+        
+        # Calculate ROC curve data for each model
+        if "test_proba" in result and result["test_proba"] is not None:
+            fpr, tpr, _ = roc_curve(y_test, result["test_proba"])
+            roc_auc = result.get("test_auc", roc_auc_score(y_test, result["test_proba"]))
+            roc_data[model_name] = (fpr, tpr, roc_auc)
 
     comparison_df = pd.DataFrame(comparison)
     comparison_df.to_csv(os.path.join(output_dir, "model_comparison.csv"), index=False)
 
+    # Plot model comparison with ROC curves
     plot_model_comparison(
-        comparison_df, output_path=os.path.join(output_dir, "model_comparison.png")
+        comparison_df, 
+        roc_data=roc_data,
+        output_path=os.path.join(output_dir, "model_comparison.png")
     )
 
     print("Classification pipeline complete!")
