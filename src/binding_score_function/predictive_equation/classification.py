@@ -174,7 +174,7 @@ def train_random_forest_classifier(
 
         results.update({
             'test_pred': test_pred,
-            'test_accuracy': test_acc,
+            'test_acc': test_acc,
             'test_f1': test_f1,
             'test_auc': test_auc,
             'test_proba': test_proba
@@ -250,7 +250,7 @@ def train_svm_classifier(
 
         results.update({
             'test_pred': test_pred,
-            'test_accuracy': test_acc,
+            'test_acc': test_acc,
             'test_f1': test_f1,
             'test_auc': test_auc,
             'test_proba': test_proba

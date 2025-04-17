@@ -6,7 +6,7 @@ import pandas as pd
 import os
 import argparse
 from sklearn.metrics import roc_curve, roc_auc_score
-from scipy.stats import pearsonr, spearmanr
+from scipy.stats import pearsonr
 
 color_palette = {
     "symbolic": "#124E78", 
@@ -78,17 +78,21 @@ def plot_regression_scatter(
     output_path=None
 ):
     """
-    Creates and saves a regplot (scatter with regression line) of actual vs. predicted.
+    Creates and saves a regplot (scatter with regression line) of actual vs. predicted,
+    with a subplot showing the residuals (deviation from perfect prediction).
     """
-    plt.figure(figsize=(4,4))
+    # Create figure with two subplots side by side
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4))
     
+    # First subplot: Actual vs Predicted with regression line
     # Train data with regplot
     sns.regplot(
         x=y_train, 
         y=train_preds, 
         scatter_kws={'alpha': 0.5, 's': 5, 'color': color_palette["train"]}, 
         line_kws={'color': color_palette["train"]},
-        label='Train'
+        label='Train',
+        ax=ax1
     )
     
     if y_test is not None and test_preds is not None:
@@ -98,19 +102,72 @@ def plot_regression_scatter(
             y=test_preds, 
             scatter_kws={'alpha': 0.5, 's': 10, 'color': color_palette["test"]}, 
             line_kws={'color': color_palette["test"]},
-            label='Test'
+            label='Test',
+            ax=ax1
         )
         y_all = np.concatenate([y_train, y_test])
     else:
         y_all = y_train
     
     # Perfect prediction line (diagonal)
-    plt.plot([min(y_all), max(y_all)], [min(y_all), max(y_all)], 'k--', alpha=0.5, label='Perfect prediction')
+    ax1.plot([min(y_all), max(y_all)], [min(y_all), max(y_all)], 'k--', alpha=0.5, label='Perfect prediction')
     
-    plt.xlabel('Actual pKd')
-    plt.ylabel('Predicted pKd')
-    plt.title(f'{model_name}: actual vs. predicted')
-    plt.legend(frameon=False)
+    ax1.set_xlabel('Actual pKd')
+    ax1.set_ylabel('Predicted pKd')
+    ax1.set_title(f'{model_name}: actual vs. predicted')
+    ax1.legend(frameon=False)
+    
+    # Second subplot: Residuals (actual - predicted)
+    train_residuals = y_train - train_preds
+    
+    # Plot training residuals
+    sns.scatterplot(
+        x=y_train, 
+        y=train_residuals, 
+        alpha=0.5, 
+        s=5, 
+        color=color_palette["train"],
+        label='Train',
+        ax=ax2
+    )
+    
+    # Add a horizontal line at y=0 (perfect prediction)
+    ax2.axhline(y=0, color='k', linestyle='--', alpha=0.5)
+    
+    # If test data is available, add test residuals
+    if y_test is not None and test_preds is not None:
+        test_residuals = y_test - test_preds
+        sns.scatterplot(
+            x=y_test, 
+            y=test_residuals, 
+            alpha=0.5, 
+            s=10, 
+            color=color_palette["test"],
+            label='Test',
+            ax=ax2
+        )
+    
+    # Calculate and annotate RMSE for train and test
+    train_rmse = np.sqrt(np.mean(train_residuals**2))
+    rmse_text = f"Train RMSE: {train_rmse:.3f}"
+    
+    if y_test is not None and test_preds is not None:
+        test_rmse = np.sqrt(np.mean((y_test - test_preds)**2))
+        rmse_text += f"\nTest RMSE: {test_rmse:.3f}"
+    
+    # Add RMSE text to the residual plot
+    ax2.text(
+        0.05, 0.95, rmse_text,
+        transform=ax2.transAxes,
+        verticalalignment='top',
+        bbox=dict(boxstyle='round', facecolor='white', alpha=0.8)
+    )
+    
+    ax2.set_xlabel('Actual pKd')
+    ax2.set_ylabel('Residuals (Actual - Predicted)')
+    ax2.set_title(f'{model_name}: prediction residuals')
+    ax2.legend(frameon=False)
+    
     plt.tight_layout()
     
     if output_path:
@@ -421,7 +478,6 @@ def plot_predictions_by_data_type(predictions_df, output_dir):
     # Add binary labels: 1 for real, 0 for non-real (shuffled or random)
     predictions_df['binary_label'] = predictions_df['data_type'].apply(lambda x: 1 if x == 'Real' else 0)
     
-    # Create a figure with 2 rows, 3 columns with specified width ratios
     fig = plt.figure(figsize=(15, 5))
     gs = fig.add_gridspec(2, 2, width_ratios=[2, 1])
     
@@ -443,7 +499,6 @@ def plot_predictions_by_data_type(predictions_df, output_dir):
     ax1.set_ylabel("Predicted pKd")
     ax1.legend(frameon=False)
     
-    # Boxplot in bottom-left position
     ax2 = fig.add_subplot(gs[1, 0])
     sns.boxplot(
         data=predictions_df, 
@@ -460,10 +515,8 @@ def plot_predictions_by_data_type(predictions_df, output_dir):
     ax2.set_ylabel("Predicted pKd")
     ax2.legend(frameon=False)
     
-    # ROC curve in right column (spans both rows)
     ax3 = fig.add_subplot(gs[:, 1])
     
-    # Calculate and plot ROC curve for each model
     model_names = predictions_df['model'].unique()
     for model_name in model_names:
         model_data = predictions_df[predictions_df['model'] == model_name]
@@ -473,16 +526,10 @@ def plot_predictions_by_data_type(predictions_df, output_dir):
             fpr, tpr, _ = roc_curve(model_data['binary_label'], model_data['prediction'])
             roc_auc = roc_auc_score(model_data['binary_label'], model_data['prediction'])
             
-            # Get color that matches model
-            if model_name.lower() in color_palette:
-                model_color = color_palette[model_name.lower()]
-            else:
-                model_color = 'gray'
-                
             ax3.plot(
                 fpr, tpr, 
                 label=f'{model_name} (AUC = {roc_auc:.3f})',
-                color=model_color
+                color= color_palette.get(model_name.lower(), 'gray')
             )
     
     ax3.set_xlim([0.0, 1.0])
@@ -503,39 +550,18 @@ def plot_predictions_by_data_type(predictions_df, output_dir):
 def plot_pkd_probability_correlation(pkd_values, probabilities, model_names, output_path=None):
     """
     Plot correlation between pKd values and classification probabilities for real samples.
-    
-    Parameters:
-    -----------
-    pkd_values : numpy.ndarray
-        The pKd values for real samples
-    probabilities : dict of numpy.ndarray
-        Dictionary mapping model names to their predicted probabilities
-    model_names : list
-        List of model names to include in the plot
-    output_path : str, optional
-        Path to save the plot
     """
-    if len(model_names) == 0:
-        print("No models to plot correlations for.")
-        return
-    
-    # Calculate number of rows and columns for subplots
     n_models = len(model_names)
     n_cols = min(2, n_models)
     n_rows = (n_models + n_cols - 1) // n_cols
     
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(5*n_cols, 4*n_rows))
-    
-    # Make axes iterable even if there's only one subplot
-    if n_models == 1:
-        axes = np.array([axes])
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(4*n_cols, 3*n_rows))
     axes = axes.flatten()
     
     for i, model_name in enumerate(model_names):
         if model_name in probabilities:
             ax = axes[i]
             
-            # Create scatter plot
             sns.scatterplot(
                 x=pkd_values, 
                 y=probabilities[model_name], 
@@ -544,36 +570,27 @@ def plot_pkd_probability_correlation(pkd_values, probabilities, model_names, out
                 color=color_palette.get(model_name.lower(), 'blue')
             )
             
-            # Add regression line
             sns.regplot(
                 x=pkd_values, 
                 y=probabilities[model_name], 
                 ax=ax,
                 scatter=False,
-                color='red'
+                color=color_palette.get(model_name.lower(), 'blue')
             )
             
-            # Calculate correlation coefficients
-            pearson_r, pearson_p = pearsonr(pkd_values, probabilities[model_name])
-            spearman_r, spearman_p = spearmanr(pkd_values, probabilities[model_name])
+            pearson_r, _ = pearsonr(pkd_values, probabilities[model_name])
+            correlation_text = f"Pearson r: {pearson_r:.3f}"
             
-            # Add correlation info to plot
-            correlation_text = (
-                f"Pearson r: {pearson_r:.3f} (p={pearson_p:.3f})\n"
-                f"Spearman r: {spearman_r:.3f} (p={spearman_p:.3f})"
-            )
             ax.text(
                 0.05, 0.95, correlation_text,
                 transform=ax.transAxes,
-                verticalalignment='top',
-                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8)
+                verticalalignment='top'
             )
             
             ax.set_xlabel('pKd value')
-            ax.set_ylabel(f'{model_name} probability')
-            ax.set_title(f'{model_name}: pKd vs Probability Correlation')
+            ax.set_ylabel(f'Output probability')
+            ax.set_title(f'{model_name}')
 
-    # Hide any unused subplots
     for j in range(i+1, len(axes)):
         axes[j].set_visible(False)
     

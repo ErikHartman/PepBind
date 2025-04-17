@@ -75,8 +75,8 @@ if __name__ == "__main__":
         y_train,
         X_test,
         y_test,
-        niterations=500,
-        populations=50,
+        niterations=1000,
+        populations=100,
         population_size=100,
         model_selection="accuracy",
         select_k_features=15,
@@ -269,7 +269,7 @@ if __name__ == "__main__":
         comparison["Train Accuracy"].append(result.get("train_acc", np.nan))
         comparison["Train F1"].append(result.get("train_f1", np.nan))
         comparison["Train AUC"].append(result.get("train_auc", np.nan))
-        comparison["Test Accuracy"].append(result.get("test_acc", result.get("test_accuracy", np.nan)))
+        comparison["Test Accuracy"].append(result.get("test_acc", np.nan))
         comparison["Test F1"].append(result.get("test_f1", np.nan))
         comparison["Test AUC"].append(result.get("test_auc", np.nan))
         
