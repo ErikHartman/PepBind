@@ -17,6 +17,7 @@ from plotting import (
     plot_model_comparison,
     plot_symbolic_complexity_tradeoff,
     plot_probability_histograms,
+    plot_pkd_probability_correlation,
 )
 
 if __name__ == "__main__":
@@ -30,6 +31,17 @@ if __name__ == "__main__":
     X_real = pd.read_csv(os.path.join(scores_path, "real_X_train.csv")).set_index("complex_filename")
     X_shuffled = pd.read_csv(os.path.join(scores_path, "shuffled_X_train.csv")).set_index("complex_filename")
     X_random = pd.read_csv(os.path.join(scores_path, "random_X_train.csv")).set_index("complex_filename")
+    
+    # Load pKd values for real data
+    y_real_pKd = pd.read_csv(os.path.join(scores_path, "real_y_train.csv"))
+    if "complex_filename" not in y_real_pKd.columns:
+        y_real_pKd = y_real_pKd["pKd"].values
+        y_real = pd.DataFrame({
+            'complex_filename': X_real.index,
+            'pKd': y_real_pKd
+        })
+    else:
+        y_real = y_real_pKd
 
     X_fake = pd.concat([X_shuffled, X_random])
 
@@ -47,6 +59,10 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = train_test_split(
         X_all, y_all, test_size=0.2, random_state=42, stratify=y_all
     )
+
+    scaling_params = X_train.describe().T[["mean", "std"]]
+    scaling_params.to_csv(
+        os.path.join(output_dir, "scaling_params.csv"), index=True)
 
     print(f"X_train shape: {X_train.shape}")
     print(f"X_test shape: {X_test.shape}")
@@ -69,6 +85,7 @@ if __name__ == "__main__":
 
     train_preds_df = pd.DataFrame(
         {
+            "complex_filename": X_train.index,
             "y_train": y_train,
             "logreg_pred": logreg_results["train_pred"],
             "rf_pred": rf_results["train_pred"],
@@ -82,6 +99,7 @@ if __name__ == "__main__":
 
     test_preds_df = pd.DataFrame(
         {
+            "complex_filename": X_test.index,
             "y_test": y_test,
             "logreg_pred": logreg_results["test_pred"],
             "rf_pred": rf_results["test_pred"],
@@ -96,6 +114,7 @@ if __name__ == "__main__":
     # Create probability predictions dataframe for ROC analysis
     train_proba_df = pd.DataFrame(
         {
+            "complex_filename": X_train.index,
             "y_train": y_train,
             "logreg_proba": logreg_results["train_proba"],
             "rf_proba": rf_results["train_proba"],
@@ -109,6 +128,7 @@ if __name__ == "__main__":
 
     test_proba_df = pd.DataFrame(
         {
+            "complex_filename": X_test.index,
             "y_test": y_test,
             "logreg_proba": logreg_results["test_proba"],
             "rf_proba": rf_results["test_proba"],
@@ -268,5 +288,41 @@ if __name__ == "__main__":
         roc_data=roc_data,
         output_path=os.path.join(output_dir, "model_comparison.png")
     )
+
+    # Extract real test samples and correlate pKd with classifier probabilities
+    real_test_indices = test_preds_df["y_test"] == 1
+    real_test_complexes = test_preds_df.loc[real_test_indices, "complex_filename"].values
+    
+    # Get pKd values for real test samples
+    real_test_pkd = pd.DataFrame({
+        "complex_filename": real_test_complexes,
+    })
+    
+    # Map complex filenames to pKd values from y_real
+    complex_to_pkd = dict(zip(y_real["complex_filename"], y_real["pKd"]))
+    real_test_pkd["pKd"] = real_test_pkd["complex_filename"].map(complex_to_pkd)
+    
+    # Save the real test pKd values for future use
+    real_test_pkd.to_csv(os.path.join(output_dir, "real_test_pkd.csv"), index=False)
+    
+    # Create dictionary of model probabilities for real test samples
+    probabilities = {}
+    model_names = []
+    
+    for model in ["logreg", "rf", "svc", "symbolic"]:
+        if f"{model}_proba" in test_proba_df.columns:
+            model_upper = model.upper()
+            model_names.append(model_upper)
+            probabilities[model_upper] = test_proba_df.loc[real_test_indices, f"{model}_proba"].values
+    
+    # Plot correlation between pKd and model probabilities
+    if not real_test_pkd.empty and "pKd" in real_test_pkd.columns:
+        plot_pkd_probability_correlation(
+            real_test_pkd["pKd"].values,
+            probabilities,
+            model_names,
+            output_path=os.path.join(output_dir, "pkd_probability_correlation.png")
+        )
+        print(f"Generated pKd-probability correlation plot at {output_dir}/pkd_probability_correlation.png")
 
     print("Classification pipeline complete!")

@@ -12,6 +12,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 
 from pysr import PySRRegressor
+import sympy
 
 from utils import scale_data
 
@@ -365,7 +366,7 @@ def perform_symbolic_classification(
             best_test_eq_index = test_metrics_df.loc[best_test_idx, 'eq_index']
             
             # Get the best expression based on test performance
-            best_expr = model.sympy(best_test_eq_index)
+            best_expr = simplify_expression(model, best_test_eq_index)
             logger.info(f"Best symbolic expression on test set: {best_expr}")
             
             # Get train and test predictions for the best test model
@@ -412,7 +413,7 @@ def perform_symbolic_classification(
     all_eqs = []
     for i, row in equations.iterrows():
         eq_index = row['eq_index']
-        eq_str = str(model.sympy(eq_index))
+        eq_str = simplify_expression(model, eq_index)
         complexity = row['complexity']
         loss = row['loss']
         score = row['score']
@@ -523,3 +524,8 @@ def perform_symbolic_classification(
         )
 
     return results
+
+def simplify_expression(model, eq_index):
+    expr = model.sympy(eq_index)
+    simplified = sympy.simplify(expr)
+    return str(simplified)

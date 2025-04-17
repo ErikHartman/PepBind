@@ -84,6 +84,9 @@ def split_and_save_real_scores(real_scores_in_binding_site: pd.DataFrame):
 
     real_scores_in_binding_site = real_scores_in_binding_site.copy()
     y = real_scores_in_binding_site["pKd"].astype(float)
+    y["complex_filename"] = real_scores_in_binding_site[
+        "complex_filename"
+    ]
     X = real_scores_in_binding_site.drop(
         columns=[
             "in_binding_site",

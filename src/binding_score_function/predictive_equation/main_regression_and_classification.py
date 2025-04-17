@@ -15,7 +15,6 @@ from plotting import (
     plot_feature_importances,
     plot_model_comparison,
     plot_symbolic_complexity_tradeoff,
-    plot_predictions_by_data_type,
 )
 
 if __name__ == "__main__":
@@ -23,23 +22,30 @@ if __name__ == "__main__":
     scores_path = os.path.join(
         base_path, "outputs/binding_score_function/4_processed_scores/"
     )
-    output_dir = "./plots/regression"
+    output_dir = "./plots/regression_and_classification"
     os.makedirs(output_dir, exist_ok=True)
 
     X_real = pd.read_csv(os.path.join(scores_path, "real_X_train.csv")).set_index(
         "complex_filename"
     )
-    y_real = pd.read_csv(os.path.join(scores_path, "real_y_train.csv"))["pKd"].values
+    X_shuffled = pd.read_csv(os.path.join(scores_path, "shuffled_X_train.csv")).set_index("complex_filename")
+    X_random = pd.read_csv(os.path.join(scores_path, "random_X_train.csv")).set_index("complex_filename")
 
-    print(f"X_real shape: {X_real.shape}")
+    X_fake = pd.concat([X_shuffled, X_random])
+    y_real = pd.read_csv(os.path.join(scores_path, "real_y_train.csv"))["pKd"].values
+    y_fake = np.random.uniform(-2, 1, X_fake.shape[0])
+
+    X_all = pd.concat([X_fake, X_real], axis=0)
+    y_all = np.concatenate([y_fake, y_real])
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X_real, y_real, test_size=0.2, random_state=42
+        X_all, y_all, test_size=0.2, random_state=42
     )
 
     scaling_params = X_train.describe().T[["mean", "std"]]
     scaling_params.to_csv(
         os.path.join(output_dir, "scaling_params.csv"), index=True)
+    
 
     print(f"X_train shape: {X_train.shape}")
     print(f"X_test shape: {X_test.shape}")
@@ -53,17 +59,15 @@ if __name__ == "__main__":
         X_test,
         y_test,
         niterations=500,
-        populations=50,
+        populations=100,
         population_size=100,
         model_selection="best",
         select_k_features=15,
         scale_features=True,
     )
 
-    # Save predictions with complex filenames
     train_preds_df = pd.DataFrame(
         {
-            "complex_filename": X_train.index,
             "y_train": y_train,
             "lasso_pred": lasso_results["train_pred"],
             "rf_pred": rf_results["train_pred"],
@@ -77,7 +81,6 @@ if __name__ == "__main__":
 
     test_preds_df = pd.DataFrame(
         {
-            "complex_filename": X_test.index,
             "y_test": y_test,
             "lasso_pred": lasso_results["test_pred"],
             "rf_pred": rf_results["test_pred"],
@@ -190,71 +193,4 @@ if __name__ == "__main__":
         comparison_df, output_path=os.path.join(output_dir, "model_comparison.png")
     )
 
-    print("\nPerforming analysis on shuffled and random data...")
-    
-    # Load shuffled and random data for analysis
-    X_shuffled = pd.read_csv(os.path.join(scores_path, "shuffled_X_train.csv")).set_index("complex_filename")
-    X_random = pd.read_csv(os.path.join(scores_path, "random_X_train.csv")).set_index("complex_filename")
-    
-    print(f"Loaded shuffled data: {X_shuffled.shape} samples")
-    print(f"Loaded random data: {X_random.shape} samples")
-    
-    # Create a dictionary to store predictions
-    model_predictions = {
-        "data_type": [],
-        "model": [],
-        "prediction": []
-    }
-    
-    # Get predictions for each model on real, shuffled, and random data
-    data_types = {
-        "Real": X_test,  # Already have the real test data
-        "Shuffled": X_shuffled,
-        "Random": X_random
-    }
-    
-    models = {
-        "LASSO": (lasso_results["model"], lasso_results["scaler"]),
-        "RF": (rf_results["model"], None),  # RF doesn't use a scaler
-        "SVR": (svr_results["model"], svr_results["scaler"]),
-        "Symbolic": (symb_results["model"], symb_results.get("scaler", None))
-    }
-    
-    for data_name, X_data in data_types.items():
-        for model_name, (model, scaler) in models.items():
-            # For symbolic regression, we need special handling
-            if model_name == "Symbolic":
-                # Get the equation index to use
-                all_eqs = symb_results["all_equations"]
-                best_eq_idx = all_eqs.loc[all_eqs["test_rmse"].idxmin(), "equation_index"]
-                
-                # Scale data if needed
-                if scaler is not None:
-                    X_data_scaled = scaler.transform(X_data)
-                else:
-                    X_data_scaled = X_data
-                
-                # Get predictions using the best equation
-                X_data_array = X_data_scaled if isinstance(X_data_scaled, np.ndarray) else X_data_scaled.values
-                predictions = model.predict(X_data_array, index=best_eq_idx)
-            else:
-                # For regular models
-                if scaler is not None:
-                    X_data_scaled = scaler.transform(X_data)
-                    predictions = model.predict(X_data_scaled)
-                else:
-                    predictions = model.predict(X_data)
-            
-            # Store all predictions
-            for pred in predictions:
-                model_predictions["data_type"].append(data_name)
-                model_predictions["model"].append(model_name)
-                model_predictions["prediction"].append(pred)
-    
-    # Convert to DataFrame
-    predictions_df = pd.DataFrame(model_predictions)
-    predictions_df.to_csv(os.path.join(output_dir, "shuffled_random_predictions.csv"), index=False)
-    plot_paths = plot_predictions_by_data_type(predictions_df, output_dir)
-    
-    print("\nAnalysis on shuffled and random data complete!")
     print("Regression pipeline complete!")
