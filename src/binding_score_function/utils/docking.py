@@ -11,6 +11,8 @@ def dock_complexes(
     template_pdb_dir: str,
     processed_df: pd.DataFrame,
     docking_config: Dict[str, Any],
+    min_length: int = 7,
+    max_length: int = 45,
 ) -> None:
     """
     Dock peptides to protein templates and score the interactions.
@@ -24,7 +26,7 @@ def dock_complexes(
             logger.warning(f"Skipping {pdb_code} - missing peptide sequence")
             continue
 
-        if len(peptide_sequence) < 7 or len(peptide_sequence) > 40:
+        if len(peptide_sequence) < min_length or len(peptide_sequence) > max_length:
             logger.warning(f"Skipping {pdb_code} - peptide length ({len(peptide_sequence)}) outside 7-40 range")
             continue
 

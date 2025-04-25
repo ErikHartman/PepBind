@@ -54,8 +54,8 @@ if __name__ == "__main__":
         y_test,
         niterations=1000,
         populations=100,
-        population_size=100,
-        model_selection="best",
+        population_size=50,
+        model_selection="accuracy",
         select_k_features=15,
         scale_features=True,
     )

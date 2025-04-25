@@ -424,7 +424,7 @@ def plot_symbolic_complexity_tradeoff(
             # Add equation text to legend area
             ax_legend.text(0.05, y_pos, legend_text, 
                          va='center', fontsize=10, wrap=True, 
-                         bbox=dict(boxstyle='round', fc='white', ec='white', alpha=0.5))
+                         bbox=dict(boxstyle='round', facecolor='white', alpha=0.5))
     
     plt.tight_layout()
 
@@ -547,50 +547,149 @@ def plot_predictions_by_data_type(predictions_df, output_dir):
         "combined_plot": os.path.join(output_dir, "real_vs_shuffled_random_analysis.png")
     }
 
-def plot_pkd_probability_correlation(pkd_values, probabilities, model_names, output_path=None):
+def plot_pkd_probability_correlation(
+    pkd_values, 
+    probabilities, 
+    model_names, 
+    output_path=None,
+    pkd_values_train=None,
+    probabilities_train=None
+):
     """
     Plot correlation between pKd values and classification probabilities for real samples.
+    
+    Parameters:
+    -----------
+    pkd_values : numpy.ndarray
+        The pKd values for real test samples
+    probabilities : dict of numpy.ndarray
+        Dictionary mapping model names to their predicted probabilities for test samples
+    model_names : list
+        List of model names to include in the plot
+    output_path : str, optional
+        Path to save the plot
+    pkd_values_train : numpy.ndarray, optional
+        The pKd values for real training samples
+    probabilities_train : dict of numpy.ndarray, optional
+        Dictionary mapping model names to their predicted probabilities for train samples
     """
+    if len(model_names) == 0:
+        print("No models to plot correlations for.")
+        return
+    
+    # Calculate number of rows and columns for subplots
     n_models = len(model_names)
     n_cols = min(2, n_models)
     n_rows = (n_models + n_cols - 1) // n_cols
     
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(4*n_cols, 3*n_rows))
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(5*n_cols, 4*n_rows))
+    
+    # Make axes iterable even if there's only one subplot
+    if n_models == 1:
+        axes = np.array([axes])
     axes = axes.flatten()
     
     for i, model_name in enumerate(model_names):
         if model_name in probabilities:
             ax = axes[i]
             
+            # Plot test data
             sns.scatterplot(
                 x=pkd_values, 
                 y=probabilities[model_name], 
                 ax=ax,
-                alpha=0.6,
-                color=color_palette.get(model_name.lower(), 'blue')
+                alpha=0.7,
+                color=color_palette.get("test", 'blue'),
+                label='Test',
+                s=40,
+                marker='o'
             )
             
-            sns.regplot(
-                x=pkd_values, 
-                y=probabilities[model_name], 
-                ax=ax,
-                scatter=False,
-                color=color_palette.get(model_name.lower(), 'blue')
-            )
+            # Plot train data if provided
+            has_train_data = (pkd_values_train is not None and 
+                             probabilities_train is not None and
+                             model_name in probabilities_train and
+                             len(pkd_values_train) == len(probabilities_train[model_name]))
             
-            pearson_r, _ = pearsonr(pkd_values, probabilities[model_name])
-            correlation_text = f"Pearson r: {pearson_r:.3f}"
+            if has_train_data:
+                sns.scatterplot(
+                    x=pkd_values_train, 
+                    y=probabilities_train[model_name], 
+                    ax=ax,
+                    alpha=0.5,
+                    color=color_palette.get("train", 'green'),
+                    label='Train',
+                    s=25,
+                    marker='x'
+                )
+                
+                # Calculate combined correlation if both train and test data exist
+                combined_pkd = np.concatenate([pkd_values, pkd_values_train])
+                combined_probs = np.concatenate([probabilities[model_name], probabilities_train[model_name]])
+                
+                # Add regression line for combined data
+                sns.regplot(
+                    x=combined_pkd, 
+                    y=combined_probs, 
+                    ax=ax,
+                    scatter=False,
+                    color='red',
+                    line_kws={'linestyle':'-'}
+                )
+                
+                # Calculate correlation coefficients for combined data
+                pearson_r, _ = pearsonr(combined_pkd, combined_probs)
+                
+                # Add correlation info to plot (combined)
+                correlation_text = (
+                    f"Combined Pearson r: {pearson_r:.3f}\n"
+                )
+            else:
+                # Add regression line for just test data
+                sns.regplot(
+                    x=pkd_values, 
+                    y=probabilities[model_name], 
+                    ax=ax,
+                    scatter=False,
+                    color='red'
+                )
+                
+                # Calculate correlation coefficients for test data only
+                pearson_r, _ = pearsonr(pkd_values, probabilities[model_name])
+                
+                # Add correlation info to plot (test only)
+                correlation_text = (
+                    f"Test Pearson r: {pearson_r:.3f}\n"
+                )
             
+            # Add separate correlations for train and test if both exist
+            if has_train_data:
+                # Calculate test-only correlations
+                test_pearson_r, _ = pearsonr(pkd_values, probabilities[model_name])
+            
+                # Calculate train-only correlations
+                train_pearson_r, _ = pearsonr(pkd_values_train, probabilities_train[model_name])
+                
+                # Add detailed correlation info
+                correlation_text += (
+                    f"\n\nTest-only Pearson r: {test_pearson_r:.3f}\n"
+                    f"Train-only Pearson r: {train_pearson_r:.3f}"
+                )
+            
+            # Display the correlation text
             ax.text(
                 0.05, 0.95, correlation_text,
                 transform=ax.transAxes,
-                verticalalignment='top'
+                verticalalignment='top',
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8)
             )
             
             ax.set_xlabel('pKd value')
-            ax.set_ylabel(f'Output probability')
-            ax.set_title(f'{model_name}')
+            ax.set_ylabel(f'{model_name} probability')
+            ax.set_title(f'{model_name}: pKd vs Probability Correlation')
+            ax.legend()
 
+    # Hide any unused subplots
     for j in range(i+1, len(axes)):
         axes[j].set_visible(False)
     
@@ -696,30 +795,48 @@ def main():
                 print("Generated standard model plots")
             
             # Generate correlation plots between pKd and probabilities if available
-            pkd_correlation_path = os.path.join(args.input_dir, "real_test_pkd.csv")
-            if os.path.exists(pkd_correlation_path):
-                pkd_df = pd.read_csv(pkd_correlation_path)
-                if not pkd_df.empty and "pKd" in pkd_df.columns:
+            pkd_test_path = os.path.join(args.input_dir, "real_test_pkd.csv")
+            pkd_train_path = os.path.join(args.input_dir, "real_train_pkd.csv")
+            
+            if os.path.exists(pkd_test_path):
+                pkd_test_df = pd.read_csv(pkd_test_path)
+                
+                # Check for train data
+                pkd_train_df = None
+                if os.path.exists(pkd_train_path):
+                    pkd_train_df = pd.read_csv(pkd_train_path)
+                
+                if not pkd_test_df.empty and "pKd" in pkd_test_df.columns:
                     print("Generating pKd-probability correlation plots")
                     
                     # Get model names
                     model_names = []
-                    proba_dict = {}
+                    test_proba_dict = {}
+                    train_proba_dict = {}
                     
                     for model in ["logreg", "rf", "svc", "symbolic"]:
                         if f"{model}_proba" in test_proba.columns:
-                            # Filter to only real samples
-                            real_indices = test_proba["y_test"] == 1
-                            if real_indices.sum() > 0:
-                                model_names.append(model.upper())
-                                proba_dict[model.upper()] = test_proba.loc[real_indices, f"{model}_proba"].values
+                            # Filter to only real test samples
+                            real_test_indices = test_proba["y_test"] == 1
+                            if real_test_indices.sum() > 0:
+                                model_upper = model.upper()
+                                model_names.append(model_upper)
+                                test_proba_dict[model_upper] = test_proba.loc[real_test_indices, f"{model}_proba"].values
+                                
+                                # Get train probabilities if available
+                                if pkd_train_df is not None and not pkd_train_df.empty and "pKd" in pkd_train_df.columns:
+                                    real_train_indices = train_proba["y_train"] == 1
+                                    if real_train_indices.sum() > 0:
+                                        train_proba_dict[model_upper] = train_proba.loc[real_train_indices, f"{model}_proba"].values
                     
                     if model_names:
                         plot_pkd_probability_correlation(
-                            pkd_df["pKd"].values,
-                            proba_dict,
+                            pkd_test_df["pKd"].values,
+                            test_proba_dict,
                             model_names,
-                            output_path=os.path.join(args.output_dir, "pkd_probability_correlation.png")
+                            output_path=os.path.join(args.output_dir, "pkd_probability_correlation.png"),
+                            pkd_values_train=pkd_train_df["pKd"].values if pkd_train_df is not None else None,
+                            probabilities_train=train_proba_dict if train_proba_dict else None
                         )
                         print("Generated pKd-probability correlation plot")
             

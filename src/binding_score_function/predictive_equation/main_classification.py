@@ -77,7 +77,7 @@ if __name__ == "__main__":
         y_test,
         niterations=1000,
         populations=100,
-        population_size=100,
+        population_size=50,
         model_selection="accuracy",
         select_k_features=15,
         scale_features=True
@@ -151,6 +151,7 @@ if __name__ == "__main__":
         output_path=os.path.join(output_dir, "logreg_metrics.png"),
     )
 
+    print("Plotting classification metrics")
     plot_classification_metrics(
         y_test,
         rf_results["test_pred"],
@@ -181,7 +182,7 @@ if __name__ == "__main__":
         output_path=os.path.join(output_dir, "symbolic_metrics.png")
     )
 
-    # Plot probability histograms for each model
+    print("Plotting probability histograms")
     plot_probability_histograms(
         y_test,
         logreg_results["test_proba"],
@@ -210,6 +211,7 @@ if __name__ == "__main__":
         output_path=os.path.join(output_dir, "symbolic_proba_hist.png"),
     )
 
+    print("Plotting feature importances")
     plot_feature_importances(
         logreg_results["coefficients"],
         model_name="LogReg",
@@ -282,7 +284,7 @@ if __name__ == "__main__":
     comparison_df = pd.DataFrame(comparison)
     comparison_df.to_csv(os.path.join(output_dir, "model_comparison.csv"), index=False)
 
-    # Plot model comparison with ROC curves
+    print("Plotting model comparison")
     plot_model_comparison(
         comparison_df, 
         roc_data=roc_data,
@@ -298,30 +300,49 @@ if __name__ == "__main__":
         "complex_filename": real_test_complexes,
     })
     
+    # Extract real training samples and their complexes
+    real_train_indices = train_preds_df["y_train"] == 1
+    real_train_complexes = train_preds_df.loc[real_train_indices, "complex_filename"].values
+    
+    # Get pKd values for real train samples
+    real_train_pkd = pd.DataFrame({
+        "complex_filename": real_train_complexes,
+    })
+    
     # Map complex filenames to pKd values from y_real
     complex_to_pkd = dict(zip(y_real["complex_filename"], y_real["pKd"]))
     real_test_pkd["pKd"] = real_test_pkd["complex_filename"].map(complex_to_pkd)
+    real_train_pkd["pKd"] = real_train_pkd["complex_filename"].map(complex_to_pkd)
     
-    # Save the real test pKd values for future use
+    # Save the real test and train pKd values for future use
     real_test_pkd.to_csv(os.path.join(output_dir, "real_test_pkd.csv"), index=False)
+    real_train_pkd.to_csv(os.path.join(output_dir, "real_train_pkd.csv"), index=False)
     
-    # Create dictionary of model probabilities for real test samples
-    probabilities = {}
+    # Create dictionaries of model probabilities for real test and train samples
+    test_probabilities = {}
+    train_probabilities = {}
     model_names = []
     
     for model in ["logreg", "rf", "svc", "symbolic"]:
         if f"{model}_proba" in test_proba_df.columns:
             model_upper = model.upper()
             model_names.append(model_upper)
-            probabilities[model_upper] = test_proba_df.loc[real_test_indices, f"{model}_proba"].values
-    
-    # Plot correlation between pKd and model probabilities
+            
+            # Extract test probabilities for real samples
+            test_probabilities[model_upper] = test_proba_df.loc[real_test_indices, f"{model}_proba"].values
+            
+            # Extract train probabilities for real samples
+            train_probabilities[model_upper] = train_proba_df.loc[real_train_indices, f"{model}_proba"].values
+    print("Plotting pKd probability correlation")
+    # Plot correlation between pKd and model probabilities (both test and train)
     if not real_test_pkd.empty and "pKd" in real_test_pkd.columns:
         plot_pkd_probability_correlation(
             real_test_pkd["pKd"].values,
-            probabilities,
+            test_probabilities,
             model_names,
-            output_path=os.path.join(output_dir, "pkd_probability_correlation.png")
+            output_path=os.path.join(output_dir, "pkd_probability_correlation.png"),
+            pkd_values_train=real_train_pkd["pKd"].values,
+            probabilities_train=train_probabilities
         )
         print(f"Generated pKd-probability correlation plot at {output_dir}/pkd_probability_correlation.png")
 

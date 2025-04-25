@@ -31,25 +31,25 @@ def main():
     # Default configuration for docking
     docking_config = {
         "num_models": 5,
-        "num_recycles": 50,
+        "num_recycles": 20,
         "recycle_early_stop_tolerance": 0.1,
         "amber": True,
         "num_relax": 1,
-        "gpu_ids": ["2", "3"],
+        "gpu_ids": ["1", "2", "3"],
         "overwrite_results": False,
         "output_dir": os.path.join(paths["2_docked"], "pdbs"),
     }
 
-    n_decoy_shuffle = 100
-    n_decoy_random = 100
+    n_decoy_shuffle = 150
+    n_decoy_random = 150
 
     decoy_docking_config = {
         "num_models": 5,
-        "num_recycles": 10,
+        "num_recycles": 20,
         "recycle_early_stop_tolerance": 0.1,
         "amber": True,
         "num_relax": 1,
-        "gpu_ids": ["2", "3"],
+        "gpu_ids": ["1", "2", "3"],
         "overwrite_results": False,
         "output_dir": os.path.join(paths["2_docked"], "decoy_pdbs"),
     }
@@ -108,6 +108,8 @@ def main():
                 template_pdb_dir=os.path.join(paths["0_complexes"], "pdbs"),
                 processed_df=processed_downloaded_df,
                 docking_config=docking_config,
+                min_length=args.min_length,
+                max_length=args.max_length,
             )
             logger.info("Docking completed")
 
@@ -155,6 +157,8 @@ def main():
                     template_pdb_dir=os.path.join(paths["0_complexes"], "pdbs"),
                     processed_df=decoys_df,
                     docking_config=decoy_docking_config,
+                    max_length=args.max_length,
+                    min_length=args.min_length,
                 )
 
             logger.info("Scoring decoy dataset")
@@ -204,8 +208,8 @@ def parse_arguments():
     parser.add_argument(
         "--max-length",
         type=int,
-        default=40,
-        help="Maximum peptide length (default: 40)",
+        default=45,
+        help="Maximum peptide length (default: 45)",
     )
 
     parser.add_argument(
@@ -220,6 +224,7 @@ def parse_arguments():
 def setup_directory_structure() -> Dict[str, str]:
     load_dotenv()
     base_dir = os.getenv("DATA_DIR", "/srv/data1/general/immunopeptides_data/")
+    output_dir = os.getenv("OUTPUT_DIR", "/srv/data1/general/immunopeptides_data/outputs/binding_score_function_prod/")
     paths = {
         "base_dir": base_dir,
         "manually_curated_pdbs": os.path.abspath(
@@ -228,25 +233,23 @@ def setup_directory_structure() -> Dict[str, str]:
         "index_dir": os.path.abspath(
             os.path.join(base_dir, "inputs/pdbbind_index_files")
         ),
-        "output_dir": os.path.abspath(
-            os.path.join(base_dir, "outputs/binding_score_function")
-        ),
+        "output_dir": os.path.abspath(output_dir),
         "0_complexes": os.path.abspath(
-            os.path.join(base_dir, "outputs/binding_score_function/0_complexes")
+            os.path.join(output_dir, "0_complexes")
         ),
         "1_processed_complexes": os.path.abspath(
             os.path.join(
-                base_dir, "outputs/binding_score_function/1_processed_complexes"
+                output_dir, "1_processed_complexes"
             )
         ),
         "2_docked": os.path.abspath(
-            os.path.join(base_dir, "outputs/binding_score_function/2_docked")
+            os.path.join(output_dir, "2_docked")
         ),
         "3_scores": os.path.abspath(
-            os.path.join(base_dir, "outputs/binding_score_function/3_scores")
+            os.path.join(output_dir, "3_scores")
         ),
         "4_processed_scores": os.path.abspath(
-            os.path.join(base_dir, "outputs/binding_score_function/4_processed_scores")
+            os.path.join(output_dir, "4_processed_scores")
         ),
     }
     paths.update(
