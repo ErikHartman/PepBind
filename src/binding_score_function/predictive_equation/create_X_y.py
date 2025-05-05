@@ -7,11 +7,10 @@ import seaborn as sns
 from sklearn.model_selection import train_test_split
 import os
 
-# --- Constants & Configurations ---
-BASE_DIR = Path("/srv/data1/general/immunopeptides_data/outputs/binding_score_function_prod")
+BASE_DIR = Path("/srv/data1/general/immunopeptides_data/outputs/binding_score_function")
 DIR_SCORES = BASE_DIR / "3_scores"
 DIR_COMPLEXES = BASE_DIR / "1_processed_complexes"
-DIR_PROCESSED = BASE_DIR / "4_processed_scores"
+DIR_PROCESSED = BASE_DIR / "4_processed_scores_new"
 PLOTS_DIR = Path.home() / "immunopeptides" / "plots"
 PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -25,7 +24,6 @@ UNIT_CONVERSION = {
     "m": 1,
 }
 
-# --- Utility Functions ---
 def process_binding_data(binding_series: pd.Series) -> pd.Series:
     """
     Convert binding strings (e.g. "< 5 µM") to pKd values.
@@ -69,7 +67,6 @@ def plot_matrix(
     shuffled: pd.DataFrame = None,
     random: pd.DataFrame = None,
 ):
-    """Plot correlations (kind='correlation') or distributions (kind='distribution')."""
     n = len(X.columns)
     cols = 5
     rows = int(np.ceil(n / cols))
@@ -94,9 +91,25 @@ def plot_matrix(
     plt.savefig(fname)
     plt.close(fig)
 
+    plt.figure(figsize=(3, 3))
+    if kind == "correlation":
+        sns.regplot(x=X["iptm"], y=y, scatter_kws={"color":"navy"}, line_kws={"color": "black"})
+    elif kind == "distribution":
+        sns.histplot(X["iptm"], kde=True, bins=50, alpha=0.5, label="Real", color="blue")
+        if shuffled is not None:
+            sns.histplot(shuffled["iptm"], kde=True, bins=50, alpha=0.5, label="Shuffled", color="purple")
+        if random is not None:
+            sns.histplot(random["iptm"], kde=True, bins=50, alpha=0.5, label="Random", color="pink")
+    plt.legend(frameon=False)
+    plt.tight_layout()
+    plt.savefig(fname.with_suffix(".iptm.svg"))
+
 
 def split_and_save_real(df: pd.DataFrame):
-    """Prepare features and labels for real complexes, plot correlations, split, and return train/test."""
+    """
+    Prepare features and labels for real complexes, plot correlations, 
+    and return train/val/test splits.
+    """
     df = df.set_index("complex_filename")
     X = df.drop(columns=["in_binding_site", "is_decoy", "pKd", "fraction_in_binding_site", "in_binding_site_score"])
     y = df["pKd"].astype(float)
@@ -107,19 +120,41 @@ def split_and_save_real(df: pd.DataFrame):
         kind="correlation",
         fname=PLOTS_DIR / "corr_real.png",
     )
-    return train_test_split(X, y, test_size=0.15, random_state=42)
+    
+
+    X_temp, X_test, y_temp, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
+    X_train, X_val, y_train, y_val = train_test_split(X_temp, y_temp, test_size=0.2, random_state=42)
+    
+    # Create DataFrames for y values that preserve the complex_filename index
+    y_train_df = pd.DataFrame({'complex_filename': X_train.index, 'pKd': y_train})
+    y_val_df = pd.DataFrame({'complex_filename': X_val.index, 'pKd': y_val})
+    y_test_df = pd.DataFrame({'complex_filename': X_test.index, 'pKd': y_test})
+    
+    return X_train, X_val, X_test, y_train_df, y_val_df, y_test_df
 
 
 def split_and_save_decoys(decoy_df: pd.DataFrame) -> dict:
-    """Split shuffled and random decoys into train/test sets."""
+    """
+    Split shuffled and random decoys into train/val/test sets.
+    """
     df = decoy_df.drop(columns=["is_decoy", "in_binding_site", "in_binding_site_score", "fraction_in_binding_site"])
     results = {}
+    
     for t in ["shuffle", "random"]:
         subset = df[df.decoy_type == t].set_index("complex_filename").drop(columns="decoy_type")
-        tr = subset.sample(frac=0.85, random_state=42)
-        te = subset.drop(tr.index)
-        results[f"{t}_X_train"] = tr
-        results[f"{t}_X_test"] = te
+        
+        temp_subset, test_subset = train_test_split(subset, test_size=0.1, random_state=42)
+        train_subset, val_subset = train_test_split(temp_subset, test_size=0.2, random_state=42)
+        
+        results[f"{t}_X_train"] = train_subset
+        results[f"{t}_X_train_with_index"] = train_subset.reset_index()
+        
+        results[f"{t}_X_val"] = val_subset
+        results[f"{t}_X_val_with_index"] = val_subset.reset_index()
+        
+        results[f"{t}_X_test"] = test_subset
+        results[f"{t}_X_test_with_index"] = test_subset.reset_index()
+    
     return results
 
 
@@ -174,21 +209,30 @@ def main():
     real_bs = real[real.in_binding_site]
     decoy_splits = split_and_save_decoys(decoys)
 
-    X_tr, X_te, y_tr, y_te = split_and_save_real(real_bs)
-    save_if_not_exists(X_tr, DIR_PROCESSED / 'real_X_train.csv')
-    save_if_not_exists(X_te, DIR_PROCESSED / 'real_X_test.csv')
-    save_if_not_exists(y_tr, DIR_PROCESSED / 'real_y_train.csv')
-    save_if_not_exists(y_te, DIR_PROCESSED / 'real_y_test.csv')
+    X_train, X_val, X_test, y_train_df, y_val_df, y_test_df = split_and_save_real(real_bs)
+
+    print("Number of rows in the different files: ")
+    print(f"Real train: {len(X_train)}, Real val: {len(X_val)}, Real test: {len(X_test)}")
+    print(f"Decoy train: {len(decoy_splits['shuffle_X_train'])}, Decoy test: {len(decoy_splits['shuffle_X_test'])}")
+    print(f"Random train: {len(decoy_splits['random_X_train'])}, Random test: {len(decoy_splits['random_X_test'])}")
+    
+    save_if_not_exists(X_train.reset_index(), DIR_PROCESSED / 'real_X_train.csv')
+    save_if_not_exists(X_val.reset_index(), DIR_PROCESSED / 'real_X_val.csv')
+    save_if_not_exists(X_test.reset_index(), DIR_PROCESSED / 'real_X_test.csv')
+    
+    save_if_not_exists(y_train_df, DIR_PROCESSED / 'real_y_train.csv')
+    save_if_not_exists(y_val_df, DIR_PROCESSED / 'real_y_val.csv')
+    save_if_not_exists(y_test_df, DIR_PROCESSED / 'real_y_test.csv')
 
     set_permissions_to_777(DIR_PROCESSED)
 
     for name, df in decoy_splits.items():
-        save_if_not_exists(df, DIR_PROCESSED / f"{name}.csv")
+        if '_with_index' in name:
+            save_if_not_exists(df, DIR_PROCESSED / f"{name.replace('_with_index', '')}.csv")
 
-    # Distribution plot against decoys
     plot_matrix(
-        X_tr,
-        y_tr,
+        X_train,
+        y_train_df.set_index('complex_filename')['pKd'],
         kind='distribution',
         fname=PLOTS_DIR / 'dist_real_vs_decoys.png',
         shuffled=decoy_splits['shuffle_X_train'],

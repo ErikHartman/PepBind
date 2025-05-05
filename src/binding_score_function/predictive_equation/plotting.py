@@ -6,7 +6,7 @@ import pandas as pd
 import os
 import argparse
 from sklearn.metrics import roc_curve, roc_auc_score
-from scipy.stats import pearsonr
+from scipy.stats import pearsonr, spearmanr
 
 color_palette = {
     "symbolic": "#124E78", 
@@ -17,11 +17,11 @@ color_palette = {
     "svc": "#2C8C99",     
 
     "random": "#F46036",
-    "shuffled": "#E88873",  
+    "shuffle": "#E88873",  
     "real": "#2C8C99",  
 
     "train": "#2C8C99", 
-    "test": "#3943B7", 
+    "val": "#3943B7", 
 
 }
     
@@ -30,7 +30,7 @@ sns.set_context("paper")
 def plot_classification_metrics(y_true, y_pred, y_proba, y_train=None, train_proba=None, model_name="Model", output_path=None):
     """
     Plot confusion matrix and ROC curve for classification results.
-    If train data is provided, both train and test ROC curves will be shown.
+    If train data is provided, both train and val ROC curves will be shown.
     """
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8,4))
     
@@ -39,28 +39,26 @@ def plot_classification_metrics(y_true, y_pred, y_proba, y_train=None, train_pro
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax1)
     ax1.set_xlabel('Predicted labels')
     ax1.set_ylabel('True labels')
-    ax1.set_title(f'{model_name} Confusion Matrix')
-    
+
     # ROC Curve
     fpr, tpr, _ = roc_curve(y_true, y_proba)
-    test_auc = roc_auc_score(y_true, y_proba)
+    val_auc = roc_auc_score(y_true, y_proba)
     
-    # Plot test ROC curve
-    ax2.plot(fpr, tpr, color=color_palette["test"], linestyle='--', lw=2, 
-             label=f'Test ROC (AUC = {test_auc:.3f})')
+    # Plot val ROC curve
+    ax2.plot(fpr, tpr, color=color_palette["val"], linestyle='--',
+             label=f'Val ROC (AUC = {val_auc:.3f})')
     
     # Plot train ROC curve if provided
     if y_train is not None and train_proba is not None:
         fpr_train, tpr_train, _ = roc_curve(y_train, train_proba)
         train_auc = roc_auc_score(y_train, train_proba)
-        ax2.plot(fpr_train, tpr_train, color=color_palette["train"], lw=2,
+        ax2.plot(fpr_train, tpr_train, color=color_palette["train"],
                  label=f'Train ROC (AUC = {train_auc:.3f})')
     
-    ax2.set_xlim([0.0, 1.0])
+    ax2.set_xlim([-0.05, 1.0])
     ax2.set_ylim([0.0, 1.05])
     ax2.set_xlabel('False Positive Rate')
     ax2.set_ylabel('True Positive Rate')
-    ax2.set_title(f'{model_name} ROC Curve')
     ax2.legend(loc='lower right', frameon=False)
     
     plt.tight_layout()
@@ -73,7 +71,7 @@ def plot_classification_metrics(y_true, y_pred, y_proba, y_train=None, train_pro
 
 def plot_regression_scatter(
     y_train, train_preds, 
-    y_test=None, test_preds=None, 
+    y_val=None, val_preds=None, 
     model_name="Model", 
     output_path=None
 ):
@@ -95,17 +93,17 @@ def plot_regression_scatter(
         ax=ax1
     )
     
-    if y_test is not None and test_preds is not None:
-        # Test data with regplot
+    if y_val is not None and val_preds is not None:
+        # Val data with regplot
         sns.regplot(
-            x=y_test, 
-            y=test_preds, 
-            scatter_kws={'alpha': 0.5, 's': 10, 'color': color_palette["test"]}, 
-            line_kws={'color': color_palette["test"]},
-            label='Test',
+            x=y_val, 
+            y=val_preds, 
+            scatter_kws={'alpha': 0.5, 's': 10, 'color': color_palette["val"]}, 
+            line_kws={'color': color_palette["val"]},
+            label='Val',
             ax=ax1
         )
-        y_all = np.concatenate([y_train, y_test])
+        y_all = np.concatenate([y_train, y_val])
     else:
         y_all = y_train
     
@@ -114,7 +112,6 @@ def plot_regression_scatter(
     
     ax1.set_xlabel('Actual pKd')
     ax1.set_ylabel('Predicted pKd')
-    ax1.set_title(f'{model_name}: actual vs. predicted')
     ax1.legend(frameon=False)
     
     # Second subplot: Residuals (actual - predicted)
@@ -124,8 +121,7 @@ def plot_regression_scatter(
     sns.scatterplot(
         x=y_train, 
         y=train_residuals, 
-        alpha=0.5, 
-        s=5, 
+        s=10, 
         color=color_palette["train"],
         label='Train',
         ax=ax2
@@ -134,26 +130,25 @@ def plot_regression_scatter(
     # Add a horizontal line at y=0 (perfect prediction)
     ax2.axhline(y=0, color='k', linestyle='--', alpha=0.5)
     
-    # If test data is available, add test residuals
-    if y_test is not None and test_preds is not None:
-        test_residuals = y_test - test_preds
+    # If val data is available, add val residuals
+    if y_val is not None and val_preds is not None:
+        val_residuals = y_val - val_preds
         sns.scatterplot(
-            x=y_test, 
-            y=test_residuals, 
-            alpha=0.5, 
+            x=y_val, 
+            y=val_residuals, 
             s=10, 
-            color=color_palette["test"],
-            label='Test',
+            color=color_palette["val"],
+            label='Val',
             ax=ax2
         )
     
-    # Calculate and annotate RMSE for train and test
+    # Calculate and annotate RMSE for train and val
     train_rmse = np.sqrt(np.mean(train_residuals**2))
     rmse_text = f"Train RMSE: {train_rmse:.3f}"
     
-    if y_test is not None and test_preds is not None:
-        test_rmse = np.sqrt(np.mean((y_test - test_preds)**2))
-        rmse_text += f"\nTest RMSE: {test_rmse:.3f}"
+    if y_val is not None and val_preds is not None:
+        val_rmse = np.sqrt(np.mean((y_val - val_preds)**2))
+        rmse_text += f"\nVal RMSE: {val_rmse:.3f}"
     
     # Add RMSE text to the residual plot
     ax2.text(
@@ -165,7 +160,6 @@ def plot_regression_scatter(
     
     ax2.set_xlabel('Actual pKd')
     ax2.set_ylabel('Residuals (Actual - Predicted)')
-    ax2.set_title(f'{model_name}: prediction residuals')
     ax2.legend(frameon=False)
     
     plt.tight_layout()
@@ -199,7 +193,7 @@ def plot_model_comparison(comparison_df, roc_data=None, output_path=None):
     
     # If it's classification metrics
     if 'Train Accuracy' in metrics:
-        metric_list = ['Test Accuracy','Test AUC']
+        metric_list = ['Val Accuracy','Val AUC']
         metric_list = [m for m in metric_list if m in metrics]
         
         # Determine if we should add ROC curve subplot
@@ -214,10 +208,15 @@ def plot_model_comparison(comparison_df, roc_data=None, output_path=None):
             colors = [color_palette.get(x.lower(), 'gray') for x in model_names]
             ax = axs[i]
             ax.bar(model_names, comparison_df[metric].values, color=colors)
-            ax.set_title(metric)
-            ax.set_xlabel('Model')
             ax.set_ylabel(metric)
             ax.tick_params(axis='x', rotation=45)
+
+            if metric == 'Val AUC':
+                # Set y-axis limits for AUC
+                ax.set_ylim([0.8, 1])
+            if metric == 'Val Accuracy':
+                # Set y-axis limits for accuracy
+                ax.set_ylim([0.6, 1])
         
         # Plot ROC curves in the last subplot if provided
         if add_roc_subplot:
@@ -227,11 +226,10 @@ def plot_model_comparison(comparison_df, roc_data=None, output_path=None):
                     fpr, tpr, roc_auc = roc_data[model]
                     ax.plot(fpr, tpr, lw=2, label=f'{model} (AUC = {roc_auc:.3f})', 
                             color=color_palette.get(model.lower(), 'gray'))
-            ax.set_xlim([0, 1])
-            ax.set_ylim([0, 1])
+            ax.set_xlim([0.0, 1.0])
+            ax.set_ylim([0.0, 1.05])
             ax.set_xlabel('False Positive Rate')
             ax.set_ylabel('True Positive Rate')
-            ax.set_title('ROC Curves')
             ax.legend(loc='lower right', frameon=False)
         
         plt.tight_layout()
@@ -239,7 +237,7 @@ def plot_model_comparison(comparison_df, roc_data=None, output_path=None):
     # If it's regression metrics
     elif 'Train RMSE' in metrics:
         regression_metrics = []
-        for m in ['Test MAE', 'Test R²']:
+        for m in ['Val MAE', 'Val R²']:
             if m in metrics:
                 regression_metrics.append(m)
         n_subplots = len(regression_metrics)
@@ -249,8 +247,6 @@ def plot_model_comparison(comparison_df, roc_data=None, output_path=None):
             colors = [color_palette.get(x.lower(), 'gray') for x in model_names]
             ax = axs[i]
             ax.bar(model_names, comparison_df[metric].values, color=colors)
-            ax.set_title(metric)
-            ax.set_xlabel('Model')
             ax.set_ylabel(metric)
             ax.tick_params(axis='x', rotation=45)
             ax.set_ylim([min(comparison_df[metric].values) * 0.9, max(comparison_df[metric].values) * 1.1])
@@ -264,7 +260,7 @@ def plot_model_comparison(comparison_df, roc_data=None, output_path=None):
 
 def plot_symbolic_complexity_tradeoff(
     equations_df: pd.DataFrame,
-    metric: str = 'test_rmse',
+    metric: str = 'val_rmse',
     model_type: str = 'regression',
     top_n: int = 50,
     output_path: str = None,
@@ -300,7 +296,7 @@ def plot_symbolic_complexity_tradeoff(
         return
         
     # Get the corresponding train metric
-    train_metric = metric.replace('test_', 'train_')
+    train_metric = metric.replace('val_', 'train_')
     
     # Create figure with two subplots
     fig = plt.figure(figsize=(10, 7))
@@ -311,18 +307,17 @@ def plot_symbolic_complexity_tradeoff(
     ax2 = fig.add_subplot(gs[0, 1], sharey=ax1)
     ax_legend = fig.add_subplot(gs[1, :])
     
-    # Plot complexity vs test metric
-    scatter_test = ax1.scatter(
+    # Plot complexity vs val metric
+    scatter_val = ax1.scatter(
         df['complexity'], 
         df[metric], 
         s=100,
-        color=color_palette["test"],
+        color=color_palette["val"],
     )
     
     ax1.set_xlabel('Complexity')
-    test_label = metric.replace('_', ' ').title()
-    ax1.set_ylabel(test_label)
-    ax1.set_title(f'Complexity vs. {test_label} (Test)')
+    val_label = metric.replace('_', ' ').title()
+    ax1.set_ylabel(val_label)
     
     # Plot complexity vs train metric if available
     if train_metric in df.columns:
@@ -334,22 +329,6 @@ def plot_symbolic_complexity_tradeoff(
         )
         
         ax2.set_xlabel('Complexity')
-        train_label = train_metric.replace('_', ' ').title()
-        ax2.set_title(f'Complexity vs. {train_label} (Train)')
-        
-        # Add horizontal line connecting the same equation in both plots
-        for _, row in df.iterrows():
-            if pd.notna(row[train_metric]) and pd.notna(row[metric]):
-                x = [row['complexity'], row['complexity']]
-                y_test = row[metric]
-                y_train = row[train_metric]
-                
-                # Draw a light gray line connecting test to train for same equation
-                plt.plot(
-                    [row['complexity'], row['complexity'] + 0.001], 
-                    [y_test, y_train],
-                    color='lightgray', alpha=0.3, linestyle='-', linewidth=0.5
-                )
 
     if lower_is_better:
         # For regression, lower metric is better (e.g., RMSE)
@@ -411,9 +390,9 @@ def plot_symbolic_complexity_tradeoff(
             
             # Format based on model type
             if model_type == 'regression':
-                metric_str = f"{test_label}: {eq_metric:.4f}"
+                metric_str = f"{val_label}: {eq_metric:.4f}"
             else:
-                metric_str = f"{test_label}: {eq_metric:.4f}"
+                metric_str = f"{val_label}: {eq_metric:.4f}"
                 
             # Add to legend with equation complexity 
             legend_text = f"{i}. Complexity: {row['complexity']}, {metric_str}\n    {eq_str}"
@@ -439,20 +418,20 @@ def plot_probability_histograms(y_true, y_proba, model_name, output_path=None):
     """
     Plot histograms of predicted probabilities for each class.
     """
-    plt.figure(figsize=(8, 4))
+    plt.figure(figsize=(3,3))
     
     # Get probabilities for each class
     pos_probs = y_proba[y_true == 1]
     neg_probs = y_proba[y_true == 0]
     
     # Plot histograms
-    plt.hist(
-        neg_probs, bins=20, alpha=0.5, color=color_palette["random"], 
-        label=f'Negative class (n={len(neg_probs)})', density=True
+    sns.histplot(
+        x=neg_probs, bins=30, alpha=0.8, kde=True, color=color_palette["random"], 
+        label=f'Decoys'
     )
-    plt.hist(
-        pos_probs, bins=20, alpha=0.5, color=color_palette["real"], 
-        label=f'Positive class (n={len(pos_probs)})', density=True
+    sns.histplot(
+        x=pos_probs, bins=30, alpha=0.8, kde=True, color=color_palette["real"], 
+        label=f'Real'
     )
     
     # Add vertical line at decision threshold (0.5)
@@ -460,7 +439,6 @@ def plot_probability_histograms(y_true, y_proba, model_name, output_path=None):
     
     plt.xlabel('Predicted probability')
     plt.ylabel('Density')
-    plt.title(f'{model_name}: Probability Distributions')
     plt.legend(frameon=False)
     plt.grid(alpha=0.3)
     plt.tight_layout()
@@ -473,47 +451,42 @@ def plot_probability_histograms(y_true, y_proba, model_name, output_path=None):
 
 def plot_predictions_by_data_type(predictions_df, output_dir):
     """
-    Create plots comparing model predictions on different data types (real, shuffled, random).
+    Create plots comparing model predictions on different data types (real, shuffle, random).
     """
-    # Add binary labels: 1 for real, 0 for non-real (shuffled or random)
+    # Add binary labels: 1 for real, 0 for non-real (shuffle or random)
     predictions_df['binary_label'] = predictions_df['data_type'].apply(lambda x: 1 if x == 'Real' else 0)
     
-    fig = plt.figure(figsize=(15, 5))
+    fig = plt.figure(figsize=(8, 3))
     gs = fig.add_gridspec(2, 2, width_ratios=[2, 1])
     
     # Stripplot in top-left position
-    ax1 = fig.add_subplot(gs[0, 0])
+    ax1 = fig.add_subplot(gs[:, 0])
     sns.stripplot(
         data=predictions_df, 
         x="model", 
         y="prediction", 
         hue="data_type",
-        palette={"Real": color_palette["real"], "Shuffled": color_palette["shuffled"], "Random": color_palette["random"]},
+        palette={"Real": color_palette["real"], "Shuffled": color_palette["shuffle"], "Random": color_palette["random"]},
         dodge=True,
         ax=ax1
     )
     
     ax1.set_ylim([3, 10])
-    ax1.set_title("Model Predictions by Data Type")
     ax1.set_xlabel("Model")
     ax1.set_ylabel("Predicted pKd")
     ax1.legend(frameon=False)
     
-    ax2 = fig.add_subplot(gs[1, 0])
+
     sns.boxplot(
         data=predictions_df, 
         x="model", 
         y="prediction", 
         hue="data_type",
-        palette={"Real": color_palette["real"], "Shuffled": color_palette["shuffled"], "Random": color_palette["random"]},
-        ax=ax2
+        palette={"Real": color_palette["real"], "Shuffled": color_palette["shuffle"], "Random": color_palette["random"]},
+        fill=False,
+        ax=ax1, legend=False
     )
-    
-    ax2.set_ylim([3, 10])
-    ax2.set_title("Distribution of Predictions by Data Type")
-    ax2.set_xlabel("Model")
-    ax2.set_ylabel("Predicted pKd")
-    ax2.legend(frameon=False)
+
     
     ax3 = fig.add_subplot(gs[:, 1])
     
@@ -536,15 +509,14 @@ def plot_predictions_by_data_type(predictions_df, output_dir):
     ax3.set_ylim([0.0, 1.05])
     ax3.set_xlabel('False Positive Rate')
     ax3.set_ylabel('True Positive Rate')
-    ax3.set_title('Real vs decoy data')
     ax3.legend(loc='lower right', frameon=False)
     
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "real_vs_shuffled_random_analysis.png"), dpi=300)
+    plt.savefig(os.path.join(output_dir, "real_vs_shuffle_random_analysis.png"), dpi=300)
     plt.close()
     
     return {
-        "combined_plot": os.path.join(output_dir, "real_vs_shuffled_random_analysis.png")
+        "combined_plot": os.path.join(output_dir, "real_vs_shuffle_random_analysis.png")
     }
 
 def plot_pkd_probability_correlation(
@@ -557,21 +529,6 @@ def plot_pkd_probability_correlation(
 ):
     """
     Plot correlation between pKd values and classification probabilities for real samples.
-    
-    Parameters:
-    -----------
-    pkd_values : numpy.ndarray
-        The pKd values for real test samples
-    probabilities : dict of numpy.ndarray
-        Dictionary mapping model names to their predicted probabilities for test samples
-    model_names : list
-        List of model names to include in the plot
-    output_path : str, optional
-        Path to save the plot
-    pkd_values_train : numpy.ndarray, optional
-        The pKd values for real training samples
-    probabilities_train : dict of numpy.ndarray, optional
-        Dictionary mapping model names to their predicted probabilities for train samples
     """
     if len(model_names) == 0:
         print("No models to plot correlations for.")
@@ -579,12 +536,11 @@ def plot_pkd_probability_correlation(
     
     # Calculate number of rows and columns for subplots
     n_models = len(model_names)
-    n_cols = min(2, n_models)
-    n_rows = (n_models + n_cols - 1) // n_cols
+    n_cols = n_models
+    n_rows = 1
     
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(5*n_cols, 4*n_rows))
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(3*n_cols, 3*n_rows))
     
-    # Make axes iterable even if there's only one subplot
     if n_models == 1:
         axes = np.array([axes])
     axes = axes.flatten()
@@ -593,103 +549,30 @@ def plot_pkd_probability_correlation(
         if model_name in probabilities:
             ax = axes[i]
             
-            # Plot test data
-            sns.scatterplot(
+            # Plot val data
+            sns.regplot(
                 x=pkd_values, 
                 y=probabilities[model_name], 
                 ax=ax,
-                alpha=0.7,
-                color=color_palette.get("test", 'blue'),
-                label='Test',
-                s=40,
-                marker='o'
+                color=color_palette.get(model_name.lower(), 'blue'),
             )
             
-            # Plot train data if provided
-            has_train_data = (pkd_values_train is not None and 
-                             probabilities_train is not None and
-                             model_name in probabilities_train and
-                             len(pkd_values_train) == len(probabilities_train[model_name]))
+            pearson_r, _ = pearsonr(pkd_values, probabilities[model_name])
             
-            if has_train_data:
-                sns.scatterplot(
-                    x=pkd_values_train, 
-                    y=probabilities_train[model_name], 
-                    ax=ax,
-                    alpha=0.5,
-                    color=color_palette.get("train", 'green'),
-                    label='Train',
-                    s=25,
-                    marker='x'
-                )
-                
-                # Calculate combined correlation if both train and test data exist
-                combined_pkd = np.concatenate([pkd_values, pkd_values_train])
-                combined_probs = np.concatenate([probabilities[model_name], probabilities_train[model_name]])
-                
-                # Add regression line for combined data
-                sns.regplot(
-                    x=combined_pkd, 
-                    y=combined_probs, 
-                    ax=ax,
-                    scatter=False,
-                    color='red',
-                    line_kws={'linestyle':'-'}
-                )
-                
-                # Calculate correlation coefficients for combined data
-                pearson_r, _ = pearsonr(combined_pkd, combined_probs)
-                
-                # Add correlation info to plot (combined)
-                correlation_text = (
-                    f"Combined Pearson r: {pearson_r:.3f}\n"
-                )
-            else:
-                # Add regression line for just test data
-                sns.regplot(
-                    x=pkd_values, 
-                    y=probabilities[model_name], 
-                    ax=ax,
-                    scatter=False,
-                    color='red'
-                )
-                
-                # Calculate correlation coefficients for test data only
-                pearson_r, _ = pearsonr(pkd_values, probabilities[model_name])
-                
-                # Add correlation info to plot (test only)
-                correlation_text = (
-                    f"Test Pearson r: {pearson_r:.3f}\n"
-                )
+            correlation_text = (
+                f"Pearson r: {pearson_r:.3f}\n"
+            )
             
-            # Add separate correlations for train and test if both exist
-            if has_train_data:
-                # Calculate test-only correlations
-                test_pearson_r, _ = pearsonr(pkd_values, probabilities[model_name])
-            
-                # Calculate train-only correlations
-                train_pearson_r, _ = pearsonr(pkd_values_train, probabilities_train[model_name])
-                
-                # Add detailed correlation info
-                correlation_text += (
-                    f"\n\nTest-only Pearson r: {test_pearson_r:.3f}\n"
-                    f"Train-only Pearson r: {train_pearson_r:.3f}"
-                )
-            
-            # Display the correlation text
             ax.text(
                 0.05, 0.95, correlation_text,
                 transform=ax.transAxes,
                 verticalalignment='top',
-                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8)
+
             )
             
             ax.set_xlabel('pKd value')
             ax.set_ylabel(f'{model_name} probability')
-            ax.set_title(f'{model_name}: pKd vs Probability Correlation')
-            ax.legend()
 
-    # Hide any unused subplots
     for j in range(i+1, len(axes)):
         axes[j].set_visible(False)
     
@@ -700,6 +583,7 @@ def plot_pkd_probability_correlation(
         plt.close()
     else:
         plt.show()
+
 
 def main():
     """
@@ -727,10 +611,8 @@ def main():
     print(f"Reading results from: {args.input_dir}")
     print(f"Saving plots to: {args.output_dir}")
     
-    # Ensure output directory exists
     os.makedirs(args.output_dir, exist_ok=True)
     
-    # Common functionality: Load model comparison data
     comparison_path = os.path.join(args.input_dir, "model_comparison.csv")
     if os.path.exists(comparison_path):
         comparison_df = pd.read_csv(comparison_path)
@@ -740,26 +622,25 @@ def main():
         comparison_df = None
     
     if args.mode == "classification":
-        # Load predictions and probabilities
         train_preds_path = os.path.join(args.input_dir, "train_predictions.csv")
-        test_preds_path = os.path.join(args.input_dir, "test_predictions.csv")
+        val_preds_path = os.path.join(args.input_dir, "val_predictions.csv")
         train_proba_path = os.path.join(args.input_dir, "train_probabilities.csv")
-        test_proba_path = os.path.join(args.input_dir, "test_probabilities.csv")
+        val_proba_path = os.path.join(args.input_dir, "val_probabilities.csv")
         
-        if all(os.path.exists(p) for p in [train_preds_path, test_preds_path, train_proba_path, test_proba_path]):
+        if all(os.path.exists(p) for p in [train_preds_path, val_preds_path, train_proba_path, val_proba_path]):
             train_preds = pd.read_csv(train_preds_path)
-            test_preds = pd.read_csv(test_preds_path)
+            val_preds = pd.read_csv(val_preds_path)
             train_proba = pd.read_csv(train_proba_path)
-            test_proba = pd.read_csv(test_proba_path)
+            val_proba = pd.read_csv(val_proba_path)
             print("Loaded prediction data for classification")
             
             # Calculate ROC curves for model comparison
             if comparison_df is not None:
                 roc_data = {}
                 for model in ["LogReg", "RF", "SVC", "Symbolic"]:
-                    if f"{model.lower()}_proba" in test_proba.columns:
-                        fpr, tpr, _ = roc_curve(test_proba["y_test"], test_proba[f"{model.lower()}_proba"])
-                        roc_auc = roc_auc_score(test_proba["y_test"], test_proba[f"{model.lower()}_proba"])
+                    if f"{model.lower()}_proba" in val_proba.columns:
+                        fpr, tpr, _ = roc_curve(val_proba["y_val"], val_proba[f"{model.lower()}_proba"])
+                        roc_auc = roc_auc_score(val_proba["y_val"], val_proba[f"{model.lower()}_proba"])
                         roc_data[model] = (fpr, tpr, roc_auc)
                 
                 # Plot model comparison
@@ -773,12 +654,12 @@ def main():
             # Generate individual model plots
             if not args.symbolic_only:
                 for model in ["logreg", "rf", "svc"]:
-                    if f"{model}_proba" in test_proba.columns:
+                    if f"{model}_proba" in val_proba.columns:
                         # Classification metrics plot
                         plot_classification_metrics(
-                            test_preds["y_test"],
-                            test_preds[f"{model}_pred"],
-                            test_proba[f"{model}_proba"],
+                            val_preds["y_val"],
+                            val_preds[f"{model}_pred"],
+                            val_proba[f"{model}_proba"],
                             train_preds["y_train"],
                             train_proba[f"{model}_proba"],
                             model_name=model.upper(),
@@ -787,41 +668,41 @@ def main():
                         
                         # Probability histograms
                         plot_probability_histograms(
-                            test_preds["y_test"],
-                            test_proba[f"{model}_proba"],
+                            val_preds["y_val"],
+                            val_proba[f"{model}_proba"],
                             model_name=model.upper(),
                             output_path=os.path.join(args.output_dir, f"{model}_proba_hist.png")
                         )
                 print("Generated standard model plots")
             
             # Generate correlation plots between pKd and probabilities if available
-            pkd_test_path = os.path.join(args.input_dir, "real_test_pkd.csv")
+            pkd_val_path = os.path.join(args.input_dir, "real_val_pkd.csv")
             pkd_train_path = os.path.join(args.input_dir, "real_train_pkd.csv")
             
-            if os.path.exists(pkd_test_path):
-                pkd_test_df = pd.read_csv(pkd_test_path)
+            if os.path.exists(pkd_val_path):
+                pkd_val_df = pd.read_csv(pkd_val_path)
                 
                 # Check for train data
                 pkd_train_df = None
                 if os.path.exists(pkd_train_path):
                     pkd_train_df = pd.read_csv(pkd_train_path)
                 
-                if not pkd_test_df.empty and "pKd" in pkd_test_df.columns:
+                if not pkd_val_df.empty and "pKd" in pkd_val_df.columns:
                     print("Generating pKd-probability correlation plots")
                     
                     # Get model names
                     model_names = []
-                    test_proba_dict = {}
+                    val_proba_dict = {}
                     train_proba_dict = {}
                     
                     for model in ["logreg", "rf", "svc", "symbolic"]:
-                        if f"{model}_proba" in test_proba.columns:
-                            # Filter to only real test samples
-                            real_test_indices = test_proba["y_test"] == 1
-                            if real_test_indices.sum() > 0:
+                        if f"{model}_proba" in val_proba.columns:
+                            # Filter to only real val samples
+                            real_val_indices = val_proba["y_val"] == 1
+                            if real_val_indices.sum() > 0:
                                 model_upper = model.upper()
                                 model_names.append(model_upper)
-                                test_proba_dict[model_upper] = test_proba.loc[real_test_indices, f"{model}_proba"].values
+                                val_proba_dict[model_upper] = val_proba.loc[real_val_indices, f"{model}_proba"].values
                                 
                                 # Get train probabilities if available
                                 if pkd_train_df is not None and not pkd_train_df.empty and "pKd" in pkd_train_df.columns:
@@ -831,8 +712,8 @@ def main():
                     
                     if model_names:
                         plot_pkd_probability_correlation(
-                            pkd_test_df["pKd"].values,
-                            test_proba_dict,
+                            pkd_val_df["pKd"].values,
+                            val_proba_dict,
                             model_names,
                             output_path=os.path.join(args.output_dir, "pkd_probability_correlation.png"),
                             pkd_values_train=pkd_train_df["pKd"].values if pkd_train_df is not None else None,
@@ -841,12 +722,12 @@ def main():
                         print("Generated pKd-probability correlation plot")
             
             # Generate symbolic model plots
-            if "symbolic_proba" in test_proba.columns:
+            if "symbolic_proba" in val_proba.columns:
                 # Classification metrics plot
                 plot_classification_metrics(
-                    test_preds["y_test"],
-                    test_preds["symbolic_pred"],
-                    test_proba["symbolic_proba"],
+                    val_preds["y_val"],
+                    val_preds["symbolic_pred"],
+                    val_proba["symbolic_proba"],
                     train_preds["y_train"],
                     train_proba["symbolic_proba"],
                     model_name="Symbolic",
@@ -855,8 +736,8 @@ def main():
                 
                 # Probability histograms
                 plot_probability_histograms(
-                    test_preds["y_test"],
-                    test_proba["symbolic_proba"],
+                    val_preds["y_val"],
+                    val_proba["symbolic_proba"],
                     model_name="Symbolic",
                     output_path=os.path.join(args.output_dir, "symbolic_proba_hist.png")
                 )
@@ -867,7 +748,7 @@ def main():
                     equations_df = pd.read_csv(symbolic_eqs_path)
                     plot_symbolic_complexity_tradeoff(
                         equations_df,
-                        metric='test_auc',
+                        metric='val_auc',
                         model_type='classification',
                         output_path=os.path.join(args.output_dir, "symbolic_classification_complexity_tradeoff.png"),
                         lower_is_better=False
@@ -884,11 +765,11 @@ def main():
     elif args.mode == "regression" or args.mode == "regression_and_classification":
         # Load predictions
         train_preds_path = os.path.join(args.input_dir, "train_predictions.csv")
-        test_preds_path = os.path.join(args.input_dir, "test_predictions.csv")
+        val_preds_path = os.path.join(args.input_dir, "val_predictions.csv")
         
-        if all(os.path.exists(p) for p in [train_preds_path, test_preds_path]):
+        if all(os.path.exists(p) for p in [train_preds_path, val_preds_path]):
             train_preds = pd.read_csv(train_preds_path)
-            test_preds = pd.read_csv(test_preds_path)
+            val_preds = pd.read_csv(val_preds_path)
             print("Loaded prediction data for regression")
             
             # Plot model comparison
@@ -902,24 +783,24 @@ def main():
             # Generate individual model plots
             if not args.symbolic_only:
                 for model in ["lasso", "rf", "svr"]:
-                    if f"{model}_pred" in test_preds.columns:
+                    if f"{model}_pred" in val_preds.columns:
                         plot_regression_scatter(
                             train_preds["y_train"],
                             train_preds[f"{model}_pred"],
-                            test_preds["y_test"],
-                            test_preds[f"{model}_pred"],
+                            val_preds["y_val"],
+                            val_preds[f"{model}_pred"],
                             model_name=model.upper(),
                             output_path=os.path.join(args.output_dir, f"{model}_scatter.png")
                         )
                 print("Generated standard model plots")
             
             # Generate symbolic model plots
-            if "symbolic_pred" in test_preds.columns:
+            if "symbolic_pred" in val_preds.columns:
                 plot_regression_scatter(
                     train_preds["y_train"],
                     train_preds["symbolic_pred"],
-                    test_preds["y_test"],
-                    test_preds["symbolic_pred"],
+                    val_preds["y_val"],
+                    val_preds["symbolic_pred"],
                     model_name="Symbolic",
                     output_path=os.path.join(args.output_dir, "symbolic_scatter.png")
                 )
@@ -930,7 +811,7 @@ def main():
                     equations_df = pd.read_csv(symbolic_eqs_path)
                     plot_symbolic_complexity_tradeoff(
                         equations_df,
-                        metric='test_r2',
+                        metric='val_r2',
                         model_type='regression',
                         output_path=os.path.join(args.output_dir, "symbolic_regression_complexity_tradeoff.png"),
                         lower_is_better=False
@@ -941,14 +822,14 @@ def main():
                     
                 print("Generated symbolic model plots")
             
-            # Generate random/shuffled data analysis
-            shuffled_random_path = os.path.join(args.input_dir, "shuffled_random_predictions.csv")
-            if os.path.exists(shuffled_random_path):
-                predictions_df = pd.read_csv(shuffled_random_path)
+            # Generate random/shuffle data analysis
+            shuffle_random_path = os.path.join(args.input_dir, "shuffle_random_predictions.csv")
+            if os.path.exists(shuffle_random_path):
+                predictions_df = pd.read_csv(shuffle_random_path)
                 plot_predictions_by_data_type(predictions_df, args.output_dir)
-                print("Generated real vs. shuffled/random data analysis plots")
+                print("Generated real vs. shuffle/random data analysis plots")
             else:
-                print(f"Warning: Shuffled/random predictions file not found at {shuffled_random_path}")
+                print(f"Warning: Shuffled/random predictions file not found at {shuffle_random_path}")
         else:
             print("Error: Missing prediction data files")
     

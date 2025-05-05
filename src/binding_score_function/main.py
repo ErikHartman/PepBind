@@ -31,7 +31,7 @@ def main():
     # Default configuration for docking
     docking_config = {
         "num_models": 5,
-        "num_recycles": 20,
+        "num_recycles": 50,
         "recycle_early_stop_tolerance": 0.1,
         "amber": True,
         "num_relax": 1,
@@ -45,7 +45,7 @@ def main():
 
     decoy_docking_config = {
         "num_models": 5,
-        "num_recycles": 20,
+        "num_recycles": 50,
         "recycle_early_stop_tolerance": 0.1,
         "amber": True,
         "num_relax": 1,
@@ -136,6 +136,8 @@ def main():
                     docking_dir=paths["2_docked"],
                     n_decoys=n_decoy_shuffle,
                     decoy_method="shuffle",
+                    min_length=args.min_length,
+                    max_length=args.max_length,
                 )
                 decoys_df_random = generate_decoy_dataset(
                     docking_dir=paths["2_docked"],

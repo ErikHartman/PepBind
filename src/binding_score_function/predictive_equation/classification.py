@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import logging
@@ -23,18 +24,18 @@ logger = logging.getLogger(__name__)
 def train_logistic_regression(
     X_train: pd.DataFrame, 
     y_train: np.ndarray, 
-    X_test: pd.DataFrame = None,
-    y_test: np.ndarray = None,
+    X_val: pd.DataFrame = None,
+    y_val: np.ndarray = None,
     cv: int = 5,
     param_grid: Dict = None,
 ) -> Dict:
     """
     Train a Logistic Regression model using GridSearchCV.
-    Returns train and test metrics and predictions.
+    Returns train and val metrics and predictions.
     """
     logger.info("Training Logistic Regression model...")
 
-    X_train_scaled, X_test_scaled, scaler = scale_data(X_train, X_test)
+    X_train_scaled, X_val_scaled, scaler = scale_data(X_train, X_val)
     
     if param_grid is None:
         param_grid = {
@@ -78,25 +79,25 @@ def train_logistic_regression(
         'coefficients': feature_importances
     }
 
-    # Evaluate on test data
-    if X_test is not None and y_test is not None:
-        test_pred = best_logreg.predict(X_test_scaled)
-        test_acc = accuracy_score(y_test, test_pred)
-        test_f1 = f1_score(y_test, test_pred, average='binary')
-        test_proba = best_logreg.predict_proba(X_test_scaled)[:, 1]
-        test_auc = roc_auc_score(y_test, test_proba)    
+    # Evaluate on val data
+    if X_val is not None and y_val is not None:
+        val_pred = best_logreg.predict(X_val_scaled)
+        val_acc = accuracy_score(y_val, val_pred)
+        val_f1 = f1_score(y_val, val_pred, average='binary')
+        val_proba = best_logreg.predict_proba(X_val_scaled)[:, 1]
+        val_auc = roc_auc_score(y_val, val_proba)    
 
         
         results.update({
-            'test_pred': test_pred,
-            'test_proba': test_proba,
-            'test_acc': test_acc,
-            'test_f1': test_f1,
-            'test_auc': test_auc
+            'val_pred': val_pred,
+            'val_proba': val_proba,
+            'val_acc': val_acc,
+            'val_f1': val_f1,
+            'val_auc': val_auc
         })
         logger.info(
-            f"Logistic Regression - Test Accuracy: {test_acc:.4f}, "
-            f"F1: {test_f1:.4f}, AUC: {test_auc:.4f}"
+            f"Logistic Regression - Val Accuracy: {val_acc:.4f}, "
+            f"F1: {val_f1:.4f}, AUC: {val_auc:.4f}"
         )
         
     return results
@@ -105,14 +106,14 @@ def train_logistic_regression(
 def train_random_forest_classifier(
     X_train: pd.DataFrame,
     y_train: np.ndarray,
-    X_test: pd.DataFrame = None,
-    y_test: np.ndarray = None,
+    X_val: pd.DataFrame = None,
+    y_val: np.ndarray = None,
     cv: int = 5,
     param_grid: Dict = None,
 ) -> Dict:
     """
     Train a Random Forest Classifier with GridSearchCV.
-    Returns train and test metrics and predictions.
+    Returns train and val metrics and predictions.
     """
     logger.info("Training Random Forest classifier...")
 
@@ -125,7 +126,7 @@ def train_random_forest_classifier(
         }
 
     # No scaling strictly required for RF, but can be done for consistency
-    X_train_scaled, X_test_scaled, scaler = scale_data(X_train, X_test)
+    X_train_scaled, X_val_scaled, scaler = scale_data(X_train, X_val)
     
     rf = RandomForestClassifier(random_state=42)
     grid_search = GridSearchCV(
@@ -163,25 +164,25 @@ def train_random_forest_classifier(
         'train_f1': train_f1
     }
 
-    # Evaluate on test data
-    if X_test is not None and y_test is not None:
-        test_pred = best_rf.predict(X_test_scaled)
-        test_acc = accuracy_score(y_test, test_pred)
-        test_f1 = f1_score(y_test, test_pred, average='binary')
-        test_proba = best_rf.predict_proba(X_test_scaled)[:, 1]
-        test_auc = roc_auc_score(y_test, test_proba)
+    # Evaluate on val data
+    if X_val is not None and y_val is not None:
+        val_pred = best_rf.predict(X_val_scaled)
+        val_acc = accuracy_score(y_val, val_pred)
+        val_f1 = f1_score(y_val, val_pred, average='binary')
+        val_proba = best_rf.predict_proba(X_val_scaled)[:, 1]
+        val_auc = roc_auc_score(y_val, val_proba)
 
 
         results.update({
-            'test_pred': test_pred,
-            'test_acc': test_acc,
-            'test_f1': test_f1,
-            'test_auc': test_auc,
-            'test_proba': test_proba
+            'val_pred': val_pred,
+            'val_acc': val_acc,
+            'val_f1': val_f1,
+            'val_auc': val_auc,
+            'val_proba': val_proba
         })
         logger.info(
-            f"RF - Test Accuracy: {test_acc:.4f}, "
-            f"F1: {test_f1:.4f}, AUC: {test_auc:.4f}"
+            f"RF - Val Accuracy: {val_acc:.4f}, "
+            f"F1: {val_f1:.4f}, AUC: {val_auc:.4f}"
         )
 
     return results
@@ -190,18 +191,18 @@ def train_random_forest_classifier(
 def train_svm_classifier(
     X_train: pd.DataFrame,
     y_train: np.ndarray,
-    X_test: pd.DataFrame = None,
-    y_test: np.ndarray = None,
+    X_val: pd.DataFrame = None,
+    y_val: np.ndarray = None,
     cv: int = 5,
     param_grid: Dict = None,
 ) -> Dict:
     """
     Train an SVM Classifier with GridSearchCV.
-    Returns train and test metrics and predictions.
+    Returns train and val metrics and predictions.
     """
     logger.info("Training SVM classifier...")
     
-    X_train_scaled, X_test_scaled, scaler = scale_data(X_train, X_test)
+    X_train_scaled, X_val_scaled, scaler = scale_data(X_train, X_val)
     
     if param_grid is None:
         param_grid = {
@@ -239,25 +240,25 @@ def train_svm_classifier(
         'train_f1': train_f1
     }
 
-    if X_test is not None and y_test is not None:
-        test_pred = best_svc.predict(X_test_scaled)
-        test_acc = accuracy_score(y_test, test_pred)
-        test_f1 = f1_score(y_test, test_pred, average='binary')
+    if X_val is not None and y_val is not None:
+        val_pred = best_svc.predict(X_val_scaled)
+        val_acc = accuracy_score(y_val, val_pred)
+        val_f1 = f1_score(y_val, val_pred, average='binary')
 
         # For AUC
-        test_proba = best_svc.predict_proba(X_test_scaled)[:, 1]
-        test_auc = roc_auc_score(y_test, test_proba)
+        val_proba = best_svc.predict_proba(X_val_scaled)[:, 1]
+        val_auc = roc_auc_score(y_val, val_proba)
 
         results.update({
-            'test_pred': test_pred,
-            'test_acc': test_acc,
-            'test_f1': test_f1,
-            'test_auc': test_auc,
-            'test_proba': test_proba
+            'val_pred': val_pred,
+            'val_acc': val_acc,
+            'val_f1': val_f1,
+            'val_auc': val_auc,
+            'val_proba': val_proba
         })
         logger.info(
-            f"SVM - Test Accuracy: {test_acc:.4f}, "
-            f"F1: {test_f1:.4f}, AUC: {test_auc:.4f}"
+            f"SVM - Val Accuracy: {val_acc:.4f}, "
+            f"F1: {val_f1:.4f}, AUC: {val_auc:.4f}"
         )
     
     return results
@@ -266,8 +267,8 @@ def train_svm_classifier(
 def perform_symbolic_classification(
     X_train: pd.DataFrame,
     y_train: np.ndarray,
-    X_test: pd.DataFrame = None,
-    y_test: np.ndarray = None,
+    X_val: pd.DataFrame = None,
+    y_val: np.ndarray = None,
     niterations: int = 200,
     populations: int = 50,
     population_size: int = 100,
@@ -294,11 +295,10 @@ def perform_symbolic_classification(
 
     # Apply scaling if requested
     if scale_features:
-        logger.info("Scaling features for symbolic classification")
-        X_train_data, X_test_data, scaler = scale_data(X_train, X_test)
+        X_train_data, X_val_data, scaler = scale_data(X_train, X_val)
     else:
         X_train_data = X_train
-        X_test_data = X_test
+        X_val_data = X_val
         scaler = None
 
     model = PySRRegressor(
@@ -309,7 +309,7 @@ def perform_symbolic_classification(
         populations=populations,
         population_size=population_size,
         select_k_features = select_k_features,
-        verbosity=0
+        verbosity=0,
     )
     
     model.fit(X_train_data, y_train, variable_names=list(X_train.columns))
@@ -318,73 +318,73 @@ def perform_symbolic_classification(
     equations = model.equations_.reset_index().rename(columns={"index": "eq_index"})
     equations = equations.sort_values(by="loss", ascending=True).reset_index(drop=True)
     
-    # Calculate metrics for each equation on the test set if available
-    if X_test is not None and y_test is not None:
-        test_metrics = []
+    # Calculate metrics for each equation on the val set if available
+    if X_val is not None and y_val is not None:
+        val_metrics = []
         for i, row in equations.iterrows():
             eq_index = row['eq_index']
             try:
                 # Calculate predictions for this equation
-                test_pred_cont = model.predict(X_test_data, index=eq_index)
-                test_pred = (test_pred_cont >= 0.5).astype(int)
+                val_pred_cont = model.predict(X_val_data, index=eq_index)
+                val_pred = (val_pred_cont >= 0.5).astype(int)
                 
                 # Safeguard against NaNs
-                valid_mask = np.isfinite(test_pred_cont)
+                valid_mask = np.isfinite(val_pred_cont)
                 if valid_mask.all():
-                    test_acc = accuracy_score(y_test, test_pred)
-                    test_f1 = f1_score(y_test, test_pred, average='binary')
-                    test_auc = roc_auc_score(y_test, test_pred_cont)
+                    val_acc = accuracy_score(y_val, val_pred)
+                    val_f1 = f1_score(y_val, val_pred, average='binary')
+                    val_auc = roc_auc_score(y_val, val_pred_cont)
                     
-                    test_metrics.append({
+                    val_metrics.append({
                         'eq_index': eq_index,
-                        'test_acc': test_acc,
-                        'test_f1': test_f1,
-                        'test_auc': test_auc
+                        'val_acc': val_acc,
+                        'val_f1': val_f1,
+                        'val_auc': val_auc
                     })
                 else:
                     if valid_mask.any():
                         # Use only valid predictions for metrics
-                        test_acc = accuracy_score(y_test[valid_mask], test_pred[valid_mask])
-                        test_f1 = f1_score(y_test[valid_mask], test_pred[valid_mask], average='binary')
-                        test_auc = roc_auc_score(y_test[valid_mask], test_pred_cont[valid_mask])
+                        val_acc = accuracy_score(y_val[valid_mask], val_pred[valid_mask])
+                        val_f1 = f1_score(y_val[valid_mask], val_pred[valid_mask], average='binary')
+                        val_auc = roc_auc_score(y_val[valid_mask], val_pred_cont[valid_mask])
                         
-                        test_metrics.append({
+                        val_metrics.append({
                             'eq_index': eq_index,
-                            'test_acc': test_acc,
-                            'test_f1': test_f1,
-                            'test_auc': test_auc,
+                            'val_acc': val_acc,
+                            'val_f1': val_f1,
+                            'val_auc': val_auc,
                             'valid_ratio': valid_mask.sum() / len(valid_mask)
                         })
             except Exception as e:
-                logger.warning(f"Error evaluating equation {i} on test set: {str(e)}")
+                logger.warning(f"Error evaluating equation {i} on val set: {str(e)}")
                 
-        # Find the best equation based on test AUC (could also use acc or f1)
-        if test_metrics:
-            test_metrics_df = pd.DataFrame(test_metrics)
+        # Find the best equation based on val AUC (could also use acc or f1)
+        if val_metrics:
+            val_metrics_df = pd.DataFrame(val_metrics)
             # Use AUC as the primary metric for classification
-            best_test_idx = test_metrics_df['test_auc'].idxmax()
-            best_test_eq_index = test_metrics_df.loc[best_test_idx, 'eq_index']
+            best_val_idx = val_metrics_df['val_auc'].idxmax()
+            best_val_eq_index = val_metrics_df.loc[best_val_idx, 'eq_index']
             
-            # Get the best expression based on test performance
-            best_expr = simplify_expression(model, best_test_eq_index)
-            logger.info(f"Best symbolic expression on test set: {best_expr}")
+            # Get the best expression based on val performance
+            best_expr = simplify_expression(model, best_val_eq_index)
+            logger.info(f"Best symbolic expression on val set: {best_expr}")
             
-            # Get train and test predictions for the best test model
-            train_pred_cont = model.predict(X_train_data, index=best_test_eq_index)
+            # Get train and val predictions for the best val model
+            train_pred_cont = model.predict(X_train_data, index=best_val_eq_index)
             train_pred = (train_pred_cont >= 0.5).astype(int)
             train_acc = accuracy_score(y_train, train_pred)
             train_f1 = f1_score(y_train, train_pred, average='binary')
             train_auc = roc_auc_score(y_train, train_pred_cont)
             
-            test_pred_cont = model.predict(X_test_data, index=best_test_eq_index)
-            test_pred = (test_pred_cont >= 0.5).astype(int)
-            test_acc = accuracy_score(y_test, test_pred)
-            test_f1 = f1_score(y_test, test_pred, average='binary')
-            test_auc = roc_auc_score(y_test, test_pred_cont)
+            val_pred_cont = model.predict(X_val_data, index=best_val_eq_index)
+            val_pred = (val_pred_cont >= 0.5).astype(int)
+            val_acc = accuracy_score(y_val, val_pred)
+            val_f1 = f1_score(y_val, val_pred, average='binary')
+            val_auc = roc_auc_score(y_val, val_pred_cont)
         else:
-            # If no equations worked well on test set, use the original best by train loss
+            # If no equations worked well on val set, use the original best by train loss
             best_expr = model.sympy(equations.iloc[0]['eq_index'])
-            logger.warning("No equations performed well on test set, using best from training")
+            logger.warning("No equations performed well on val set, using best from training")
             
             # Predictions with best training model
             train_pred_cont = model.predict(X_train_data, index=equations.iloc[0]['eq_index'])
@@ -393,13 +393,13 @@ def perform_symbolic_classification(
             train_f1 = f1_score(y_train, train_pred, average='binary')
             train_auc = roc_auc_score(y_train, train_pred_cont)
             
-            test_pred_cont = model.predict(X_test_data, index=equations.iloc[0]['eq_index'])
-            test_pred = (test_pred_cont >= 0.5).astype(int)
-            test_acc = accuracy_score(y_test, test_pred)
-            test_f1 = f1_score(y_test, test_pred, average='binary')
-            test_auc = roc_auc_score(y_test, test_pred_cont)
+            val_pred_cont = model.predict(X_val_data, index=equations.iloc[0]['eq_index'])
+            val_pred = (val_pred_cont >= 0.5).astype(int)
+            val_acc = accuracy_score(y_val, val_pred)
+            val_f1 = f1_score(y_val, val_pred, average='binary')
+            val_auc = roc_auc_score(y_val, val_pred_cont)
     else:
-        # Without test data, just use the best equation from training
+        # Without val data, just use the best equation from training
         best_expr = model.sympy(equations.iloc[0]['eq_index'])
         
         # Predictions with best training model
@@ -439,29 +439,29 @@ def perform_symbolic_classification(
                 train_f1_eq = f1_score(y_train, eq_pred_train, average='binary')
                 train_auc_eq = roc_auc_score(y_train, eq_pred_cont_train)
             
-            # Test metrics if test data provided
-            test_acc_eq, test_f1_eq, test_auc_eq = np.nan, np.nan, np.nan
-            if X_test is not None and y_test is not None:
-                eq_pred_cont_test = model.predict(X_test_data, index=eq_index)
-                eq_pred_test = (eq_pred_cont_test >= 0.5).astype(int)
+            # Val metrics if val data provided
+            val_acc_eq, val_f1_eq, val_auc_eq = np.nan, np.nan, np.nan
+            if X_val is not None and y_val is not None:
+                eq_pred_cont_val = model.predict(X_val_data, index=eq_index)
+                eq_pred_val = (eq_pred_cont_val >= 0.5).astype(int)
                 
-                # Safeguard against NaNs in test predictions
-                valid_mask_test = np.isfinite(eq_pred_cont_test)
-                if not valid_mask_test.all():
-                    logger.warning(f"Equation {i}: {valid_mask_test.sum()}/{len(valid_mask_test)} valid predictions on test")
-                    if valid_mask_test.any():
-                        test_acc_eq = accuracy_score(y_test[valid_mask_test], eq_pred_test[valid_mask_test])
-                        test_f1_eq = f1_score(y_test[valid_mask_test], eq_pred_test[valid_mask_test], average='binary')
-                        test_auc_eq = roc_auc_score(y_test[valid_mask_test], eq_pred_cont_test[valid_mask_test])
+                # Safeguard against NaNs in val predictions
+                valid_mask_val = np.isfinite(eq_pred_cont_val)
+                if not valid_mask_val.all():
+                    logger.warning(f"Equation {i}: {valid_mask_val.sum()}/{len(valid_mask_val)} valid predictions on val")
+                    if valid_mask_val.any():
+                        val_acc_eq = accuracy_score(y_val[valid_mask_val], eq_pred_val[valid_mask_val])
+                        val_f1_eq = f1_score(y_val[valid_mask_val], eq_pred_val[valid_mask_val], average='binary')
+                        val_auc_eq = roc_auc_score(y_val[valid_mask_val], eq_pred_cont_val[valid_mask_val])
                 else:
-                    test_acc_eq = accuracy_score(y_test, eq_pred_test)
-                    test_f1_eq = f1_score(y_test, eq_pred_test, average='binary')
-                    test_auc_eq = roc_auc_score(y_test, eq_pred_cont_test)
+                    val_acc_eq = accuracy_score(y_val, eq_pred_val)
+                    val_f1_eq = f1_score(y_val, eq_pred_val, average='binary')
+                    val_auc_eq = roc_auc_score(y_val, eq_pred_cont_val)
         
         except Exception as e:
             logger.warning(f"Error calculating metrics for equation {i}: {str(e)}")
             train_acc_eq, train_f1_eq, train_auc_eq = np.nan, np.nan, np.nan
-            test_acc_eq, test_f1_eq, test_auc_eq = np.nan, np.nan, np.nan
+            val_acc_eq, val_f1_eq, val_auc_eq = np.nan, np.nan, np.nan
             
         all_eqs.append({
             'equation': eq_str,
@@ -471,9 +471,9 @@ def perform_symbolic_classification(
             'train_acc': train_acc_eq,
             'train_f1': train_f1_eq,
             'train_auc': train_auc_eq,
-            'test_acc': test_acc_eq,
-            'test_f1': test_f1_eq,
-            'test_auc': test_auc_eq,
+            'val_acc': val_acc_eq,
+            'val_f1': val_f1_eq,
+            'val_auc': val_auc_eq,
             'equation_index': eq_index
         })
     
@@ -507,20 +507,20 @@ def perform_symbolic_classification(
         'scaler': scaler,  # Include the scaler if scaling was used
     }
 
-    # Evaluate on test data
-    if X_test is not None and y_test is not None:
+    # Evaluate on val data
+    if X_val is not None and y_val is not None:
         results.update({
-            'test_pred_cont': test_pred_cont,
-            'test_pred': test_pred,
-            'test_proba': test_pred_cont,
-            'test_acc': test_acc,
-            'test_f1': test_f1,
-            'test_auc': test_auc
+            'val_pred_cont': val_pred_cont,
+            'val_pred': val_pred,
+            'val_proba': val_pred_cont,
+            'val_acc': val_acc,
+            'val_f1': val_f1,
+            'val_auc': val_auc
         })
 
         logger.info(
-            f"Symbolic Classification (Test) - Accuracy: {test_acc:.4f}, "
-            f"F1: {test_f1:.4f}, AUC: {test_auc:.4f}"
+            f"Symbolic Classification (Val) - Accuracy: {val_acc:.4f}, "
+            f"F1: {val_f1:.4f}, AUC: {val_auc:.4f}"
         )
 
     return results

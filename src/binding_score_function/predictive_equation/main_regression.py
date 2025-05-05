@@ -19,43 +19,56 @@ from plotting import (
 )
 
 if __name__ == "__main__":
+    # Data paths setup
     base_path = "/srv/data1/general/immunopeptides_data/"
     scores_path = os.path.join(
-        base_path, "outputs/binding_score_function/4_processed_scores/"
+        base_path, "outputs/binding_score_function/4_processed_scores_new/"
     )
     output_dir = "./plots/regression"
     os.makedirs(output_dir, exist_ok=True)
 
-    X_real = pd.read_csv(os.path.join(scores_path, "real_X_train.csv")).set_index(
-        "complex_filename"
-    )
-    y_real = pd.read_csv(os.path.join(scores_path, "real_y_train.csv"))["pKd"].values
+    # Load pre-split training and validation data files
+    X_train_df = pd.read_csv(os.path.join(scores_path, "real_X_train.csv"))
+    y_train_df = pd.read_csv(os.path.join(scores_path, "real_y_train.csv"))
+    
+    X_val_df = pd.read_csv(os.path.join(scores_path, "real_X_val.csv"))
+    y_val_df = pd.read_csv(os.path.join(scores_path, "real_y_val.csv"))
+    
+    # Remove any 'Unnamed:_0' columns that might have been created during saving/loading
+    for df in [X_train_df, X_val_df]:
+        columns_to_drop = [col for col in df.columns if col.startswith('Unnamed:')]
+        if columns_to_drop:
+            df.drop(columns=columns_to_drop, inplace=True)
+    
+    # Set complex_filename as index for X DataFrames
+    X_train = X_train_df.set_index("complex_filename")
+    X_val = X_val_df.set_index("complex_filename")
+    
+    # Extract pKd values as arrays for model training
+    y_train = y_train_df["pKd"].values
+    y_val = y_val_df["pKd"].values
 
-    print(f"X_real shape: {X_real.shape}")
+    print(f"X_train shape: {X_train.shape}")
+    print(f"X_val shape: {X_val.shape}")
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X_real, y_real, test_size=0.2, random_state=42
-    )
-
+    # Save scaling parameters for later use
     scaling_params = X_train.describe().T[["mean", "std"]]
     scaling_params.to_csv(
         os.path.join(output_dir, "scaling_params.csv"), index=True)
 
-    print(f"X_train shape: {X_train.shape}")
-    print(f"X_test shape: {X_test.shape}")
-
-    lasso_results = train_lasso(X_train, y_train, X_test, y_test)
-    rf_results = train_rf(X_train, y_train, X_test, y_test)
-    svr_results = train_svr(X_train, y_train, X_test, y_test)
+    # Train models
+    lasso_results = train_lasso(X_train, y_train, X_val, y_val)
+    rf_results = train_rf(X_train, y_train, X_val, y_val)
+    svr_results = train_svr(X_train, y_train, X_val, y_val)
     symb_results = train_symbolic(
         X_train,
         y_train,
-        X_test,
-        y_test,
-        niterations=1000,
-        populations=100,
+        X_val,
+        y_val,
+        niterations=500,
+        populations=50,
         population_size=50,
-        model_selection="accuracy",
+        model_selection="best",
         select_k_features=15,
         scale_features=True,
     )
@@ -75,25 +88,25 @@ if __name__ == "__main__":
         os.path.join(output_dir, "train_predictions.csv"), index=False
     )
 
-    test_preds_df = pd.DataFrame(
+    val_preds_df = pd.DataFrame(
         {
-            "complex_filename": X_test.index,
-            "y_test": y_test,
-            "lasso_pred": lasso_results["test_pred"],
-            "rf_pred": rf_results["test_pred"],
-            "svr_pred": svr_results["test_pred"],
-            "symbolic_pred": symb_results["test_pred"],
+            "complex_filename": X_val.index,
+            "y_val": y_val,
+            "lasso_pred": lasso_results["val_pred"],
+            "rf_pred": rf_results["val_pred"],
+            "svr_pred": svr_results["val_pred"],
+            "symbolic_pred": symb_results["val_pred"],
         }
     )
-    test_preds_df.to_csv(
-        os.path.join(output_dir, "test_predictions.csv"), index=False
+    val_preds_df.to_csv(
+        os.path.join(output_dir, "val_predictions.csv"), index=False
     )
 
     plot_regression_scatter(
         y_train,
         lasso_results["train_pred"],
-        y_test,
-        lasso_results.get("test_pred", None),
+        y_val,
+        lasso_results.get("val_pred", None),
         model_name="Lasso",
         output_path=os.path.join(output_dir, "lasso_scatter.png"),
     )
@@ -101,8 +114,8 @@ if __name__ == "__main__":
     plot_regression_scatter(
         y_train,
         rf_results["train_pred"],
-        y_test,
-        rf_results.get("test_pred", None),
+        y_val,
+        rf_results.get("val_pred", None),
         model_name="Random Forest",
         output_path=os.path.join(output_dir, "rf_scatter.png"),
     )
@@ -110,8 +123,8 @@ if __name__ == "__main__":
     plot_regression_scatter(
         y_train,
         svr_results["train_pred"],
-        y_test,
-        svr_results.get("test_pred", None),
+        y_val,
+        svr_results.get("val_pred", None),
         model_name="SVR",
         output_path=os.path.join(output_dir, "svr_scatter.png"),
     )
@@ -119,8 +132,8 @@ if __name__ == "__main__":
     plot_regression_scatter(
         y_train,
         symb_results["train_pred"],
-        y_test,
-        symb_results.get("test_pred", None),
+        y_val,
+        symb_results.get("val_pred", None),
         model_name="Symbolic",
         output_path=os.path.join(output_dir, "symbolic_scatter.png"),
     )
@@ -154,7 +167,7 @@ if __name__ == "__main__":
         # Plot complexity vs accuracy tradeoff
         plot_symbolic_complexity_tradeoff(
             symb_results['all_equations'],
-            metric='test_r2',
+            metric='val_r2',
             model_type='regression',
             output_path=os.path.join(output_dir, "symbolic_regression_complexity_tradeoff.png"),
             lower_is_better=False
@@ -170,18 +183,18 @@ if __name__ == "__main__":
         "Model": [],
         "Train RMSE": [],
         "Train R²": [],
-        "Test RMSE": [],
-        "Test R²": [],
-        "Test MAE": [],
+        "Val RMSE": [],
+        "Val R²": [],
+        "Val MAE": [],
     }
 
     for model_name, result in results_dict.items():
         comparison["Model"].append(model_name)
         comparison["Train RMSE"].append(result.get("train_rmse", np.nan))
         comparison["Train R²"].append(result.get("train_r2", np.nan))
-        comparison["Test RMSE"].append(result.get("test_rmse", np.nan))
-        comparison["Test R²"].append(result.get("test_r2", np.nan))
-        comparison["Test MAE"].append(result.get("test_mae", np.nan))
+        comparison["Val RMSE"].append(result.get("val_rmse", np.nan))
+        comparison["Val R²"].append(result.get("val_r2", np.nan))
+        comparison["Val MAE"].append(result.get("val_mae", np.nan))
 
     comparison_df = pd.DataFrame(comparison)
     comparison_df.to_csv(os.path.join(output_dir, "model_comparison.csv"), index=False)
@@ -190,13 +203,23 @@ if __name__ == "__main__":
         comparison_df, output_path=os.path.join(output_dir, "model_comparison.png")
     )
 
-    print("\nPerforming analysis on shuffled and random data...")
+    print("\nPerforming analysis on shuffle and random data...")
     
-    # Load shuffled and random data for analysis
-    X_shuffled = pd.read_csv(os.path.join(scores_path, "shuffled_X_train.csv")).set_index("complex_filename")
-    X_random = pd.read_csv(os.path.join(scores_path, "random_X_train.csv")).set_index("complex_filename")
+    # Load shuffle and random data with proper index handling
+    X_shuffle_df = pd.read_csv(os.path.join(scores_path, "shuffle_X_val.csv"))
+    X_random_df = pd.read_csv(os.path.join(scores_path, "random_X_val.csv"))
     
-    print(f"Loaded shuffled data: {X_shuffled.shape} samples")
+    # Remove any 'Unnamed:_0' columns that might have been created during saving/loading
+    for df in [X_shuffle_df, X_random_df]:
+        columns_to_drop = [col for col in df.columns if col.startswith('Unnamed:')]
+        if columns_to_drop:
+            df.drop(columns=columns_to_drop, inplace=True)
+    
+    # Set complex_filename as index for consistency
+    X_shuffle = X_shuffle_df.set_index("complex_filename")
+    X_random = X_random_df.set_index("complex_filename")
+    
+    print(f"Loaded shuffle data: {X_shuffle.shape} samples")
     print(f"Loaded random data: {X_random.shape} samples")
     
     # Create a dictionary to store predictions
@@ -206,10 +229,10 @@ if __name__ == "__main__":
         "prediction": []
     }
     
-    # Get predictions for each model on real, shuffled, and random data
+    # Get predictions for each model on real, shuffle, and random data
     data_types = {
-        "Real": X_test,  # Already have the real test data
-        "Shuffled": X_shuffled,
+        "Real": X_val,  # Use the validation data for real samples
+        "Shuffled": X_shuffle,
         "Random": X_random
     }
     
@@ -226,7 +249,7 @@ if __name__ == "__main__":
             if model_name == "Symbolic":
                 # Get the equation index to use
                 all_eqs = symb_results["all_equations"]
-                best_eq_idx = all_eqs.loc[all_eqs["test_rmse"].idxmin(), "equation_index"]
+                best_eq_idx = all_eqs.loc[all_eqs["val_rmse"].idxmin(), "equation_index"]
                 
                 # Scale data if needed
                 if scaler is not None:
@@ -253,8 +276,8 @@ if __name__ == "__main__":
     
     # Convert to DataFrame
     predictions_df = pd.DataFrame(model_predictions)
-    predictions_df.to_csv(os.path.join(output_dir, "shuffled_random_predictions.csv"), index=False)
+    predictions_df.to_csv(os.path.join(output_dir, "shuffle_random_predictions.csv"), index=False)
     plot_paths = plot_predictions_by_data_type(predictions_df, output_dir)
     
-    print("\nAnalysis on shuffled and random data complete!")
+    print("\nAnalysis on shuffle and random data complete!")
     print("Regression pipeline complete!")
