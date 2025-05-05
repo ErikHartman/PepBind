@@ -211,7 +211,6 @@ def train_svr(
     
     return results
 
-
 def perform_symbolic_regression(
     X_train: pd.DataFrame,
     y_train: np.ndarray,
@@ -227,14 +226,13 @@ def perform_symbolic_regression(
     scale_features: bool = False,
 ) -> Dict:
     logger.info("Performing Symbolic Regression...")
-
     if binary_operators is None:
         binary_operators = ["+", "-", "*", "/"]
     if unary_operators is None:
         unary_operators = ["square", "log", "sqrt"]
-
     # Apply scaling if requested
     if scale_features:
+        logger.info("Scaling features for symbolic regression.")
         X_train_scaled, X_val_scaled, scaler = scale_data(X_train, X_val)
         X_train_data = X_train_scaled
         X_val_data = X_val_scaled
@@ -242,7 +240,12 @@ def perform_symbolic_regression(
         X_train_data = X_train
         X_val_data = X_val
         scaler = None
-
+    logger.info(
+        f"PySRRegressor params: niterations={niterations}, populations={populations}, "
+        f"population_size={population_size}, binary_operators={binary_operators}, "
+        f"unary_operators={unary_operators}, select_k_features={select_k_features}, "
+        f"model_selection={model_selection}"
+    )
     model = PySRRegressor(
         model_selection=model_selection,
         niterations=niterations,
@@ -251,32 +254,31 @@ def perform_symbolic_regression(
         populations=populations,
         population_size=population_size,
         select_k_features=select_k_features,
-        verbosity=0,
+        verbosity=1,
     )
     
+    logger.info("Fitting symbolic regression model...")
     model.fit(X_train_data, y_train, variable_names=list(X_train.columns))
+    logger.info("Symbolic regression model fitting complete.")
     
     # Get equations dataframe
     equations = model.equations_.reset_index().rename(columns={"index": "eq_index"})
     equations = equations.sort_values(by="loss", ascending=True).reset_index(drop=True)
-    
+    logger.info(f"Found {len(equations)} equations from symbolic regression.")
     # Calculate metrics for each equation on the val set
     if X_val is not None and y_val is not None:
+        logger.info("Evaluating equations on validation set...")
         val_metrics = []
         for i, row in equations.iterrows():
             eq_index = row['eq_index']
             try:
-                # Ensure we're passing numpy arrays, not trying to access .values on a numpy array
                 X_val_array = X_val_data if isinstance(X_val_data, np.ndarray) else X_val_data.values
                 val_pred = model.predict(X_val_array, index=eq_index)
-                
-                # Safeguard against NaNs
                 valid_mask = np.isfinite(val_pred)
                 if valid_mask.all():
                     val_rmse = np.sqrt(mean_squared_error(y_val, val_pred))
                     val_r2 = r2_score(y_val, val_pred)
                     val_mae = mean_absolute_error(y_val, val_pred)
-                    
                     val_metrics.append({
                         'eq_index': eq_index,
                         'val_rmse': val_rmse,
@@ -285,11 +287,9 @@ def perform_symbolic_regression(
                     })
                 else:
                     if valid_mask.any():
-                        # Use only valid predictions for metrics
                         val_rmse = np.sqrt(mean_squared_error(y_val[valid_mask], val_pred[valid_mask]))
                         val_r2 = r2_score(y_val[valid_mask], val_pred[valid_mask])
                         val_mae = mean_absolute_error(y_val[valid_mask], val_pred[valid_mask])
-                        
                         val_metrics.append({
                             'eq_index': eq_index,
                             'val_rmse': val_rmse,
@@ -297,6 +297,7 @@ def perform_symbolic_regression(
                             'val_mae': val_mae,
                             'valid_ratio': valid_mask.sum() / len(valid_mask)
                         })
+                logger.debug(f"Equation {eq_index}: val_rmse={val_rmse:.4f}, val_r2={val_r2:.4f}, val_mae={val_mae:.4f}")
             except Exception as e:
                 logger.warning(f"Error evaluating equation {i} on val set: {str(e)}")
     
@@ -305,74 +306,60 @@ def perform_symbolic_regression(
             val_metrics_df = pd.DataFrame(val_metrics)
             best_val_idx = val_metrics_df['val_rmse'].idxmin()
             best_val_eq_index = val_metrics_df.loc[best_val_idx, 'eq_index']
-            
-            # Get the best expression based on val performance
+            logger.info(f"Best equation on validation set: eq_index={best_val_eq_index}")
             best_expr = simplify_expression(model, best_val_eq_index)
             logger.info(f"Best symbolic expression on val set: {best_expr}")
-            
-            # Get train and val predictions for the best val model
             X_train_array = X_train_data if isinstance(X_train_data, np.ndarray) else X_train_data.values
             train_pred = model.predict(X_train_array, index=best_val_eq_index)
             train_rmse = np.sqrt(mean_squared_error(y_train, train_pred))
             train_r2 = r2_score(y_train, train_pred)
-            
             X_val_array = X_val_data if isinstance(X_val_data, np.ndarray) else X_val_data.values
             val_pred = model.predict(X_val_array, index=best_val_eq_index)
             val_rmse = np.sqrt(mean_squared_error(y_val, val_pred))
             val_r2 = r2_score(y_val, val_pred)
             val_mae = mean_absolute_error(y_val, val_pred)
         else:
-            # If no equations worked well on val set, use the original best by train loss
             best_expr = model.sympy(equations.iloc[0]['eq_index'])
             logger.warning("No equations performed well on val set, using best from training")
-            
-            # Predictions with best training model
             X_train_array = X_train_data if isinstance(X_train_data, np.ndarray) else X_train_data.values
             train_pred = model.predict(X_train_array, index=equations.iloc[0]['eq_index'])
             train_rmse = np.sqrt(mean_squared_error(y_train, train_pred))
             train_r2 = r2_score(y_train, train_pred)
-            
             X_val_array = X_val_data if isinstance(X_val_data, np.ndarray) else X_val_data.values
             val_pred = model.predict(X_val_array, index=equations.iloc[0]['eq_index'])
             val_rmse = np.sqrt(mean_squared_error(y_val, val_pred))
             val_r2 = r2_score(y_val, val_pred)
             val_mae = mean_absolute_error(y_val, val_pred)
     else:
-        # Without val data, just use the best equation from training
         best_expr = model.sympy(equations.iloc[0]['eq_index'])
-        
         X_train_array = X_train_data if isinstance(X_train_data, np.ndarray) else X_train_data.values
         train_pred = model.predict(X_train_array, index=equations.iloc[0]['eq_index'])
         train_rmse = np.sqrt(mean_squared_error(y_train, train_pred))
         train_r2 = r2_score(y_train, train_pred)
-    
+        logger.info("No validation set provided, using best training equation.")
     all_eqs = []
+    logger.info("Calculating metrics for all equations...")
     for i, row in equations.iterrows():
         eq_index = row['eq_index']
         eq_str = simplify_expression(model, eq_index)
         complexity = row['complexity']
         loss = row['loss']
         score = row['score']
-        
         try:
             X_train_array = X_train_data if isinstance(X_train_data, np.ndarray) else X_train_data.values
             eq_pred_train = model.predict(X_train_array, index=eq_index)
-            
             valid_mask_train = np.isfinite(eq_pred_train)
             if not valid_mask_train.all():
                 logger.warning(f"Equation {i}: {valid_mask_train.sum()}/{len(valid_mask_train)} valid predictions on train")
-
                 train_rmse_eq = np.sqrt(mean_squared_error(y_train[valid_mask_train], eq_pred_train[valid_mask_train])) if valid_mask_train.any() else np.nan
                 train_r2_eq = r2_score(y_train[valid_mask_train], eq_pred_train[valid_mask_train]) if valid_mask_train.any() else np.nan
             else:
                 train_rmse_eq = np.sqrt(mean_squared_error(y_train, eq_pred_train))
                 train_r2_eq = r2_score(y_train, eq_pred_train)
-            
             val_rmse_eq, val_r2_eq, val_mae_eq = np.nan, np.nan, np.nan
             if X_val is not None and y_val is not None:
                 X_val_array = X_val_data if isinstance(X_val_data, np.ndarray) else X_val_data.values
                 eq_pred_val = model.predict(X_val_array, index=eq_index)
-                
                 valid_mask_val = np.isfinite(eq_pred_val)
                 if not valid_mask_val.all():
                     logger.warning(f"Equation {i}: {valid_mask_val.sum()}/{len(valid_mask_val)} valid predictions on val")
@@ -384,12 +371,10 @@ def perform_symbolic_regression(
                     val_rmse_eq = np.sqrt(mean_squared_error(y_val, eq_pred_val))
                     val_r2_eq = r2_score(y_val, eq_pred_val)
                     val_mae_eq = mean_absolute_error(y_val, eq_pred_val)
-        
         except Exception as e:
             logger.warning(f"Error calculating metrics for equation {i}: {str(e)}")
             train_rmse_eq, train_r2_eq = np.nan, np.nan
             val_rmse_eq, val_r2_eq, val_mae_eq = np.nan, np.nan, np.nan
-            
         all_eqs.append({
             'equation': eq_str,
             'complexity': complexity,
@@ -402,14 +387,12 @@ def perform_symbolic_regression(
             'val_mae': val_mae_eq,
             'equation_index': eq_index
         })
-    
-
+        logger.debug(f"Equation {i}: train_rmse={train_rmse_eq}, val_rmse={val_rmse_eq}")
     valid_mask_train = np.isfinite(train_pred)
     if not valid_mask_train.all():
         logger.warning(f"Best model: {valid_mask_train.sum()}/{len(valid_mask_train)} valid predictions on train")
         train_rmse = np.sqrt(mean_squared_error(y_train[valid_mask_train], train_pred[valid_mask_train])) if valid_mask_train.any() else np.nan
         train_r2 = r2_score(y_train[valid_mask_train], train_pred[valid_mask_train]) if valid_mask_train.any() else np.nan
-    
     results = {
         'model': model,
         'best_expr': str(best_expr),
@@ -419,7 +402,6 @@ def perform_symbolic_regression(
         'all_equations': pd.DataFrame(all_eqs),
         'scaler': scaler,
     }
-    
     if X_val is not None and y_val is not None:
         results.update({
             'val_pred': val_pred,
@@ -431,9 +413,8 @@ def perform_symbolic_regression(
             f"Symbolic Reg Perf: Train RMSE={train_rmse:.4f}, R²={train_r2:.4f} | "
             f"Val RMSE={val_rmse:.4f}, R²={val_r2:.4f}, MAE={val_mae:.4f}"
         )
-
+    logger.info("Symbolic regression complete.")
     return results
-
 
 def simplify_expression(model, eq_index):
     expr = model.sympy(eq_index)
