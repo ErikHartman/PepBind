@@ -7,6 +7,7 @@ from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 import sympy
 import logging
 import seaborn as sns
+from sklearn.metrics import ndcg_score as sk_ndcg_score
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -92,132 +93,97 @@ def load_best_symbolic_equation(output_dir):
     logger.error("No symbolic regression equations found")
     return None, None
 
+def ndcg_score(y_true, y_pred, k=None):
+    """Compute Normalized Discounted Cumulative Gain (NDCG) for regression using sklearn."""
+    # Reshape to 2D arrays as required by sklearn's ndcg_score
+    y_true = np.asarray(y_true).reshape(1, -1)
+    y_pred = np.asarray(y_pred).reshape(1, -1)
+    if k is None:
+        k = y_true.shape[1]
+    return sk_ndcg_score(y_true, y_pred, k=k)
 
 def evaluate_equation(equation_str, X, y, is_scaled=True):
     """Evaluate a symbolic equation on X and compare with y."""
-    # Parse equation with sympy
     expr = sympy.sympify(equation_str)
-
-    print(expr)
-    
-    # Get feature names from the equation
     features = [str(symbol) for symbol in expr.free_symbols]
     logger.info(f"Equation uses {len(features)} features: {features}")
-    
-    # Make sure all needed features are in X
     for feature in features:
         if feature not in X.columns:
             logger.error(f"Feature {feature} not found in X_test")
             return None
-    
-    # Create lambda function from sympy expression
     func = sympy.lambdify(features, expr)
-    
-    # Prepare inputs for function
     inputs = [X[feature].values for feature in features]
-    
-    # Evaluate function
     try:
         y_pred = func(*inputs)
-        
-        # Calculate metrics
         rmse = np.sqrt(mean_squared_error(y, y_pred))
         mae = mean_absolute_error(y, y_pred)
         r2 = r2_score(y, y_pred)
-        
-        logger.info(f"Test metrics - RMSE: {rmse:.4f}, MAE: {mae:.4f}, R²: {r2:.4f}")
-        
+        ndcg = ndcg_score(y, y_pred)
+        logger.info(f"Test metrics - RMSE: {rmse:.4f}, MAE: {mae:.4f}, R²: {r2:.4f}, NDCG: {ndcg:.4f}")
         return {
             'y_pred': y_pred,
             'rmse': rmse,
             'mae': mae,
-            'r2': r2
+            'r2': r2,
+            'ndcg': ndcg
         }
     except Exception as e:
         logger.error(f"Error evaluating equation: {e}")
         return None
 
-
 def evaluate_equation_ensemble(equations, X, y, top_n=5, weights=None):
     """
     Evaluate an ensemble of symbolic equations on X and combine predictions.
     """
-    # Keep only equations with valid validation metrics
     valid_eqs = equations[equations["val_r2"].notna()].sort_values(by="val_r2")
-    
     if len(valid_eqs) == 0:
         logger.error("No valid equations found for ensemble")
         return None
-    
-    # Select top N equations
     top_eqs = valid_eqs.head(min(top_n, len(valid_eqs)))
     logger.info(f"Creating ensemble with {len(top_eqs)} equations")
-    
-    # Store individual predictions
     all_predictions = []
     failed_equations = 0
-    
-    # Get predictions from each equation
     for i, row in top_eqs.iterrows():
         equation_str = row["equation"]
         try:
-            # Parse equation with sympy
             expr = sympy.sympify(equation_str)
             features = [str(symbol) for symbol in expr.free_symbols]
-            
-            # Check features
             for feature in features:
                 if feature not in X.columns:
                     logger.warning(f"Feature {feature} not found in X_test, skipping equation")
                     failed_equations += 1
                     continue
-            
-            # Create lambda function
             func = sympy.lambdify(features, expr)
-            
-            # Prepare inputs
             inputs = [X[feature].values for feature in features]
-            
-            # Get predictions
             y_pred = func(*inputs)
             all_predictions.append(y_pred)
-            
             logger.info(f"Added equation to ensemble: {equation_str[:60]}{'...' if len(equation_str) > 60 else ''}")
-        
         except Exception as e:
             logger.warning(f"Error evaluating equation for ensemble: {e}")
             failed_equations += 1
-    
     if not all_predictions:
         logger.error("No valid predictions for ensemble")
         return None
-    
     if failed_equations > 0:
         logger.warning(f"{failed_equations} equations failed and were excluded from ensemble")
-    
-    # Calculate weights if not provided
     if weights is None and len(all_predictions) > 1:
         weights = top_eqs["val_r2"].values
-        weights = weights / np.sum(weights)  # Normalize to sum to 1
+        weights = weights / np.sum(weights)
     elif weights is None:
         weights = [1.0]
-    
-    # Combine predictions
     all_predictions = np.array(all_predictions)
     ensemble_pred = np.average(all_predictions, axis=0, weights=weights)
-    
-    # Calculate metrics
     rmse = np.sqrt(mean_squared_error(y, ensemble_pred))
     mae = mean_absolute_error(y, ensemble_pred)
     r2 = r2_score(y, ensemble_pred)
-    
-    logger.info(f"Ensemble test metrics - RMSE: {rmse:.4f}, MAE: {mae:.4f}, R²: {r2:.4f}")
-    
+    ndcg = ndcg_score(y, ensemble_pred)
+    logger.info(f"Ensemble test metrics - RMSE: {rmse:.4f}, MAE: {mae:.4f}, R²: {r2:.4f}, NDCG: {ndcg:.4f}")
     return {
         'y_pred': ensemble_pred,
         'rmse': rmse,
         'mae': mae,
         'r2': r2,
+        'ndcg': ndcg,
         'individual_predictions': all_predictions,
         'weights': weights,
         'equations': top_eqs["equation"].values
@@ -225,7 +191,7 @@ def evaluate_equation_ensemble(equations, X, y, top_n=5, weights=None):
 
 
 def plot_results(y_true, y_pred, output_path=None):
-    """Create a scatter plot of actual vs. predicted values."""
+    """Create a scatter plot of actual vs. predicted values, including NDCG."""
     plt.figure(figsize=(4,4))
     
     # Scatter plot
@@ -244,10 +210,11 @@ def plot_results(y_true, y_pred, output_path=None):
     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
     r2 = r2_score(y_true, y_pred)
     mae = mean_absolute_error(y_true, y_pred)
+    ndcg = ndcg_score(y_true, y_pred)
     
     plt.text(
         0.05, 0.95, 
-        f'RMSE: {rmse:.3f}\nR²: {r2:.3f}\nMAE: {mae:.3f}', 
+        f'RMSE: {rmse:.3f}\nR²: {r2:.3f}\nMAE: {mae:.3f}\nNDCG: {ndcg:.3f}', 
         transform=plt.gca().transAxes,
         verticalalignment='top',
         bbox=dict(boxstyle='round', facecolor='white', alpha=0.8)
@@ -264,9 +231,8 @@ def plot_results(y_true, y_pred, output_path=None):
     
     plt.close()
 
-
 def compare_with_validation_results(output_dir, test_metrics):
-    """Compare test results with validation results from model comparison."""
+    """Compare test results with validation results from model comparison, including NDCG if available."""
     model_comparison_path = os.path.join(output_dir, "model_comparison.csv")
     
     if not os.path.exists(model_comparison_path):
@@ -281,12 +247,17 @@ def compare_with_validation_results(output_dir, test_metrics):
         "R²": symbolic_row["Val R²"],
         "MAE": symbolic_row["Val MAE"]
     }
+    # Add NDCG if present in test_metrics
+    if "ndcg" in test_metrics:
+        validation_metrics["NDCG"] = symbolic_row["Val NDCG"] if "Val NDCG" in symbolic_row else None
     
     test_metrics_dict = {
         "RMSE": test_metrics["rmse"],
         "R²": test_metrics["r2"],
         "MAE": test_metrics["mae"]
     }
+    if "ndcg" in test_metrics:
+        test_metrics_dict["NDCG"] = test_metrics["ndcg"]
     
     # Create comparison dataframe
     comparison = pd.DataFrame({
@@ -300,7 +271,6 @@ def compare_with_validation_results(output_dir, test_metrics):
     
     return comparison
 
-
 def save_predictions(complex_filenames, y_true, y_pred, output_path):
     """Save predictions with complex filenames to a CSV file."""
     predictions_df = pd.DataFrame({
@@ -311,7 +281,6 @@ def save_predictions(complex_filenames, y_true, y_pred, output_path):
     
     predictions_df.to_csv(output_path, index=False)
     logger.info(f"Saved predictions to {output_path}")
-
 
 def main():
     """Main function to load data, evaluate the best equation, and visualize results."""
@@ -378,18 +347,20 @@ def main():
                 os.path.join(output_dir, "ensemble_test_predictions.csv")
             )
             
-            # Compare single model vs ensemble
+            # Compare single model vs ensemble, including NDCG
             comparison_df = pd.DataFrame({
-                "Metric": ["RMSE", "MAE", "R²"],
+                "Metric": ["RMSE", "MAE", "R²", "NDCG"],
                 "Single Model": [
                     single_results["rmse"], 
                     single_results["mae"], 
-                    single_results["r2"]
+                    single_results["r2"],
+                    single_results["ndcg"]
                 ],
                 "Ensemble": [
                     ensemble_results["rmse"], 
                     ensemble_results["mae"], 
-                    ensemble_results["r2"]
+                    ensemble_results["r2"],
+                    ensemble_results["ndcg"]
                 ]
             })
             
@@ -398,7 +369,5 @@ def main():
             comparison_df.to_csv(os.path.join(output_dir, "single_vs_ensemble.csv"), index=False)
     
     logger.info("Evaluation on test set complete!")
-
-
 if __name__ == "__main__":
     main()
