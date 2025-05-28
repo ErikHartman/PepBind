@@ -22,7 +22,7 @@ if __name__ == "__main__":
     # Data paths setup
     base_path = "/srv/data1/general/immunopeptides_data/"
     scores_path = os.path.join(
-        base_path, "outputs/binding_score_function/4_processed_scores_new/"
+        base_path, "outputs/binding_score_function_prod/4_processed_scores/"
     )
     output_dir = "./plots/regression"
     os.makedirs(output_dir, exist_ok=True)
@@ -65,7 +65,7 @@ if __name__ == "__main__":
         y_train,
         X_val,
         y_val,
-        niterations=500,
+        niterations=100,
         populations=50,
         population_size=50,
         model_selection="best",

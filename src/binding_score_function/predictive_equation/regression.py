@@ -254,7 +254,7 @@ def perform_symbolic_regression(
         populations=populations,
         population_size=population_size,
         select_k_features=select_k_features,
-        verbosity=1,
+        verbosity=0,
     )
     
     logger.info("Fitting symbolic regression model...")
