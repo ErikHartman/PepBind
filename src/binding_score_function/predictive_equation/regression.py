@@ -11,8 +11,8 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.svm import SVR
 from pysr import PySRRegressor
 import sympy
-
-from utils import scale_data
+from scipy.stats import spearmanr, kendalltau, pearsonr
+from utils import scale_data, top_k_accuracy
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -20,8 +20,8 @@ logger = logging.getLogger(__name__)
 def train_lasso(
     X_train: pd.DataFrame, 
     y_train: np.ndarray, 
-    X_val: pd.DataFrame = None,
-    y_val: np.ndarray = None,
+    X_val: pd.DataFrame,
+    y_val: pd.DataFrame,
     cv: int = 5,
     n_alphas: int = 100,
 ) -> Dict:
@@ -66,17 +66,27 @@ def train_lasso(
         val_rmse = np.sqrt(mean_squared_error(y_val, val_pred))
         val_r2 = r2_score(y_val, val_pred)
         val_mae = mean_absolute_error(y_val, val_pred)
+        val_pearson_r = pearsonr(y_val, val_pred)[0]
+        val_spearman_r = spearmanr(y_val, val_pred)[0]
+        val_kendall_tau = kendalltau(y_val, val_pred)[0]
+        top_k_accuracy_val = top_k_accuracy(y_val, val_pred, k=25)
         
         results.update({
             'val_pred': val_pred,
             'val_rmse': val_rmse,
             'val_r2': val_r2,
-            'val_mae': val_mae
+            'val_mae': val_mae,
+            'val_pearson_r': val_pearson_r,
+            'val_spearman_r': val_spearman_r,
+            'val_kendall_tau': val_kendall_tau,
+            'top_k_accuracy_val': top_k_accuracy_val
         })
         
         logger.info(
             f"Lasso Perf: Train RMSE={train_rmse:.4f}, R²={train_r2:.4f} | "
-            f"Val RMSE={val_rmse:.4f}, R²={val_r2:.4f}, MAE={val_mae:.4f}"
+            f"Val RMSE={val_rmse:.4f}, R²={val_r2:.4f}, MAE={val_mae:.4f} | "
+            f"Pearson r={val_pearson_r:.4f}, Spearman r={val_spearman_r:.4f}, "
+            f"Kendall τ={val_kendall_tau:.4f}, Top-25 Accuracy={top_k_accuracy_val:.4f} | "
         )
     
     return results
@@ -85,8 +95,8 @@ def train_lasso(
 def train_random_forest(
     X_train: pd.DataFrame,
     y_train: np.ndarray,
-    X_val: pd.DataFrame = None,
-    y_val: np.ndarray = None,
+    X_val: pd.DataFrame,
+    y_val: pd.DataFrame,
     cv: int = 5,
     param_grid: Dict = None,
 ) -> Dict:
@@ -133,17 +143,30 @@ def train_random_forest(
         val_rmse = np.sqrt(mean_squared_error(y_val, val_pred))
         val_r2 = r2_score(y_val, val_pred)
         val_mae = mean_absolute_error(y_val, val_pred)
+        val_pearson_r = pearsonr(y_val, val_pred)[0]
+        val_spearman_r = spearmanr(y_val, val_pred)[0]
+        val_kendall_tau = kendalltau(y_val, val_pred)[0]
+        top_k_accuracy_val = top_k_accuracy(y_val, val_pred, k=25)
         
         results.update({
             'val_pred': val_pred,
             'val_rmse': val_rmse,
             'val_r2': val_r2,
-            'val_mae': val_mae
+            'val_mae': val_mae,
+            'val_pearson_r': val_pearson_r,
+            'val_spearman_r': val_spearman_r,
+            'val_kendall_tau': val_kendall_tau,
+            'top_k_accuracy_val': top_k_accuracy_val
         })
+        
         logger.info(
             f"RF Perf: Train RMSE={train_rmse:.4f}, R²={train_r2:.4f} | "
-            f"Val RMSE={val_rmse:.4f}, R²={val_r2:.4f}, MAE={val_mae:.4f}"
+            f"Val RMSE={val_rmse:.4f}, R²={val_r2:.4f}, MAE={val_mae:.4f} | "
+            f"Pearson r={val_pearson_r:.4f}, Spearman r={val_spearman_r:.4f}, "
+            f"Kendall τ={val_kendall_tau:.4f}, Top-25 Accuracy={top_k_accuracy_val:.4f} | "
         )
+
+    
     
     return results
 
@@ -151,8 +174,8 @@ def train_random_forest(
 def train_svr(
     X_train: pd.DataFrame,
     y_train: np.ndarray,
-    X_val: pd.DataFrame = None,
-    y_val: np.ndarray = None,
+    X_val: pd.DataFrame,
+    y_val: pd.DataFrame,
     cv: int = 5,
     param_grid: Dict = None,
 ) -> Dict:
@@ -197,16 +220,27 @@ def train_svr(
         val_rmse = np.sqrt(mean_squared_error(y_val, val_pred))
         val_r2 = r2_score(y_val, val_pred)
         val_mae = mean_absolute_error(y_val, val_pred)
+        val_pearson_r = pearsonr(y_val, val_pred)[0]
+        val_spearman_r = spearmanr(y_val, val_pred)[0]
+        val_kendall_tau = kendalltau(y_val, val_pred)[0]
+        top_k_accuracy_val = top_k_accuracy(y_val, val_pred, k=25)
         
         results.update({
             'val_pred': val_pred,
             'val_rmse': val_rmse,
             'val_r2': val_r2,
-            'val_mae': val_mae
+            'val_mae': val_mae,
+            'val_pearson_r': val_pearson_r,
+            'val_spearman_r': val_spearman_r,
+            'val_kendall_tau': val_kendall_tau,
+            'top_k_accuracy_val': top_k_accuracy_val
         })
+        
         logger.info(
-            f"SVR Perf: Train RMSE={train_rmse:.4f}, R²={train_r2:.4f} | "
-            f"Val RMSE={val_rmse:.4f}, R²={val_r2:.4f}, MAE={val_mae:.4f}"
+            f"Lasso Perf: Train RMSE={train_rmse:.4f}, R²={train_r2:.4f} | "
+            f"Val RMSE={val_rmse:.4f}, R²={val_r2:.4f}, MAE={val_mae:.4f} | "
+            f"Pearson r={val_pearson_r:.4f}, Spearman r={val_spearman_r:.4f}, "
+            f"Kendall τ={val_kendall_tau:.4f}, Top-25 Accuracy={top_k_accuracy_val:.4f} | "
         )
     
     return results
@@ -214,8 +248,8 @@ def train_svr(
 def perform_symbolic_regression(
     X_train: pd.DataFrame,
     y_train: np.ndarray,
-    X_val: pd.DataFrame = None,
-    y_val: np.ndarray = None,
+    X_val: pd.DataFrame,
+    y_val: pd.DataFrame,
     niterations: int = 200,
     populations: int = 50,
     population_size: int = 100,

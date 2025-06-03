@@ -302,7 +302,7 @@ def plot_symbolic_complexity_tradeoff(
     fig = plt.figure(figsize=(10, 7))
     
     # Create gridspec to have plots on top (larger) and equation legend below
-    gs = fig.add_gridspec(2, 2, height_ratios=[2,1])
+    gs = fig.add_gridspec(2, 2, height_ratios=[1,1])
     ax1 = fig.add_subplot(gs[0, 0])
     ax2 = fig.add_subplot(gs[0, 1], sharey=ax1)
     ax_legend = fig.add_subplot(gs[1, :])
@@ -334,8 +334,6 @@ def plot_symbolic_complexity_tradeoff(
         # For regression, lower metric is better (e.g., RMSE)
         is_pareto = np.ones(len(df), dtype=bool)
         for i, (c1, m1) in enumerate(zip(df['complexity'], df[metric])):
-            # An equation is not on Pareto front if there exists another
-            # with both lower complexity AND lower (=better) metric
             for c2, m2 in zip(df['complexity'], df[metric]):
                 if (c2 < c1 and m2 <= m1) or (c2 <= c1 and m2 < m1):
                     is_pareto[i] = False
@@ -344,8 +342,6 @@ def plot_symbolic_complexity_tradeoff(
         # For classification, higher metric is better (e.g., AUC)
         is_pareto = np.ones(len(df), dtype=bool)
         for i, (c1, m1) in enumerate(zip(df['complexity'], df[metric])):
-            # An equation is not on Pareto front if there exists another
-            # with both lower complexity AND higher (=better) metric
             for c2, m2 in zip(df['complexity'], df[metric]):
                 if (c2 < c1 and m2 >= m1) or (c2 <= c1 and m2 > m1):
                     is_pareto[i] = False
@@ -471,7 +467,7 @@ def plot_predictions_by_data_type(predictions_df, output_dir):
         ax=ax1
     )
     
-    ax1.set_ylim([3, 10])
+    ax1.set_ylim([3, 10]) # type: ignore
     ax1.set_xlabel("Model")
     ax1.set_ylabel("Predicted pKd")
     ax1.legend(frameon=False)
@@ -505,8 +501,8 @@ def plot_predictions_by_data_type(predictions_df, output_dir):
                 color= color_palette.get(model_name.lower(), 'gray')
             )
     
-    ax3.set_xlim([0.0, 1.0])
-    ax3.set_ylim([0.0, 1.05])
+    ax3.set_xlim([0.0, 1.0]) # type: ignore
+    ax3.set_ylim([0.0, 1.05]) # type: ignore
     ax3.set_xlabel('False Positive Rate')
     ax3.set_ylabel('True Positive Rate')
     ax3.legend(loc='lower right', frameon=False)

@@ -148,6 +148,78 @@ def plot_matrix(
     plt.tight_layout()
     plt.savefig(fname.with_suffix(".iptm.svg"))
 
+def plot_feature_correlation_matrix(
+    real_df: pd.DataFrame,
+    shuffled_df: pd.DataFrame,
+    random_df: pd.DataFrame,
+    fname: Path,
+    sample_size: int = 1000
+):
+    """
+    Create a correlation matrix plot showing relationships between all pairs of features,
+    with data points colored by type (real/shuffled/random).
+
+    """
+    # Ensure all dataframes have the same columns
+    common_cols = list(set(real_df.columns) & set(shuffled_df.columns) & set(random_df.columns))
+    
+    # Remove non-numeric columns
+    numeric_cols = []
+    for col in common_cols:
+        if pd.api.types.is_numeric_dtype(real_df[col]):
+            numeric_cols.append(col)
+    
+    print(f"Creating correlation matrix for {len(numeric_cols)} features: {numeric_cols}")
+    
+    # Sample data if too large (for performance)
+    real_sample = real_df[numeric_cols].sample(n=min(len(real_df), sample_size), random_state=42)
+    shuffled_sample = shuffled_df[numeric_cols].sample(n=min(len(shuffled_df), sample_size), random_state=42)
+    random_sample = random_df[numeric_cols].sample(n=min(len(random_df), sample_size), random_state=42)
+    
+    # Add data type labels
+    real_sample = real_sample.copy()
+    real_sample['data_type'] = 'Real'
+    shuffled_sample = shuffled_sample.copy()
+    shuffled_sample['data_type'] = 'Shuffled'
+    random_sample = random_sample.copy()
+    random_sample['data_type'] = 'Random'
+    
+    combined_df = pd.concat([real_sample, shuffled_sample, random_sample], ignore_index=True)
+    
+    colors = {'Real': '#2C8C99', 'Shuffled': '#E88873', 'Random': '#F46036'}
+    
+    n_features = len(numeric_cols)
+    
+    fig, axes = plt.subplots(n_features, n_features, figsize=(3*n_features, 3*n_features))
+    
+    for i, col1 in enumerate(numeric_cols):
+        for j, col2 in enumerate(numeric_cols):
+            ax = axes[i, j]
+            
+            if i == j:
+
+                for data_type, color in colors.items():
+                    subset = combined_df[combined_df['data_type'] == data_type]
+                    ax.hist(subset[col1], bins=30, alpha=0.6, color=color, density=True)
+                ax.set_xlabel(col1)
+                ax.set_ylabel("Density")
+                
+            else:
+     
+                for data_type, color in colors.items():
+                    subset = combined_df[combined_df['data_type'] == data_type]
+                    sns.regplot(x=subset[col2], y=subset[col1], 
+                                ax=ax, color=color)
+                ax.set_xlabel(col2)
+                ax.set_ylabel(col1)
+                    
+    plt.tight_layout()
+    plt.savefig(fname, dpi=200, bbox_inches='tight')
+    plt.close(fig)
+    
+    print(f"Correlation matrix plot saved to: {fname}")
+
+
 
 def split_and_save_real(df: pd.DataFrame):
     """
@@ -155,7 +227,7 @@ def split_and_save_real(df: pd.DataFrame):
     and return train/val/test splits.
     """
     df = df.set_index("complex_filename")
-    X = df.drop(columns=["in_binding_site", "is_decoy", "pKd", "fraction_in_binding_site", "in_binding_site_score"])
+    X = df.drop(columns=["in_binding_site", "is_decoy", "pKd", "fraction_in_binding_site", "in_binding_site_score", "peptide_plddt"])
     y = df["pKd"].astype(float)
 
     plot_matrix(
@@ -181,7 +253,7 @@ def split_and_save_decoys(decoy_df: pd.DataFrame) -> dict:
     """
     Split shuffled and random decoys into train/val/test sets.
     """
-    df = decoy_df.drop(columns=["is_decoy", "in_binding_site", "in_binding_site_score", "fraction_in_binding_site"])
+    df = decoy_df.drop(columns=["is_decoy", "in_binding_site", "in_binding_site_score", "fraction_in_binding_site", "peptide_plddt"])
     results = {}
     
     for t in ["shuffle", "random"]:
@@ -596,8 +668,15 @@ def main():
         shuffled=decoy_splits['shuffle_X_train'],
         random=decoy_splits['random_X_train'],
     )
+
+    plot_feature_correlation_matrix(
+        real_df=X_train,
+        shuffled_df=decoy_splits['shuffle_X_train'], 
+        random_df=decoy_splits['random_X_train'],
+        fname=PLOTS_DIR / 'feature_correlation_matrix.png',
+        sample_size=1000  # Limit points for performance
+    )
     
-    # ===== DATA VALIDATION SECTION =====
     print("\nValidating data integrity...\n")
     validate_processed_files(
         original_real=original_real,

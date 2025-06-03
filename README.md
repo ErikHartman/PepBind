@@ -1,5 +1,9 @@
 # Immunomodulating peptides
 
+### TODO
+
+[ ] Add top-k plots to regression. Fix metrics etc.
+
 The aim of this project is to get an understanding of the peptides that exist in infected/inflamed conditions and how these interact with immunomodulatory proteins.
 
 To do so we utilize newly developed protein-peptide interaction mining and public data.

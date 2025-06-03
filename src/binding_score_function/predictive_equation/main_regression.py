@@ -65,7 +65,7 @@ if __name__ == "__main__":
         y_train,
         X_val,
         y_val,
-        niterations=100,
+        niterations=500,
         populations=50,
         population_size=50,
         model_selection="best",

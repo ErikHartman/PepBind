@@ -6,16 +6,16 @@
 #SBATCH --job-name="binding_scoring"
 #SBATCH --output="binding_scoring.out"
 #SBATCH --error="binding_scoring.err"
-#SBATCH --time="72:00:00"
+#SBATCH --time="200:00:00"
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=48
 #SBATCH --nodelist=alap759
-#SBATCH --gpus-per-task=2
+#SBATCH --gpus-per-task=3
 
 
 ### RUN COMMAND ###
 # Run the complete benchmark pipeline with all steps
 
 /srv/data1/general/immunopeptides_data/erik-venv/bin/python \
-    /home/er8813ha/immunopeptides/src/binding_score_function/main.py --download-pdbs --process --dock --score --decoys
+    /home/er8813ha/immunopeptides/src/binding_score_function/main.py --score --decoys
