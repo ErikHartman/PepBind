@@ -43,7 +43,7 @@ def get_regression_results(y_true, y_pred, prefix=""):
     mae = mean_absolute_error(y_true, y_pred)
     r2 = r2_score(y_true, y_pred)
     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
-    top_k_accuracy_true = top_k_accuracy(y_true, y_pred, k=25)
+    top_k_accuracy_true = top_k_accuracy(y_true, y_pred, k=10)
     
     return {
         f'{prefix}rmse': rmse,

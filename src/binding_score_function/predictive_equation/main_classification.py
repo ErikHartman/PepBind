@@ -106,11 +106,11 @@ if __name__ == "__main__":
         y_train,
         X_val,
         y_val,
-        niterations=50, #500,
+        niterations=200,
         populations=50,
         population_size=50,
         model_selection="best",
-        select_k_features=10,
+        select_k_features=15,
         scale_features=True
     )
 

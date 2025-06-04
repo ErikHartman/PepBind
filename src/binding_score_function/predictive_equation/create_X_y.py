@@ -7,6 +7,8 @@ import seaborn as sns
 from sklearn.model_selection import train_test_split
 import os
 from scipy import stats
+import argparse
+
 
 BASE_DIR = Path("/srv/data1/general/immunopeptides_data/outputs/binding_score_function_prod")
 DIR_SCORES = BASE_DIR / "3_scores"
@@ -579,9 +581,9 @@ def remove_outliers(df: pd.DataFrame) -> pd.DataFrame:
             outlier_count = (~col_mask).sum()
             if outlier_count > 0:
                 if isinstance(threshold, tuple):
-                    print(f"Found {outlier_count} outliers in '{col}' (outside range {threshold})")
+                    print(f"Found {outlier_count} in '{col}' (outside range {threshold})")
                 else:
-                    print(f"Found {outlier_count} outliers in '{col}' (>= {threshold})")
+                    print(f"Found {outlier_count} in '{col}' (>= {threshold})")
     
     # Apply the mask to get the filtered dataframe
     filtered_df = df.loc[mask].copy()
@@ -629,6 +631,23 @@ def main():
 
     # Filter binding site complexes
     real_bs = real[real.in_binding_site]
+
+    print("\nPlotting unfiltered feature–pKd correlations...")
+    real_full = real[real.in_binding_site].copy()
+    real_full = real_full.set_index("complex_filename")
+
+    X_all = real_full.drop(columns=[
+        "in_binding_site", "is_decoy", "pKd", "fraction_in_binding_site", 
+        "in_binding_site_score", "peptide_plddt"
+    ])
+    y_all = real_full["pKd"].astype(float)
+
+    plot_matrix(
+        X_all,
+        y_all,
+        kind="correlation",
+        fname=PLOTS_DIR / "corr_real_unfiltered.png",
+    )
     
     # Remove outliers from real data before splitting
     print("\nRemoving outliers from real data:")
@@ -669,13 +688,13 @@ def main():
         random=decoy_splits['random_X_train'],
     )
 
-    plot_feature_correlation_matrix(
-        real_df=X_train,
-        shuffled_df=decoy_splits['shuffle_X_train'], 
-        random_df=decoy_splits['random_X_train'],
-        fname=PLOTS_DIR / 'feature_correlation_matrix.png',
-        sample_size=1000  # Limit points for performance
-    )
+    #plot_feature_correlation_matrix(
+    #    real_df=X_train,
+    #    shuffled_df=decoy_splits['shuffle_X_train'], 
+    #    random_df=decoy_splits['random_X_train'],
+    #    fname=PLOTS_DIR / 'feature_correlation_matrix.png',
+    #    sample_size=1000  # Limit points for performance
+    #)
     
     print("\nValidating data integrity...\n")
     validate_processed_files(
@@ -692,7 +711,7 @@ def main():
 
 
 if __name__ == "__main__":
-    import argparse
+
     
     parser = argparse.ArgumentParser(description="Process immunopeptide data and validate processed files")
     parser.add_argument("--validate-only", action="store_true", 

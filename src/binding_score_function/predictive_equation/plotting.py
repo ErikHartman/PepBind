@@ -9,9 +9,9 @@ from sklearn.metrics import roc_curve, roc_auc_score
 from scipy.stats import pearsonr, spearmanr
 
 color_palette = {
-    "symbolic": "#124E78", 
+    "symbolic": "#3E88BC", 
     "lasso": "#B388EB",    
-    "rf": "#57A773",        
+    "rf": "#57A3A7",        
     "svr": "#2C8C99",   
     "logreg": "#B388EB", 
     "svc": "#2C8C99",     
@@ -21,7 +21,7 @@ color_palette = {
     "real": "#2C8C99",  
 
     "train": "#2C8C99", 
-    "val": "#3943B7", 
+    "val": "#595FA7", 
 
 }
     
