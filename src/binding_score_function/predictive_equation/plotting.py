@@ -192,8 +192,8 @@ def plot_model_comparison(comparison_df, roc_data=None, output_path=None):
     metrics = [col for col in comparison_df.columns if col != 'Model']
     
     # If it's classification metrics
-    if 'Train Accuracy' in metrics:
-        metric_list = ['Val Accuracy','Val AUC']
+    if 'train_acc' in metrics:
+        metric_list = ['val_acc','val_auc']
         metric_list = [m for m in metric_list if m in metrics]
         
         # Determine if we should add ROC curve subplot
@@ -211,10 +211,10 @@ def plot_model_comparison(comparison_df, roc_data=None, output_path=None):
             ax.set_ylabel(metric)
             ax.tick_params(axis='x', rotation=45)
 
-            if metric == 'Val AUC':
+            if metric == 'val_auc':
                 # Set y-axis limits for AUC
                 ax.set_ylim([0.8, 1])
-            if metric == 'Val Accuracy':
+            if metric == 'val_acc':
                 # Set y-axis limits for accuracy
                 ax.set_ylim([0.6, 1])
         
@@ -235,9 +235,9 @@ def plot_model_comparison(comparison_df, roc_data=None, output_path=None):
         plt.tight_layout()
     
     # If it's regression metrics
-    elif 'Train RMSE' in metrics:
+    elif 'train_rmse' in metrics:
         regression_metrics = []
-        for m in ['Val MAE', 'Val R²']:
+        for m in ['val_top_k_accuracy_true', 'val_r2', 'val_kendall_tau']:
             if m in metrics:
                 regression_metrics.append(m)
         n_subplots = len(regression_metrics)
@@ -451,6 +451,9 @@ def plot_predictions_by_data_type(predictions_df, output_dir):
     """
     # Add binary labels: 1 for real, 0 for non-real (shuffle or random)
     predictions_df['binary_label'] = predictions_df['data_type'].apply(lambda x: 1 if x == 'Real' else 0)
+
+    # filter out nans
+    predictions_df = predictions_df.dropna(subset=['prediction'])
     
     fig = plt.figure(figsize=(8, 3))
     gs = fig.add_gridspec(2, 2, width_ratios=[2, 1])

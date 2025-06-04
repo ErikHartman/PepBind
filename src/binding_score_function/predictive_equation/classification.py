@@ -5,9 +5,6 @@ import logging
 from typing import Dict, List
 
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import (
-    accuracy_score, f1_score, roc_auc_score
-)
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
@@ -15,7 +12,7 @@ from sklearn.svm import SVC
 from pysr import PySRRegressor
 import sympy
 
-from utils import scale_data
+from utils import scale_data, get_classification_results
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -24,8 +21,8 @@ logger = logging.getLogger(__name__)
 def train_logistic_regression(
     X_train: pd.DataFrame, 
     y_train: np.ndarray, 
-    X_val: pd.DataFrame = None,
-    y_val: np.ndarray = None,
+    X_val: pd.DataFrame,
+    y_val: np.ndarray,
     cv: int = 5,
     param_grid: Dict = None,
 ) -> Dict:
@@ -57,12 +54,19 @@ def train_logistic_regression(
 
     # Training predictions
     train_pred = best_logreg.predict(X_train_scaled)
-    train_acc = accuracy_score(y_train, train_pred)
-    train_f1 = f1_score(y_train, train_pred, average='binary')
     train_proba = best_logreg.predict_proba(X_train_scaled)[:, 1]
-    logger.info(f"Logistic Regression - Train Accuracy: {train_acc:.4f}, F1: {train_f1:.4f}")
+    train_metrics = get_classification_results(y_train, train_pred, train_proba, prefix="train_")
+    
+    # Validation predictions
+    val_pred = best_logreg.predict(X_val_scaled)
+    val_proba = best_logreg.predict_proba(X_val_scaled)[:, 1]
+    val_metrics = get_classification_results(y_val, val_pred, val_proba, prefix="val_")
+    
+    logger.info(f"Logistic Regression Perf")
+    logger.info(f"Train results: {train_metrics}")
+    logger.info(f"Validation results: {val_metrics}")
 
-    # Create a nice dataframe with feature importance like the RF function does
+    # Create feature importance dataframe  
     feature_importances = pd.DataFrame({
         'Feature': X_train.columns,
         'Coefficient': best_logreg.coef_[0]
@@ -74,40 +78,23 @@ def train_logistic_regression(
         'best_params': grid_search.best_params_,
         'train_pred': train_pred,
         'train_proba': train_proba,
-        'train_acc': train_acc,
-        'train_f1': train_f1,
+        'val_pred': val_pred,
+        'val_proba': val_proba,
         'coefficients': feature_importances
     }
+    
+    # Add all metrics to results
+    results.update(train_metrics)
+    results.update(val_metrics)
 
-    # Evaluate on val data
-    if X_val is not None and y_val is not None:
-        val_pred = best_logreg.predict(X_val_scaled)
-        val_acc = accuracy_score(y_val, val_pred)
-        val_f1 = f1_score(y_val, val_pred, average='binary')
-        val_proba = best_logreg.predict_proba(X_val_scaled)[:, 1]
-        val_auc = roc_auc_score(y_val, val_proba)    
-
-        
-        results.update({
-            'val_pred': val_pred,
-            'val_proba': val_proba,
-            'val_acc': val_acc,
-            'val_f1': val_f1,
-            'val_auc': val_auc
-        })
-        logger.info(
-            f"Logistic Regression - Val Accuracy: {val_acc:.4f}, "
-            f"F1: {val_f1:.4f}, AUC: {val_auc:.4f}"
-        )
-        
     return results
 
 
 def train_random_forest_classifier(
     X_train: pd.DataFrame,
     y_train: np.ndarray,
-    X_val: pd.DataFrame = None,
-    y_val: np.ndarray = None,
+    X_val: pd.DataFrame,
+    y_val: np.ndarray,
     cv: int = 5,
     param_grid: Dict = None,
 ) -> Dict:
@@ -143,10 +130,17 @@ def train_random_forest_classifier(
 
     # Training predictions
     train_pred = best_rf.predict(X_train_scaled)
-    train_acc = accuracy_score(y_train, train_pred)
-    train_f1 = f1_score(y_train, train_pred, average='binary')
     train_proba = best_rf.predict_proba(X_train_scaled)[:, 1]
-    logger.info(f"RF - Train Accuracy: {train_acc:.4f}, F1: {train_f1:.4f}")
+    train_metrics = get_classification_results(y_train, train_pred, train_proba, prefix="train_")
+    
+    # Validation predictions
+    val_pred = best_rf.predict(X_val_scaled)
+    val_proba = best_rf.predict_proba(X_val_scaled)[:, 1]
+    val_metrics = get_classification_results(y_val, val_pred, val_proba, prefix="val_")
+
+    logger.info(f"RF Perf")
+    logger.info(f"Train results: {train_metrics}")
+    logger.info(f"Validation results: {val_metrics}")
 
     feature_importances = pd.DataFrame({
         'Feature': X_train.columns,
@@ -160,30 +154,13 @@ def train_random_forest_classifier(
         'feature_importance': feature_importances,
         'train_pred': train_pred,
         'train_proba': train_proba,
-        'train_acc': train_acc,
-        'train_f1': train_f1
+        'val_pred': val_pred,
+        'val_proba': val_proba
     }
-
-    # Evaluate on val data
-    if X_val is not None and y_val is not None:
-        val_pred = best_rf.predict(X_val_scaled)
-        val_acc = accuracy_score(y_val, val_pred)
-        val_f1 = f1_score(y_val, val_pred, average='binary')
-        val_proba = best_rf.predict_proba(X_val_scaled)[:, 1]
-        val_auc = roc_auc_score(y_val, val_proba)
-
-
-        results.update({
-            'val_pred': val_pred,
-            'val_acc': val_acc,
-            'val_f1': val_f1,
-            'val_auc': val_auc,
-            'val_proba': val_proba
-        })
-        logger.info(
-            f"RF - Val Accuracy: {val_acc:.4f}, "
-            f"F1: {val_f1:.4f}, AUC: {val_auc:.4f}"
-        )
+    
+    # Add all metrics to results
+    results.update(train_metrics)
+    results.update(val_metrics)
 
     return results
 
@@ -191,8 +168,8 @@ def train_random_forest_classifier(
 def train_svm_classifier(
     X_train: pd.DataFrame,
     y_train: np.ndarray,
-    X_val: pd.DataFrame = None,
-    y_val: np.ndarray = None,
+    X_val: pd.DataFrame,
+    y_val: np.ndarray,
     cv: int = 5,
     param_grid: Dict = None,
 ) -> Dict:
@@ -224,11 +201,19 @@ def train_svm_classifier(
     best_svc = grid_search.best_estimator_
     logger.info(f"SVM best params: {grid_search.best_params_}")
 
+    # Training predictions
     train_pred = best_svc.predict(X_train_scaled)
-    train_acc = accuracy_score(y_train, train_pred)
-    train_f1 = f1_score(y_train, train_pred, average='binary')
     train_proba = best_svc.predict_proba(X_train_scaled)[:, 1]
-    logger.info(f"SVM - Train Accuracy: {train_acc:.4f}, F1: {train_f1:.4f}")
+    train_metrics = get_classification_results(y_train, train_pred, train_proba, prefix="train_")
+    
+    # Validation predictions
+    val_pred = best_svc.predict(X_val_scaled)
+    val_proba = best_svc.predict_proba(X_val_scaled)[:, 1]
+    val_metrics = get_classification_results(y_val, val_pred, val_proba, prefix="val_")
+
+    logger.info(f"SVM Perf")
+    logger.info(f"Train results: {train_metrics}")
+    logger.info(f"Validation results: {val_metrics}")
 
     results = {
         'model': best_svc,
@@ -236,30 +221,13 @@ def train_svm_classifier(
         'best_params': grid_search.best_params_,
         'train_pred': train_pred,
         'train_proba': train_proba,
-        'train_acc': train_acc,
-        'train_f1': train_f1
+        'val_pred': val_pred,
+        'val_proba': val_proba
     }
-
-    if X_val is not None and y_val is not None:
-        val_pred = best_svc.predict(X_val_scaled)
-        val_acc = accuracy_score(y_val, val_pred)
-        val_f1 = f1_score(y_val, val_pred, average='binary')
-
-        # For AUC
-        val_proba = best_svc.predict_proba(X_val_scaled)[:, 1]
-        val_auc = roc_auc_score(y_val, val_proba)
-
-        results.update({
-            'val_pred': val_pred,
-            'val_acc': val_acc,
-            'val_f1': val_f1,
-            'val_auc': val_auc,
-            'val_proba': val_proba
-        })
-        logger.info(
-            f"SVM - Val Accuracy: {val_acc:.4f}, "
-            f"F1: {val_f1:.4f}, AUC: {val_auc:.4f}"
-        )
+    
+    # Add all metrics to results
+    results.update(train_metrics)
+    results.update(val_metrics)
     
     return results
 
@@ -267,8 +235,8 @@ def train_svm_classifier(
 def perform_symbolic_classification(
     X_train: pd.DataFrame,
     y_train: np.ndarray,
-    X_val: pd.DataFrame = None,
-    y_val: np.ndarray = None,
+    X_val: pd.DataFrame,
+    y_val: np.ndarray,
     niterations: int = 200,
     populations: int = 50,
     population_size: int = 100,
@@ -318,96 +286,137 @@ def perform_symbolic_classification(
     equations = model.equations_.reset_index().rename(columns={"index": "eq_index"})
     equations = equations.sort_values(by="loss", ascending=True).reset_index(drop=True)
     
-    # Calculate metrics for each equation on the val set if available
-    if X_val is not None and y_val is not None:
-        val_metrics = []
-        for i, row in equations.iterrows():
-            eq_index = row['eq_index']
-            try:
-                # Calculate predictions for this equation
-                val_pred_cont = model.predict(X_val_data, index=eq_index)
-                val_pred = (val_pred_cont >= 0.5).astype(int)
-                
-                # Safeguard against NaNs
-                valid_mask = np.isfinite(val_pred_cont)
-                if valid_mask.all():
-                    val_acc = accuracy_score(y_val, val_pred)
-                    val_f1 = f1_score(y_val, val_pred, average='binary')
-                    val_auc = roc_auc_score(y_val, val_pred_cont)
-                    
-                    val_metrics.append({
-                        'eq_index': eq_index,
-                        'val_acc': val_acc,
-                        'val_f1': val_f1,
-                        'val_auc': val_auc
-                    })
-                else:
-                    if valid_mask.any():
-                        # Use only valid predictions for metrics
-                        val_acc = accuracy_score(y_val[valid_mask], val_pred[valid_mask])
-                        val_f1 = f1_score(y_val[valid_mask], val_pred[valid_mask], average='binary')
-                        val_auc = roc_auc_score(y_val[valid_mask], val_pred_cont[valid_mask])
-                        
-                        val_metrics.append({
-                            'eq_index': eq_index,
-                            'val_acc': val_acc,
-                            'val_f1': val_f1,
-                            'val_auc': val_auc,
-                            'valid_ratio': valid_mask.sum() / len(valid_mask)
-                        })
-            except Exception as e:
-                logger.warning(f"Error evaluating equation {i} on val set: {str(e)}")
-                
-        # Find the best equation based on val AUC (could also use acc or f1)
-        if val_metrics:
-            val_metrics_df = pd.DataFrame(val_metrics)
-            # Use AUC as the primary metric for classification
-            best_val_idx = val_metrics_df['val_auc'].idxmax()
-            best_val_eq_index = val_metrics_df.loc[best_val_idx, 'eq_index']
+    # Calculate metrics for each equation on the val set
+    val_metrics = []
+    for i, row in equations.iterrows():
+        eq_index = row['eq_index']
+        try:
+            # Calculate predictions for this equation
+            val_pred_cont = model.predict(X_val_data, index=eq_index)
             
-            # Get the best expression based on val performance
-            best_expr = simplify_expression(model, best_val_eq_index)
-            logger.info(f"Best symbolic expression on val set: {best_expr}")
+            # Filter out NaN/infinite values
+            valid_mask = np.isfinite(val_pred_cont)
+            if not valid_mask.any():
+                logger.warning(f"Equation {i}: All predictions are NaN/infinite on val set")
+                continue
+                
+            if not valid_mask.all():
+                logger.warning(f"Equation {i}: {valid_mask.sum()}/{len(valid_mask)} valid predictions on val")
+                
+            # Use only valid predictions for metrics
+            val_pred_cont_valid = val_pred_cont[valid_mask] if not valid_mask.all() else val_pred_cont
+            y_val_valid = y_val[valid_mask] if not valid_mask.all() else y_val
             
-            # Get train and val predictions for the best val model
-            train_pred_cont = model.predict(X_train_data, index=best_val_eq_index)
+            val_pred_valid = (val_pred_cont_valid >= 0.5).astype(int)
+            val_metrics_dict = get_classification_results(y_val_valid, val_pred_valid, val_pred_cont_valid, prefix="")
+            
+            val_metrics.append({
+                'eq_index': eq_index,
+                'val_acc': val_metrics_dict['acc'],
+                'val_f1': val_metrics_dict['f1'],
+                'val_auc': val_metrics_dict['auc'],
+                'valid_ratio': valid_mask.sum() / len(valid_mask) if not valid_mask.all() else 1.0
+            })
+        except Exception as e:
+            logger.warning(f"Error evaluating equation {i} on val set: {str(e)}")
+            
+    # Find the best equation based on val AUC (could also use acc or f1)
+    if val_metrics:
+        val_metrics_df = pd.DataFrame(val_metrics)
+        # Use AUC as the primary metric for classification
+        best_val_idx = val_metrics_df['val_auc'].idxmax()
+        best_val_eq_index = val_metrics_df.loc[best_val_idx, 'eq_index']
+        
+        # Get the best expression based on val performance
+        best_expr = simplify_expression(model, best_val_eq_index)
+        logger.info(f"Best symbolic expression on val set: {best_expr}")
+        
+        # Get train and val predictions for the best val model
+        train_pred_cont = model.predict(X_train_data, index=best_val_eq_index)
+        val_pred_cont = model.predict(X_val_data, index=best_val_eq_index)
+        
+        # Handle NaN values in final predictions
+        train_valid_mask = np.isfinite(train_pred_cont)
+        val_valid_mask = np.isfinite(val_pred_cont)
+        
+        if train_valid_mask.all() and val_valid_mask.all():
+            # All predictions are valid
             train_pred = (train_pred_cont >= 0.5).astype(int)
-            train_acc = accuracy_score(y_train, train_pred)
-            train_f1 = f1_score(y_train, train_pred, average='binary')
-            train_auc = roc_auc_score(y_train, train_pred_cont)
-            
-            val_pred_cont = model.predict(X_val_data, index=best_val_eq_index)
             val_pred = (val_pred_cont >= 0.5).astype(int)
-            val_acc = accuracy_score(y_val, val_pred)
-            val_f1 = f1_score(y_val, val_pred, average='binary')
-            val_auc = roc_auc_score(y_val, val_pred_cont)
+            
+            train_metrics = get_classification_results(y_train, train_pred, train_pred_cont, prefix="train_")
+            val_metrics = get_classification_results(y_val, val_pred, val_pred_cont, prefix="val_")
         else:
-            # If no equations worked well on val set, use the original best by train loss
-            best_expr = model.sympy(equations.iloc[0]['eq_index'])
-            logger.warning("No equations performed well on val set, using best from training")
+            # Some predictions are invalid, filter them out
+            if train_valid_mask.any():
+                train_pred_cont_valid = train_pred_cont[train_valid_mask]
+                train_pred_valid = (train_pred_cont_valid >= 0.5).astype(int)
+                y_train_valid = y_train[train_valid_mask]
+                train_metrics = get_classification_results(y_train_valid, train_pred_valid, train_pred_cont_valid, prefix="train_")
+                
+                # Create full arrays with NaN for invalid predictions
+                train_pred = np.full_like(train_pred_cont, np.nan)
+                train_pred[train_valid_mask] = train_pred_valid
+            else:
+                train_metrics = {'train_acc': np.nan, 'train_f1': np.nan, 'train_auc': np.nan}
+                train_pred = np.full_like(train_pred_cont, np.nan)
             
-            # Predictions with best training model
-            train_pred_cont = model.predict(X_train_data, index=equations.iloc[0]['eq_index'])
-            train_pred = (train_pred_cont >= 0.5).astype(int)
-            train_acc = accuracy_score(y_train, train_pred)
-            train_f1 = f1_score(y_train, train_pred, average='binary')
-            train_auc = roc_auc_score(y_train, train_pred_cont)
-            
-            val_pred_cont = model.predict(X_val_data, index=equations.iloc[0]['eq_index'])
-            val_pred = (val_pred_cont >= 0.5).astype(int)
-            val_acc = accuracy_score(y_val, val_pred)
-            val_f1 = f1_score(y_val, val_pred, average='binary')
-            val_auc = roc_auc_score(y_val, val_pred_cont)
+            if val_valid_mask.any():
+                val_pred_cont_valid = val_pred_cont[val_valid_mask]
+                val_pred_valid = (val_pred_cont_valid >= 0.5).astype(int)
+                y_val_valid = y_val[val_valid_mask]
+                val_metrics = get_classification_results(y_val_valid, val_pred_valid, val_pred_cont_valid, prefix="val_")
+                
+                # Create full arrays with NaN for invalid predictions
+                val_pred = np.full_like(val_pred_cont, np.nan)
+                val_pred[val_valid_mask] = val_pred_valid
+            else:
+                val_metrics = {'val_acc': np.nan, 'val_f1': np.nan, 'val_auc': np.nan}
+                val_pred = np.full_like(val_pred_cont, np.nan)
     else:
-        # Without val data, just use the best equation from training
+        # If no equations worked well on val set, use the original best by train loss
         best_expr = model.sympy(equations.iloc[0]['eq_index'])
+        logger.warning("No equations performed well on val set, using best from training")
         
         # Predictions with best training model
         train_pred_cont = model.predict(X_train_data, index=equations.iloc[0]['eq_index'])
-        train_pred = (train_pred_cont >= 0.5).astype(int)
-        train_acc = accuracy_score(y_train, train_pred)
-        train_f1 = f1_score(y_train, train_pred, average='binary')
-        train_auc = roc_auc_score(y_train, train_pred_cont)
+        val_pred_cont = model.predict(X_val_data, index=equations.iloc[0]['eq_index'])
+        
+        # Handle NaN values similar to above
+        train_valid_mask = np.isfinite(train_pred_cont)
+        val_valid_mask = np.isfinite(val_pred_cont)
+        
+        if train_valid_mask.all() and val_valid_mask.all():
+            train_pred = (train_pred_cont >= 0.5).astype(int)
+            val_pred = (val_pred_cont >= 0.5).astype(int)
+            
+            train_metrics = get_classification_results(y_train, train_pred, train_pred_cont, prefix="train_")
+            val_metrics = get_classification_results(y_val, val_pred, val_pred_cont, prefix="val_")
+        else:
+            # Handle invalid predictions as above
+            if train_valid_mask.any():
+                train_pred_cont_valid = train_pred_cont[train_valid_mask]
+                train_pred_valid = (train_pred_cont_valid >= 0.5).astype(int)
+                y_train_valid = y_train[train_valid_mask]
+                train_metrics = get_classification_results(y_train_valid, train_pred_valid, train_pred_cont_valid, prefix="train_")
+                
+                train_pred = np.full_like(train_pred_cont, np.nan)
+                train_pred[train_valid_mask] = train_pred_valid
+            else:
+                train_metrics = {'train_acc': np.nan, 'train_f1': np.nan, 'train_auc': np.nan}
+                train_pred = np.full_like(train_pred_cont, np.nan)
+            
+            if val_valid_mask.any():
+                val_pred_cont_valid = val_pred_cont[val_valid_mask]
+                val_pred_valid = (val_pred_cont_valid >= 0.5).astype(int)
+                y_val_valid = y_val[val_valid_mask]
+                val_metrics = get_classification_results(y_val_valid, val_pred_valid, val_pred_cont_valid, prefix="val_")
+                
+                val_pred = np.full_like(val_pred_cont, np.nan)
+                val_pred[val_valid_mask] = val_pred_valid
+            else:
+                val_metrics = {'val_acc': np.nan, 'val_f1': np.nan, 'val_auc': np.nan}
+                val_pred = np.full_like(val_pred_cont, np.nan)
 
     # Get all equations and their metrics
     all_eqs = []
@@ -421,42 +430,33 @@ def perform_symbolic_classification(
         # Calculate predictions for this specific equation
         try:
             eq_pred_cont_train = model.predict(X_train_data, index=eq_index)
-            eq_pred_train = (eq_pred_cont_train >= 0.5).astype(int)
+            eq_pred_cont_val = model.predict(X_val_data, index=eq_index)
             
-            # Safeguard against NaNs or Infs
-            valid_mask_train = np.isfinite(eq_pred_cont_train)
-            if not valid_mask_train.all():
-                logger.warning(f"Equation {i}: {valid_mask_train.sum()}/{len(valid_mask_train)} valid predictions on train")
-                # Use only valid predictions for metrics
-                if valid_mask_train.any():
-                    train_acc_eq = accuracy_score(y_train[valid_mask_train], eq_pred_train[valid_mask_train])
-                    train_f1_eq = f1_score(y_train[valid_mask_train], eq_pred_train[valid_mask_train], average='binary')
-                    train_auc_eq = roc_auc_score(y_train[valid_mask_train], eq_pred_cont_train[valid_mask_train])
-                else:
-                    train_acc_eq, train_f1_eq, train_auc_eq = np.nan, np.nan, np.nan
-            else:
-                train_acc_eq = accuracy_score(y_train, eq_pred_train)
-                train_f1_eq = f1_score(y_train, eq_pred_train, average='binary')
-                train_auc_eq = roc_auc_score(y_train, eq_pred_cont_train)
-            
-            # Val metrics if val data provided
-            val_acc_eq, val_f1_eq, val_auc_eq = np.nan, np.nan, np.nan
-            if X_val is not None and y_val is not None:
-                eq_pred_cont_val = model.predict(X_val_data, index=eq_index)
-                eq_pred_val = (eq_pred_cont_val >= 0.5).astype(int)
+            # Handle train metrics with NaN filtering using utility function
+            train_valid_mask_eq = np.isfinite(eq_pred_cont_train)
+            if train_valid_mask_eq.any():
+                y_train_filtered = y_train[train_valid_mask_eq] if not train_valid_mask_eq.all() else y_train
+                eq_pred_cont_train_filtered = eq_pred_cont_train[train_valid_mask_eq] if not train_valid_mask_eq.all() else eq_pred_cont_train
+                eq_pred_train_valid = (eq_pred_cont_train_filtered >= 0.5).astype(int)
                 
-                # Safeguard against NaNs in val predictions
-                valid_mask_val = np.isfinite(eq_pred_cont_val)
-                if not valid_mask_val.all():
-                    logger.warning(f"Equation {i}: {valid_mask_val.sum()}/{len(valid_mask_val)} valid predictions on val")
-                    if valid_mask_val.any():
-                        val_acc_eq = accuracy_score(y_val[valid_mask_val], eq_pred_val[valid_mask_val])
-                        val_f1_eq = f1_score(y_val[valid_mask_val], eq_pred_val[valid_mask_val], average='binary')
-                        val_auc_eq = roc_auc_score(y_val[valid_mask_val], eq_pred_cont_val[valid_mask_val])
-                else:
-                    val_acc_eq = accuracy_score(y_val, eq_pred_val)
-                    val_f1_eq = f1_score(y_val, eq_pred_val, average='binary')
-                    val_auc_eq = roc_auc_score(y_val, eq_pred_cont_val)
+                train_metrics_eq = get_classification_results(y_train_filtered, eq_pred_train_valid, 
+                                                            eq_pred_cont_train_filtered, prefix="")
+                train_acc_eq, train_f1_eq, train_auc_eq = train_metrics_eq['acc'], train_metrics_eq['f1'], train_metrics_eq['auc']
+            else:
+                train_acc_eq, train_f1_eq, train_auc_eq = np.nan, np.nan, np.nan
+            
+            # Handle val metrics with NaN filtering using utility function
+            val_valid_mask_eq = np.isfinite(eq_pred_cont_val)
+            if val_valid_mask_eq.any():
+                y_val_filtered = y_val[val_valid_mask_eq] if not val_valid_mask_eq.all() else y_val
+                eq_pred_cont_val_filtered = eq_pred_cont_val[val_valid_mask_eq] if not val_valid_mask_eq.all() else eq_pred_cont_val
+                eq_pred_val_valid = (eq_pred_cont_val_filtered >= 0.5).astype(int)
+                
+                val_metrics_eq = get_classification_results(y_val_filtered, eq_pred_val_valid, 
+                                                          eq_pred_cont_val_filtered, prefix="")
+                val_acc_eq, val_f1_eq, val_auc_eq = val_metrics_eq['acc'], val_metrics_eq['f1'], val_metrics_eq['auc']
+            else:
+                val_acc_eq, val_f1_eq, val_auc_eq = np.nan, np.nan, np.nan
         
         except Exception as e:
             logger.warning(f"Error calculating metrics for equation {i}: {str(e)}")
@@ -477,22 +477,10 @@ def perform_symbolic_classification(
             'equation_index': eq_index
         })
     
-    # Recheck train predictions for best model (with NaN safeguards)
-    valid_mask_train = np.isfinite(train_pred_cont)
-    if not valid_mask_train.all():
-        logger.warning(f"Best model: {valid_mask_train.sum()}/{len(valid_mask_train)} valid train predictions")
-        if valid_mask_train.any():
-            # Recalculate metrics using only valid predictions
-            valid_train_pred = train_pred[valid_mask_train]
-            valid_train_pred_cont = train_pred_cont[valid_mask_train]
-            valid_y_train = y_train[valid_mask_train]
-            
-            train_acc = accuracy_score(valid_y_train, valid_train_pred)
-            train_f1 = f1_score(valid_y_train, valid_train_pred, average='binary')
-            train_auc = roc_auc_score(valid_y_train, valid_train_pred_cont)
-        else:
-            train_acc, train_f1, train_auc = np.nan, np.nan, np.nan
-    
+    logger.info(f"Symbolic Classification Perf")
+    logger.info(f"Train results: {train_metrics}")
+    logger.info(f"Validation results: {val_metrics}")
+
     # Prepare results dict
     results = {
         'model': model,
@@ -500,28 +488,16 @@ def perform_symbolic_classification(
         'train_pred_cont': train_pred_cont,
         'train_pred': train_pred,
         'train_proba': train_pred_cont,
-        'train_acc': train_acc,
-        'train_f1': train_f1,
-        'train_auc': train_auc,
+        'val_pred_cont': val_pred_cont,
+        'val_pred': val_pred,
+        'val_proba': val_pred_cont,
         'all_equations': pd.DataFrame(all_eqs),
         'scaler': scaler,  # Include the scaler if scaling was used
     }
-
-    # Evaluate on val data
-    if X_val is not None and y_val is not None:
-        results.update({
-            'val_pred_cont': val_pred_cont,
-            'val_pred': val_pred,
-            'val_proba': val_pred_cont,
-            'val_acc': val_acc,
-            'val_f1': val_f1,
-            'val_auc': val_auc
-        })
-
-        logger.info(
-            f"Symbolic Classification (Val) - Accuracy: {val_acc:.4f}, "
-            f"F1: {val_f1:.4f}, AUC: {val_auc:.4f}"
-        )
+    
+    # Add all metrics to results
+    results.update(train_metrics)
+    results.update(val_metrics)
 
     return results
 

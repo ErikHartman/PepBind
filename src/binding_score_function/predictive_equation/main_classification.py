@@ -1,7 +1,7 @@
 import os
 import pandas as pd
-import numpy as np
 from sklearn.metrics import roc_curve, roc_auc_score
+from utils import create_model_comparison
 
 from classification import (
     train_logistic_regression,
@@ -106,11 +106,11 @@ if __name__ == "__main__":
         y_train,
         X_val,
         y_val,
-        niterations=500,
+        niterations=50, #500,
         populations=50,
         population_size=50,
         model_selection="best",
-        select_k_features=15,
+        select_k_features=10,
         scale_features=True
     )
 
@@ -287,34 +287,15 @@ if __name__ == "__main__":
         "SVC": svc_results,
         "Symbolic": symb_results,
     }
-    comparison = {
-        "Model": [],
-        "Train Accuracy": [],
-        "Train F1": [],
-        "Train AUC": [],
-        "Val Accuracy": [],
-        "Val F1": [],
-        "Val AUC": [],
-    }
-
+    
     # Calculate ROC curves for each model
     roc_data = {}
     for model_name, result in results_dict.items():
-        comparison["Model"].append(model_name)
-        comparison["Train Accuracy"].append(result.get("train_acc", np.nan))
-        comparison["Train F1"].append(result.get("train_f1", np.nan))
-        comparison["Train AUC"].append(result.get("train_auc", np.nan))
-        comparison["Val Accuracy"].append(result.get("val_acc", np.nan))
-        comparison["Val F1"].append(result.get("val_f1", np.nan))
-        comparison["Val AUC"].append(result.get("val_auc", np.nan))
-        
-        # Calculate ROC curve data for each model
-        if "val_proba" in result and result["val_proba"] is not None:
-            fpr, tpr, _ = roc_curve(y_val, result["val_proba"])
-            roc_auc = result.get("val_auc", roc_auc_score(y_val, result["val_proba"]))
-            roc_data[model_name] = (fpr, tpr, roc_auc)
+        fpr, tpr, _ = roc_curve(y_val, result["val_proba"])
+        roc_auc = result.get("val_auc", roc_auc_score(y_val, result["val_proba"]))
+        roc_data[model_name] = (fpr, tpr, roc_auc)
 
-    comparison_df = pd.DataFrame(comparison)
+    comparison_df = create_model_comparison(results_dict)
     comparison_df.to_csv(os.path.join(output_dir, "model_comparison.csv"), index=False)
 
     print("Plotting model comparison")

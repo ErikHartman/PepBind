@@ -203,8 +203,8 @@ def scoring_func_classification(X, equation_string):
 
 def main():
 
-    regression_equation_string = "0.388913840578385*(0.743588986647955*interface_dG - 1)**2 + 6.3203826"
-    classification_equation_string = "0.4791635 - 0.34893492*peptide_pae"
+    regression_equation_string = "0.39*(0.74*interface_dG - 1)**2 + 6.3"
+    classification_equation_string = "0.48 - 0.35*peptide_pae"
 
     X_real, y_real, X_shuffle, X_random = load_test_data()
     
@@ -222,10 +222,14 @@ def main():
     # regression plot
     plt.figure(figsize=(4, 4))
     sns.regplot(x=y_real, y=X_real_scaled_predictions_reg)
+    plt.xlabel("True pKd")
+    plt.ylabel("Predicted pKd")
     plt.savefig("/home/er8813ha/immunopeptides/plots/test/regression_scatter_plot.png", dpi=300)
     
     plt.figure(figsize=(4, 4))
     sns.regplot(x=y_real, y=X_real_scaled_predictions_class)
+    plt.xlabel("True pKd")
+    plt.ylabel("Predicted pKd")
     plt.savefig("/home/er8813ha/immunopeptides/plots/test/classification_scatter_plot.png", dpi=300)
 
     # histogram of classification predictions
@@ -233,6 +237,8 @@ def main():
     sns.kdeplot(X_real_scaled_predictions_class, fill=True, color=color_palette['real'])
     sns.kdeplot(X_shuffle_scaled_predictions_class, fill=True, color=color_palette['shuffled'])
     sns.kdeplot(X_random_scaled_predictions_class, fill=True, color=color_palette['random'])
+    plt.xlabel("Predicted pKd")
+    plt.ylabel("Density")
     plt.savefig("/home/er8813ha/immunopeptides/plots/test/classification_histogram.png", dpi=300)
 
     # histogram of regression predictions
@@ -240,6 +246,8 @@ def main():
     sns.kdeplot(X_real_scaled_predictions_reg, fill=True, color=color_palette['real'])
     sns.kdeplot(X_shuffle_scaled_predictions_reg, fill=True, color=color_palette['shuffled'])
     sns.kdeplot(X_random_scaled_predictions_reg, fill=True, color=color_palette['random'])
+    plt.xlabel("Predicted pKd")
+    plt.ylabel("Density")
     plt.savefig("/home/er8813ha/immunopeptides/plots/test/regression_histogram.png", dpi=300)
 
 

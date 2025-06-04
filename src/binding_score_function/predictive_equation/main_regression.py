@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
+from utils import create_model_comparison
 
 from regression import (
     train_lasso,
@@ -65,11 +65,11 @@ if __name__ == "__main__":
         y_train,
         X_val,
         y_val,
-        niterations=500,
+        niterations=100,#500,
         populations=50,
         population_size=50,
         model_selection="best",
-        select_k_features=15,
+        select_k_features=10,
         scale_features=True,
     )
 
@@ -179,24 +179,7 @@ if __name__ == "__main__":
         "SVR": svr_results,
         "Symbolic": symb_results,
     }
-    comparison = {
-        "Model": [],
-        "Train RMSE": [],
-        "Train R²": [],
-        "Val RMSE": [],
-        "Val R²": [],
-        "Val MAE": [],
-    }
-
-    for model_name, result in results_dict.items():
-        comparison["Model"].append(model_name)
-        comparison["Train RMSE"].append(result.get("train_rmse", np.nan))
-        comparison["Train R²"].append(result.get("train_r2", np.nan))
-        comparison["Val RMSE"].append(result.get("val_rmse", np.nan))
-        comparison["Val R²"].append(result.get("val_r2", np.nan))
-        comparison["Val MAE"].append(result.get("val_mae", np.nan))
-
-    comparison_df = pd.DataFrame(comparison)
+    comparison_df = create_model_comparison(results_dict)
     comparison_df.to_csv(os.path.join(output_dir, "model_comparison.csv"), index=False)
 
     plot_model_comparison(
