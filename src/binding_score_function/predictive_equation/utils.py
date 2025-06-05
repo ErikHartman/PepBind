@@ -1,14 +1,17 @@
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import pandas as pd
 import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score, accuracy_score, f1_score, roc_auc_score
 from scipy.stats import spearmanr, kendalltau, pearsonr
 
-def scale_data(X_train: pd.DataFrame, X_test: pd.DataFrame = None):
+def scale_data(X_train: pd.DataFrame, X_test: pd.DataFrame = None, type="minmax"):
     """
     Scale features using StandardScaler.
     """
-    scaler = StandardScaler()
+    if type == "minmax":
+        scaler = MinMaxScaler()
+    elif type == "standard":
+        scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
 
     X_test_scaled = scaler.transform(X_test)
@@ -60,14 +63,6 @@ def get_classification_results(y_true, y_pred, y_proba, prefix=""):
     """
     Calculate comprehensive classification metrics.
     
-    Args:
-        y_true: True binary labels
-        y_pred: Predicted binary labels  
-        y_proba: Predicted probabilities for positive class
-        prefix: Prefix for metric names (e.g., "train_", "val_")
-    
-    Returns:
-        Dictionary of classification metrics
     """
     acc = accuracy_score(y_true, y_pred)
     f1 = f1_score(y_true, y_pred, average='binary')

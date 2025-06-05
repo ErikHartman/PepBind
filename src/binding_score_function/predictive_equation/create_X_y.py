@@ -116,20 +116,19 @@ def plot_matrix(
                 significance = "*"
             
             # Format annotation text with correlation value and significance stars
-            annotation_text = f"r = {correlation:.2f}{significance}"
+            annotation_text = f"r = {correlation:.2f}"
             ax.annotate(annotation_text, xy=(0.05, 0.95), xycoords='axes fraction', 
-                        fontsize=10, ha='left', va='top',
-                        bbox=dict(boxstyle='round,pad=0.3', fc='white', alpha=0.7))
+                        fontsize=10, ha='left', va='top')
             
             ax.set_ylabel("pKd")
         
         elif kind == "distribution":
             # Plot histograms for distribution comparison
-            sns.histplot(X[col], kde=True, bins=50, alpha=0.5, label="Real", ax=ax, color="blue")
+            sns.histplot(X[col], kde=True, bins=50, alpha=0.5, label="Real", ax=ax, color="#2C8C99")
             if shuffled is not None:
-                sns.histplot(shuffled[col], kde=True, bins=50, alpha=0.5, label="Shuffled", ax=ax, color="purple")
+                sns.histplot(shuffled[col], kde=True, bins=50, alpha=0.5, label="Shuffled", ax=ax, color="#E88873")
             if random is not None:
-                sns.histplot(random[col], kde=True, bins=50, alpha=0.5, label="Random", ax=ax, color="pink")
+                sns.histplot(random[col], kde=True, bins=50, alpha=0.5, label="Random", ax=ax, color="#F46036")
             ax.legend(frameon=False)
             
         ax.set_title(col)
@@ -137,15 +136,21 @@ def plot_matrix(
     plt.savefig(fname)
     plt.close(fig)
 
-    plt.figure(figsize=(3, 3))
+    fig, axs = plt.subplots(1,2, figsize=(6,3))
     if kind == "correlation":
-        sns.regplot(x=X["iptm"], y=y, scatter_kws={"color":"navy"}, line_kws={"color": "black"})
+        sns.regplot(x=X["iptm"], y=y, ax=axs[0], scatter_kws={'s':5}, line_kws={"color": "#E88873"})
+        sns.regplot(x=X["interface_dG"], y=y, ax=axs[1], scatter_kws={'s':5}, line_kws={"color": "#E88873"})
+        axs[0].annotate(f"r = {stats.pearsonr(X['iptm'], y)[0]:.2f}", xy=(0.05, 0.95), xycoords='axes fraction', ha='left', va='top')
+        axs[1].annotate(f"r = {stats.pearsonr(X['interface_dG'], y)[0]:.2f}", xy=(0.05, 0.95), xycoords='axes fraction', ha='left', va='top')
     elif kind == "distribution":
-        sns.histplot(X["iptm"], kde=True, bins=50, alpha=0.5, label="Real", color="blue")
-        if shuffled is not None:
-            sns.histplot(shuffled["iptm"], kde=True, bins=50, alpha=0.5, label="Shuffled", color="purple")
-        if random is not None:
-            sns.histplot(random["iptm"], kde=True, bins=50, alpha=0.5, label="Random", color="pink")
+        sns.histplot(X["iptm"], kde=True, bins=50,  label="Real", color ="#2C8C99", ax=axs[0])
+        sns.histplot(shuffled["iptm"], kde=True, bins=50,  label="Shuffled", color="#E88873", ax=axs[0])
+        sns.histplot(random["iptm"], kde=True, bins=50,  label="Random", color="#F46036", ax=axs[0])
+        sns.histplot(X["interface_dG"], kde=True, bins=50, label="Real",color ="#2C8C99", ax=axs[1])
+        sns.histplot(shuffled["interface_dG"], kde=True, bins=50,  label="Shuffled", color="#E88873", ax=axs[1])
+        sns.histplot(random["interface_dG"], kde=True, bins=50, label="Random", color="#F46036", ax=axs[1])
+
+
     plt.legend(frameon=False)
     plt.tight_layout()
     plt.savefig(fname.with_suffix(".iptm.svg"))
@@ -554,7 +559,7 @@ def remove_outliers(df: pd.DataFrame) -> pd.DataFrame:
     
     # Define outlier thresholds for specific columns
     outlier_thresholds = {
-        "interface_dG": (-100, 100),  # interface_dG between -100 and 100
+        "interface_dG": (-100, 25),  # interface_dG between -100 and 100
         "rosetta_score": (-1200, 1500),        # rosetta_score less than 1500
         "interface_sasa": 4000         # interface_sasa less than 4000
     }

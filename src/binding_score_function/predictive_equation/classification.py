@@ -259,7 +259,7 @@ def perform_symbolic_classification(
     if binary_operators is None:
         binary_operators = ["+", "-", "*", "/"]
     if unary_operators is None:
-        unary_operators = ["square", "log", "sqrt"]
+        unary_operators = []
 
     # Apply scaling if requested
     if scale_features:

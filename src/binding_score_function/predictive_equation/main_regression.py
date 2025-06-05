@@ -52,7 +52,7 @@ if __name__ == "__main__":
     print(f"X_val shape: {X_val.shape}")
 
     # Save scaling parameters for later use
-    scaling_params = X_train.describe().T[["mean", "std"]]
+    scaling_params = X_train.describe().T[["mean", "std", "min", "max"]]
     scaling_params.to_csv(
         os.path.join(output_dir, "scaling_params.csv"), index=True)
 
@@ -65,7 +65,7 @@ if __name__ == "__main__":
         y_train,
         X_val,
         y_val,
-        niterations=200,
+        niterations=300,
         populations=50,
         population_size=50,
         model_selection="best",
@@ -108,7 +108,7 @@ if __name__ == "__main__":
         y_val,
         lasso_results.get("val_pred", None),
         model_name="Lasso",
-        output_path=os.path.join(output_dir, "lasso_scatter.png"),
+        output_path=os.path.join(output_dir, "lasso_scatter.svg"),
     )
 
     plot_regression_scatter(
@@ -117,7 +117,7 @@ if __name__ == "__main__":
         y_val,
         rf_results.get("val_pred", None),
         model_name="Random Forest",
-        output_path=os.path.join(output_dir, "rf_scatter.png"),
+        output_path=os.path.join(output_dir, "rf_scatter.svg"),
     )
 
     plot_regression_scatter(
@@ -126,7 +126,7 @@ if __name__ == "__main__":
         y_val,
         svr_results.get("val_pred", None),
         model_name="SVR",
-        output_path=os.path.join(output_dir, "svr_scatter.png"),
+        output_path=os.path.join(output_dir, "svr_scatter.svg"),
     )
 
     plot_regression_scatter(
@@ -135,20 +135,20 @@ if __name__ == "__main__":
         y_val,
         symb_results.get("val_pred", None),
         model_name="Symbolic",
-        output_path=os.path.join(output_dir, "symbolic_scatter.png"),
+        output_path=os.path.join(output_dir, "symbolic_scatter.svg"),
     )
 
     plot_feature_importances(
         lasso_results["coefficients"],
-        model_name="Lasso",
-        output_path=os.path.join(output_dir, "lasso_coef.png"),
+        output_path=os.path.join(output_dir, "lasso_coef.svg"),
     )
 
     plot_feature_importances(
         rf_results["feature_importance"],
-        model_name="Random Forest",
-        output_path=os.path.join(output_dir, "rf_importance.png"),
+        output_path=os.path.join(output_dir, "rf_importance.svg"),
     )
+
+    rf_results["feature_importance"].to_csv(os.path.join(output_dir, "rf_feature_importance.csv"), index=False)
 
     # Save top symbolic equations to CSV
     if 'top_equations' in symb_results:
@@ -169,7 +169,7 @@ if __name__ == "__main__":
             symb_results['all_equations'],
             metric='val_r2',
             model_type='regression',
-            output_path=os.path.join(output_dir, "symbolic_regression_complexity_tradeoff.png"),
+            output_path=os.path.join(output_dir, "symbolic_regression_complexity_tradeoff.svg"),
             lower_is_better=False
         )
 
@@ -182,8 +182,17 @@ if __name__ == "__main__":
     comparison_df = create_model_comparison(results_dict)
     comparison_df.to_csv(os.path.join(output_dir, "model_comparison.csv"), index=False)
 
+    # Create regression_data dictionary for scatter plot visualization
+    regression_data = {'y_true': y_val}
+    
+    for model_name, results in results_dict.items():
+        if 'val_pred' in results:
+            regression_data[model_name] = results['val_pred']
+    
     plot_model_comparison(
-        comparison_df, output_path=os.path.join(output_dir, "model_comparison.png")
+        comparison_df, 
+        regression_data=regression_data,
+        output_path=os.path.join(output_dir, "model_comparison.svg")
     )
 
     print("\nPerforming analysis on shuffle and random data...")
