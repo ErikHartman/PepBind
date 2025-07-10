@@ -1,13 +1,24 @@
-data/databases/0_uniprot2reactome_all_levels_2024_02_04.txt
-
 .DS_Store
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+.vscode
 
 # C extensions
 *.so
+
+temp_plots/
+plots/
+scoring_slurm.sh
+predictive_equation_slurm.sh
+
+__pycache__
+
+outputs
+*.err
+*.out
+
 
 # Distribution / packaging
 .Python
@@ -53,6 +64,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+
 
 # Translations
 *.mo
@@ -172,3 +184,6 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# VS code settings
+*.code-workspace

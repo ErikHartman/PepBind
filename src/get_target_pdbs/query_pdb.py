@@ -1,12 +1,13 @@
-#!/usr/bin/env python3
 import requests
 import pandas as pd
-import time
+import os
 from tqdm import tqdm
 import json
 
+data_dir = os.path.abspath("/srv/data1/general/immunopeptides_data/")
+output_dir = os.path.abspath(os.path.join(data_dir, "outputs/target_data"))
 extracellular_df = pd.read_csv(
-    "/Users/erikhartman/dev/immunopeptides/data/databases/1_proteins_extracellular_cell_membrane.txt",
+    os.path.join(output_dir, "1_proteins_extracellular_cell_membrane.txt"),
     sep="\t",
 )
 
@@ -77,8 +78,24 @@ result_df = extracellular_df.merge(pdb_df, on="uniprot", how="left")
 result_df = result_df.dropna(subset=["pdb_ids"])
 print(len(result_df))
 
-output_file = "/Users/erikhartman/dev/immunopeptides/data/databases/2_proteins_extracellular_cell_membrane_with_pdb.txt"
+output_file = os.path.join(output_dir, "2_proteins_extracellular_cell_membrane_with_pdb.txt")
 result_df.to_csv(output_file, sep="\t", index=False)
 
 print(f"Results saved to {output_file}")
 print(result_df.head())
+
+for root, dirs, files in os.walk(output_dir):
+    for d in dirs:
+        try:
+            os.chmod(os.path.join(root, d), 0o777)
+        except:
+            print(f"Failed to change permissions for directory: {os.path.join(root, d)}")
+            continue
+    for f in files:
+        try:
+            os.chmod(os.path.join(root, f), 0o777)
+        except:
+            print(f"Failed to change permissions for file: {os.path.join(root, f)}")
+            continue
+
+
