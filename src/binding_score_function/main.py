@@ -233,7 +233,7 @@ def setup_directory_structure() -> Dict[str, str]:
             os.path.join(base_dir, "inputs/manually_curated_pdbs.csv")
         ),
         "index_dir": os.path.abspath(
-            os.path.join(base_dir, "inputs/pdbbind_index_files")
+        "/home/ma7631si/home/immunopeptides/data/"
         ),
         "output_dir": os.path.abspath(output_dir),
         "0_complexes": os.path.abspath(
