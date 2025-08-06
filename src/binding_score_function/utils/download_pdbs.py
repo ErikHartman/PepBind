@@ -254,10 +254,10 @@ def download_pdbs(
     """
     # Load PDBBind data
     protein_ligands_path = os.path.join(
-        pdbbind_index_files_path, "INDEX_PL.2020"
+        pdbbind_index_files_path, "INDEX_general_PP.2020R1.lst"
     )  # protein ligand
     protein_protein_path = os.path.join(
-        pdbbind_index_files_path, "INDEX_PP.2020"
+        pdbbind_index_files_path, "INDEX_general_PL.2020R1.lst"
     )  # protein peptide
 
     df_pl = convert_to_index_file_to_dataframe(protein_ligands_path)
