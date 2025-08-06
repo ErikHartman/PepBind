@@ -1,7 +1,7 @@
 import os
 import pandas as pd
-import numpy as np
 from sklearn.metrics import roc_curve, roc_auc_score
+from utils import create_model_comparison
 
 from classification import (
     train_logistic_regression,
@@ -22,7 +22,7 @@ from plotting import (
 if __name__ == "__main__":
     # Data paths setup
     base_path = "/srv/data1/general/immunopeptides_data/"
-    scores_path = os.path.join(base_path, "outputs/binding_score_function/4_processed_scores_new/")
+    scores_path = os.path.join(base_path, "outputs/binding_score_function_prod/4_processed_scores/")
     output_dir = "./plots/classification"
     os.makedirs(output_dir, exist_ok=True)
 
@@ -90,7 +90,7 @@ if __name__ == "__main__":
     y_val = X_val.pop('label').values
 
     # Save scaling parameters for later use
-    scaling_params = X_train.describe().T[["mean", "std"]]
+    scaling_params = X_train.describe().T[["mean", "std", "min", "max"]]
     scaling_params.to_csv(
         os.path.join(output_dir, "scaling_params.csv"), index=True)
 
@@ -106,7 +106,7 @@ if __name__ == "__main__":
         y_train,
         X_val,
         y_val,
-        niterations=500,
+        niterations=300,
         populations=50,
         population_size=50,
         model_selection="best",
@@ -181,7 +181,7 @@ if __name__ == "__main__":
         y_train,
         logreg_results["train_proba"],
         model_name="Logistic Regression",
-        output_path=os.path.join(output_dir, "logreg_metrics.png"),
+        output_path=os.path.join(output_dir, "logreg_metrics.svg"),
     )
 
     print("Plotting classification metrics")
@@ -192,7 +192,7 @@ if __name__ == "__main__":
         y_train,
         rf_results["train_proba"],
         model_name="Random Forest",
-        output_path=os.path.join(output_dir, "rf_metrics.png"),
+        output_path=os.path.join(output_dir, "rf_metrics.svg"),
     )
 
     plot_classification_metrics(
@@ -202,7 +202,7 @@ if __name__ == "__main__":
         y_train,
         svc_results["train_proba"],
         model_name="SVC",
-        output_path=os.path.join(output_dir, "svc_metrics.png"),
+        output_path=os.path.join(output_dir, "svc_metrics.svg"),
     )
 
     plot_classification_metrics(
@@ -212,7 +212,7 @@ if __name__ == "__main__":
         y_train,
         symb_results["train_proba"],
         model_name="Symbolic",
-        output_path=os.path.join(output_dir, "symbolic_metrics.png")
+        output_path=os.path.join(output_dir, "symbolic_metrics.svg")
     )
 
     print("Plotting probability histograms")
@@ -220,42 +220,42 @@ if __name__ == "__main__":
         y_val,
         logreg_results["val_proba"],
         model_name="Logistic Regression",
-        output_path=os.path.join(output_dir, "logreg_proba_hist.png"),
+        output_path=os.path.join(output_dir, "logreg_proba_hist.svg"),
     )
 
     plot_probability_histograms(
         y_val,
         rf_results["val_proba"],
         model_name="Random Forest",
-        output_path=os.path.join(output_dir, "rf_proba_hist.png"),
+        output_path=os.path.join(output_dir, "rf_proba_hist.svg"),
     )
 
     plot_probability_histograms(
         y_val,
         svc_results["val_proba"],
         model_name="SVC",
-        output_path=os.path.join(output_dir, "svc_proba_hist.png"),
+        output_path=os.path.join(output_dir, "svc_proba_hist.svg"),
     )
 
     plot_probability_histograms(
         y_val,
         symb_results["val_proba"],
         model_name="Symbolic",
-        output_path=os.path.join(output_dir, "symbolic_proba_hist.png"),
+        output_path=os.path.join(output_dir, "symbolic_proba_hist.svg"),
     )
 
     print("Plotting feature importances")
     plot_feature_importances(
         logreg_results["coefficients"],
-        model_name="LogReg",
-        output_path=os.path.join(output_dir, "logreg_coef.png"),
+        output_path=os.path.join(output_dir, "logreg_coef.svg"),
     )
 
     plot_feature_importances(
         rf_results["feature_importance"],
-        model_name="Random Forest",
-        output_path=os.path.join(output_dir, "rf_importance.png"),
+        output_path=os.path.join(output_dir, "rf_importance.svg"),
     )
+
+    rf_results["feature_importance"].to_csv(os.path.join(output_dir, "rf_feature_importance.csv"), index=False)
 
     # Save top symbolic equations to CSV
     if 'top_equations' in symb_results:
@@ -276,7 +276,7 @@ if __name__ == "__main__":
             symb_results['all_equations'],
             metric='val_auc', 
             model_type='classification',
-            output_path=os.path.join(output_dir, "symbolic_classification_complexity_tradeoff.png"),
+            output_path=os.path.join(output_dir, "symbolic_classification_complexity_tradeoff.svg"),
             lower_is_better=False
         )
 
@@ -287,41 +287,22 @@ if __name__ == "__main__":
         "SVC": svc_results,
         "Symbolic": symb_results,
     }
-    comparison = {
-        "Model": [],
-        "Train Accuracy": [],
-        "Train F1": [],
-        "Train AUC": [],
-        "Val Accuracy": [],
-        "Val F1": [],
-        "Val AUC": [],
-    }
-
+    
     # Calculate ROC curves for each model
     roc_data = {}
     for model_name, result in results_dict.items():
-        comparison["Model"].append(model_name)
-        comparison["Train Accuracy"].append(result.get("train_acc", np.nan))
-        comparison["Train F1"].append(result.get("train_f1", np.nan))
-        comparison["Train AUC"].append(result.get("train_auc", np.nan))
-        comparison["Val Accuracy"].append(result.get("val_acc", np.nan))
-        comparison["Val F1"].append(result.get("val_f1", np.nan))
-        comparison["Val AUC"].append(result.get("val_auc", np.nan))
-        
-        # Calculate ROC curve data for each model
-        if "val_proba" in result and result["val_proba"] is not None:
-            fpr, tpr, _ = roc_curve(y_val, result["val_proba"])
-            roc_auc = result.get("val_auc", roc_auc_score(y_val, result["val_proba"]))
-            roc_data[model_name] = (fpr, tpr, roc_auc)
+        fpr, tpr, _ = roc_curve(y_val, result["val_proba"])
+        roc_auc = result.get("val_auc", roc_auc_score(y_val, result["val_proba"]))
+        roc_data[model_name] = (fpr, tpr, roc_auc)
 
-    comparison_df = pd.DataFrame(comparison)
+    comparison_df = create_model_comparison(results_dict)
     comparison_df.to_csv(os.path.join(output_dir, "model_comparison.csv"), index=False)
 
     print("Plotting model comparison")
     plot_model_comparison(
         comparison_df, 
         roc_data=roc_data,
-        output_path=os.path.join(output_dir, "model_comparison.png")
+        output_path=os.path.join(output_dir, "model_comparison.svg")
     )
 
     # Extract real val samples and correlate pKd with classifier probabilities
@@ -373,10 +354,10 @@ if __name__ == "__main__":
             real_val_pkd["pKd"].values,
             val_probabilities,
             model_names,
-            output_path=os.path.join(output_dir, "pkd_probability_correlation.png"),
+            output_path=os.path.join(output_dir, "pkd_probability_correlation.svg"),
             pkd_values_train=real_train_pkd["pKd"].values,
             probabilities_train=train_probabilities
         )
-        print(f"Generated pKd-probability correlation plot at {output_dir}/pkd_probability_correlation.png")
+        print(f"Generated pKd-probability correlation plot at {output_dir}/pkd_probability_correlation.svg")
 
     print("Classification pipeline complete!")

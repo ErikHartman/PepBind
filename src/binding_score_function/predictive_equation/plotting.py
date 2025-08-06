@@ -6,14 +6,14 @@ import pandas as pd
 import os
 import argparse
 from sklearn.metrics import roc_curve, roc_auc_score
-from scipy.stats import pearsonr, spearmanr
+from scipy.stats import pearsonr
 
 color_palette = {
-    "symbolic": "#124E78", 
-    "lasso": "#B388EB",    
-    "rf": "#57A773",        
+    "symbolic": "#B388EB", 
+    "lasso": "#3E88BC",    
+    "rf": "#57A3A7",        
     "svr": "#2C8C99",   
-    "logreg": "#B388EB", 
+    "logreg": "#3E88BC", 
     "svc": "#2C8C99",     
 
     "random": "#F46036",
@@ -21,7 +21,7 @@ color_palette = {
     "real": "#2C8C99",  
 
     "train": "#2C8C99", 
-    "val": "#3943B7", 
+    "val": "#595FA7", 
 
 }
     
@@ -32,7 +32,7 @@ def plot_classification_metrics(y_true, y_pred, y_proba, y_train=None, train_pro
     Plot confusion matrix and ROC curve for classification results.
     If train data is provided, both train and val ROC curves will be shown.
     """
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8,4))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6,3))
     
     # Confusion Matrix
     cm = confusion_matrix(y_true, y_pred)
@@ -168,12 +168,12 @@ def plot_regression_scatter(
         plt.savefig(output_path, dpi=300)
     plt.close()
 
-def plot_feature_importances(feature_df, model_name="Model", output_path=None):
+def plot_feature_importances(feature_df, output_path=None):
     """
     Creates and saves a barplot of feature importances or coefficients.
     """
-    plt.figure(figsize=(4,4))
-    feature_df = feature_df.sort_values(by=feature_df.columns[1], ascending=False).head(10)
+    plt.figure(figsize=(3,3))
+    feature_df = feature_df.sort_values(by=feature_df.columns[1], ascending=False).head(7)
     plt.barh(feature_df['Feature'], feature_df.iloc[:, 1])
     
     if 'Importance' in feature_df.columns:
@@ -187,13 +187,17 @@ def plot_feature_importances(feature_df, model_name="Model", output_path=None):
         plt.savefig(output_path, dpi=300)
     plt.close()
 
-def plot_model_comparison(comparison_df, roc_data=None, output_path=None):
+def plot_model_comparison(comparison_df, roc_data=None, regression_data=None, output_path=None):
+    """
+    Plot comparison of model performance metrics.
+    
+    """
     model_names = comparison_df['Model'].values
     metrics = [col for col in comparison_df.columns if col != 'Model']
     
     # If it's classification metrics
-    if 'Train Accuracy' in metrics:
-        metric_list = ['Val Accuracy','Val AUC']
+    if 'train_acc' in metrics:
+        metric_list = ['val_auc']
         metric_list = [m for m in metric_list if m in metrics]
         
         # Determine if we should add ROC curve subplot
@@ -211,10 +215,10 @@ def plot_model_comparison(comparison_df, roc_data=None, output_path=None):
             ax.set_ylabel(metric)
             ax.tick_params(axis='x', rotation=45)
 
-            if metric == 'Val AUC':
+            if metric == 'val_auc':
                 # Set y-axis limits for AUC
                 ax.set_ylim([0.8, 1])
-            if metric == 'Val Accuracy':
+            if metric == 'val_acc':
                 # Set y-axis limits for accuracy
                 ax.set_ylim([0.6, 1])
         
@@ -226,7 +230,7 @@ def plot_model_comparison(comparison_df, roc_data=None, output_path=None):
                     fpr, tpr, roc_auc = roc_data[model]
                     ax.plot(fpr, tpr, lw=2, label=f'{model} (AUC = {roc_auc:.3f})', 
                             color=color_palette.get(model.lower(), 'gray'))
-            ax.set_xlim([0.0, 1.0])
+            ax.set_xlim([-.05, 1.0])
             ax.set_ylim([0.0, 1.05])
             ax.set_xlabel('False Positive Rate')
             ax.set_ylabel('True Positive Rate')
@@ -235,14 +239,20 @@ def plot_model_comparison(comparison_df, roc_data=None, output_path=None):
         plt.tight_layout()
     
     # If it's regression metrics
-    elif 'Train RMSE' in metrics:
+    elif 'train_rmse' in metrics:
         regression_metrics = []
-        for m in ['Val MAE', 'Val R²']:
+        for m in ['val_r']:
             if m in metrics:
                 regression_metrics.append(m)
-        n_subplots = len(regression_metrics)
+        
+        # Determine if we should add regression scatter plot subplot
+        add_scatter_subplot = regression_data is not None
+        
+        n_subplots = len(regression_metrics) + (1 if add_scatter_subplot else 0)
         fig, axs = plt.subplots(1, n_subplots, figsize=(3 * n_subplots, 3), squeeze=False)
         axs = axs.flatten()
+        
+        # Plot bar charts for each metric
         for i, metric in enumerate(regression_metrics):
             colors = [color_palette.get(x.lower(), 'gray') for x in model_names]
             ax = axs[i]
@@ -250,8 +260,91 @@ def plot_model_comparison(comparison_df, roc_data=None, output_path=None):
             ax.set_ylabel(metric)
             ax.tick_params(axis='x', rotation=45)
             ax.set_ylim([min(comparison_df[metric].values) * 0.9, max(comparison_df[metric].values) * 1.1])
+            
+        # Add regression scatter plot if data is provided
+        if add_scatter_subplot:
+            ax = axs[-1]
+            y_true = regression_data.get('y_true', None)
+            
+            if y_true is not None:
+                for model in regression_data:
+                    if model != 'y_true' and model in regression_data:
+                        y_pred = regression_data[model]
+                        r = pearsonr(y_true, y_pred)[0]
+                        sns.regplot(
+                            x=y_true, y=y_pred, 
+                            label=f'{model}: {r:.2f}',
+                            scatter_kws={'color': color_palette.get(model.lower(), 'gray'), 's':5},
+                            line_kws={'color': color_palette.get(model.lower(), 'gray')},
+                        )
+                        
+                
+                ax.set_xlabel('pKd')
+                ax.set_ylabel('Predicted pKd')
+                ax.legend(frameon=False)
+                
         plt.tight_layout()
         
+    if output_path:
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.close()
+    else:
+        plt.show()
+
+
+
+
+def plot_symbolic_complexity_tradeoff_simple(
+    equations_df: pd.DataFrame,
+    metric: str = 'val_rmse',
+    model_type: str = 'regression',
+    top_n: int = 50,
+    output_path: str = None,
+):
+    if len(equations_df) == 0:
+        print("No equations to plot.")
+        return
+    
+    # In case we have more equations than we want to plot
+    if top_n and len(equations_df) > top_n:
+        if model_type == 'regression':
+            # For regression, sort by metric ascending (lower RMSE is better)
+            df = equations_df.sort_values(by=f"val_{metric}").head(top_n)
+        else:
+            # For classification, sort by metric descending (higher AUC is better)
+            df = equations_df.sort_values(by=f"val_{metric}", ascending=False).head(top_n)
+    else:
+        df = equations_df.copy()
+    
+    # Drop rows with NaN in the metric column
+    df = df.dropna(subset=[f"val_{metric}"])
+    
+    # Create figure with two subplots
+    fig = plt.figure(figsize=(3,2))
+    
+   
+    # Plot complexity vs val metric
+    plt.scatter(
+        df['complexity'], 
+        df[f"val_{metric}"], 
+        color=color_palette["val"],
+        label="Validation"
+    )
+
+    plt.scatter(
+        df['complexity'], 
+        df[f"train_{metric}"], 
+        color=color_palette["train"],
+        label="Train",
+    )
+    plt.legend(frameon=False)
+    plt.ylabel("Complexity")
+    plt.xlabel(metric)
+
+    
+    plt.tight_layout()
+
+    
     if output_path:
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         plt.close()
@@ -268,11 +361,6 @@ def plot_symbolic_complexity_tradeoff(
     max_equations: int = 5,
     lower_is_better: bool = False,
 ):
-    """
-    Plot the tradeoff between model complexity and accuracy for symbolic models.
-    For regression: lower metric (RMSE) is better
-    For classification: higher metric (AUC/accuracy) is better
-    """
     if len(equations_df) == 0:
         print("No equations to plot.")
         return
@@ -302,7 +390,7 @@ def plot_symbolic_complexity_tradeoff(
     fig = plt.figure(figsize=(10, 7))
     
     # Create gridspec to have plots on top (larger) and equation legend below
-    gs = fig.add_gridspec(2, 2, height_ratios=[2,1])
+    gs = fig.add_gridspec(2, 2, height_ratios=[1,1])
     ax1 = fig.add_subplot(gs[0, 0])
     ax2 = fig.add_subplot(gs[0, 1], sharey=ax1)
     ax_legend = fig.add_subplot(gs[1, :])
@@ -334,8 +422,6 @@ def plot_symbolic_complexity_tradeoff(
         # For regression, lower metric is better (e.g., RMSE)
         is_pareto = np.ones(len(df), dtype=bool)
         for i, (c1, m1) in enumerate(zip(df['complexity'], df[metric])):
-            # An equation is not on Pareto front if there exists another
-            # with both lower complexity AND lower (=better) metric
             for c2, m2 in zip(df['complexity'], df[metric]):
                 if (c2 < c1 and m2 <= m1) or (c2 <= c1 and m2 < m1):
                     is_pareto[i] = False
@@ -344,8 +430,6 @@ def plot_symbolic_complexity_tradeoff(
         # For classification, higher metric is better (e.g., AUC)
         is_pareto = np.ones(len(df), dtype=bool)
         for i, (c1, m1) in enumerate(zip(df['complexity'], df[metric])):
-            # An equation is not on Pareto front if there exists another
-            # with both lower complexity AND higher (=better) metric
             for c2, m2 in zip(df['complexity'], df[metric]):
                 if (c2 < c1 and m2 >= m1) or (c2 <= c1 and m2 > m1):
                     is_pareto[i] = False
@@ -381,7 +465,6 @@ def plot_symbolic_complexity_tradeoff(
                 xytext=(5, 5),
                 textcoords='offset points',
                 bbox=dict(boxstyle='circle', fc='white', ec='red'),
-                fontsize=10,
             )
             
             # Get full equation text and add to legend
@@ -402,7 +485,8 @@ def plot_symbolic_complexity_tradeoff(
             
             # Add equation text to legend area
             ax_legend.text(0.05, y_pos, legend_text, 
-                         va='center', fontsize=10, wrap=True, 
+                         va='center',
+                         wrap=True, 
                          bbox=dict(boxstyle='round', facecolor='white', alpha=0.5))
     
     plt.tight_layout()
@@ -455,6 +539,9 @@ def plot_predictions_by_data_type(predictions_df, output_dir):
     """
     # Add binary labels: 1 for real, 0 for non-real (shuffle or random)
     predictions_df['binary_label'] = predictions_df['data_type'].apply(lambda x: 1 if x == 'Real' else 0)
+
+    # filter out nans
+    predictions_df = predictions_df.dropna(subset=['prediction'])
     
     fig = plt.figure(figsize=(8, 3))
     gs = fig.add_gridspec(2, 2, width_ratios=[2, 1])
@@ -471,7 +558,7 @@ def plot_predictions_by_data_type(predictions_df, output_dir):
         ax=ax1
     )
     
-    ax1.set_ylim([3, 10])
+    ax1.set_ylim([3, 10]) # type: ignore
     ax1.set_xlabel("Model")
     ax1.set_ylabel("Predicted pKd")
     ax1.legend(frameon=False)
@@ -493,30 +580,27 @@ def plot_predictions_by_data_type(predictions_df, output_dir):
     model_names = predictions_df['model'].unique()
     for model_name in model_names:
         model_data = predictions_df[predictions_df['model'] == model_name]
+        fpr, tpr, _ = roc_curve(model_data['binary_label'], model_data['prediction'])
+        roc_auc = roc_auc_score(model_data['binary_label'], model_data['prediction'])
         
-        if len(model_data) > 0 and len(model_data['binary_label'].unique()) > 1:
-            # Use prediction as score (higher pKd indicates more likely to be real)
-            fpr, tpr, _ = roc_curve(model_data['binary_label'], model_data['prediction'])
-            roc_auc = roc_auc_score(model_data['binary_label'], model_data['prediction'])
-            
-            ax3.plot(
-                fpr, tpr, 
-                label=f'{model_name} (AUC = {roc_auc:.3f})',
-                color= color_palette.get(model_name.lower(), 'gray')
-            )
+        ax3.plot(
+            fpr, tpr, 
+            label=f'{model_name} (AUC = {roc_auc:.3f})',
+            color= color_palette.get(model_name.lower(), 'gray')
+        )
     
-    ax3.set_xlim([0.0, 1.0])
-    ax3.set_ylim([0.0, 1.05])
+    ax3.set_xlim([0.0, 1.0]) # type: ignore
+    ax3.set_ylim([0.0, 1.05]) # type: ignore
     ax3.set_xlabel('False Positive Rate')
     ax3.set_ylabel('True Positive Rate')
     ax3.legend(loc='lower right', frameon=False)
     
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "real_vs_shuffle_random_analysis.png"), dpi=300)
+    plt.savefig(os.path.join(output_dir, "real_vs_shuffle_random_analysis.svg"), dpi=300)
     plt.close()
     
     return {
-        "combined_plot": os.path.join(output_dir, "real_vs_shuffle_random_analysis.png")
+        "combined_plot": os.path.join(output_dir, "real_vs_shuffle_random_analysis.svg")
     }
 
 def plot_pkd_probability_correlation(
@@ -524,8 +608,6 @@ def plot_pkd_probability_correlation(
     probabilities, 
     model_names, 
     output_path=None,
-    pkd_values_train=None,
-    probabilities_train=None
 ):
     """
     Plot correlation between pKd values and classification probabilities for real samples.
@@ -647,7 +729,7 @@ def main():
                 plot_model_comparison(
                     comparison_df, 
                     roc_data=roc_data,
-                    output_path=os.path.join(args.output_dir, "model_comparison.png")
+                    output_path=os.path.join(args.output_dir, "model_comparison.svg")
                 )
                 print("Generated model comparison plot")
             
@@ -663,7 +745,7 @@ def main():
                             train_preds["y_train"],
                             train_proba[f"{model}_proba"],
                             model_name=model.upper(),
-                            output_path=os.path.join(args.output_dir, f"{model}_metrics.png")
+                            output_path=os.path.join(args.output_dir, f"{model}_metrics.svg")
                         )
                         
                         # Probability histograms
@@ -671,7 +753,7 @@ def main():
                             val_preds["y_val"],
                             val_proba[f"{model}_proba"],
                             model_name=model.upper(),
-                            output_path=os.path.join(args.output_dir, f"{model}_proba_hist.png")
+                            output_path=os.path.join(args.output_dir, f"{model}_proba_hist.svg")
                         )
                 print("Generated standard model plots")
             
@@ -715,9 +797,7 @@ def main():
                             pkd_val_df["pKd"].values,
                             val_proba_dict,
                             model_names,
-                            output_path=os.path.join(args.output_dir, "pkd_probability_correlation.png"),
-                            pkd_values_train=pkd_train_df["pKd"].values if pkd_train_df is not None else None,
-                            probabilities_train=train_proba_dict if train_proba_dict else None
+                            output_path=os.path.join(args.output_dir, "pkd_probability_correlation.svg"),
                         )
                         print("Generated pKd-probability correlation plot")
             
@@ -731,7 +811,7 @@ def main():
                     train_preds["y_train"],
                     train_proba["symbolic_proba"],
                     model_name="Symbolic",
-                    output_path=os.path.join(args.output_dir, "symbolic_metrics.png")
+                    output_path=os.path.join(args.output_dir, "symbolic_metrics.svg")
                 )
                 
                 # Probability histograms
@@ -739,7 +819,7 @@ def main():
                     val_preds["y_val"],
                     val_proba["symbolic_proba"],
                     model_name="Symbolic",
-                    output_path=os.path.join(args.output_dir, "symbolic_proba_hist.png")
+                    output_path=os.path.join(args.output_dir, "symbolic_proba_hist.svg")
                 )
                 
                 # Complexity tradeoff plot (if data available)
@@ -750,8 +830,14 @@ def main():
                         equations_df,
                         metric='val_auc',
                         model_type='classification',
-                        output_path=os.path.join(args.output_dir, "symbolic_classification_complexity_tradeoff.png"),
+                        output_path=os.path.join(args.output_dir, "symbolic_classification_complexity_tradeoff.svg"),
                         lower_is_better=False
+                    )
+                    plot_symbolic_complexity_tradeoff_simple(
+                        equations_df,
+                        metric='auc',
+                        model_type='classification',
+                        output_path=os.path.join(args.output_dir, "symbolic_classification_complexity_tradeoff_simple.svg"),
                     )
                     print("Generated symbolic complexity tradeoff plot")
                 else:
@@ -762,7 +848,7 @@ def main():
         else:
             print("Error: Missing prediction data files")
             
-    elif args.mode == "regression" or args.mode == "regression_and_classification":
+    elif args.mode == "regression":
         # Load predictions
         train_preds_path = os.path.join(args.input_dir, "train_predictions.csv")
         val_preds_path = os.path.join(args.input_dir, "val_predictions.csv")
@@ -774,9 +860,19 @@ def main():
             
             # Plot model comparison
             if comparison_df is not None:
+                # Create regression_data dictionary for scatter plot visualization
+                regression_data = {'y_true': val_preds["y_val"].values}
+                
+                for model in ["lasso", "rf", "svr", "symbolic"]:
+                    col_name = f"{model}_pred"
+                    if col_name in val_preds.columns:
+                        model_upper = model.upper()
+                        regression_data[model_upper] = val_preds[col_name].values
+                
                 plot_model_comparison(
                     comparison_df,
-                    output_path=os.path.join(args.output_dir, "model_comparison.png")
+                    regression_data=regression_data,
+                    output_path=os.path.join(args.output_dir, "model_comparison.svg")
                 )
                 print("Generated model comparison plot")
             
@@ -790,7 +886,7 @@ def main():
                             val_preds["y_val"],
                             val_preds[f"{model}_pred"],
                             model_name=model.upper(),
-                            output_path=os.path.join(args.output_dir, f"{model}_scatter.png")
+                            output_path=os.path.join(args.output_dir, f"{model}_scatter.svg")
                         )
                 print("Generated standard model plots")
             
@@ -802,7 +898,7 @@ def main():
                     val_preds["y_val"],
                     val_preds["symbolic_pred"],
                     model_name="Symbolic",
-                    output_path=os.path.join(args.output_dir, "symbolic_scatter.png")
+                    output_path=os.path.join(args.output_dir, "symbolic_scatter.svg")
                 )
                 
                 # Complexity tradeoff plot (if data available)
@@ -813,8 +909,14 @@ def main():
                         equations_df,
                         metric='val_r2',
                         model_type='regression',
-                        output_path=os.path.join(args.output_dir, "symbolic_regression_complexity_tradeoff.png"),
+                        output_path=os.path.join(args.output_dir, "symbolic_regression_complexity_tradeoff.svg"),
                         lower_is_better=False
+                    )
+                    plot_symbolic_complexity_tradeoff_simple(
+                        equations_df,
+                        metric='r2',
+                        model_type='regression',
+                        output_path=os.path.join(args.output_dir, "symbolic_regression_complexity_tradeoff_simple.svg"),
                     )
                     print("Generated symbolic complexity tradeoff plot")
                 else:

@@ -1,373 +1,518 @@
 import os
-import sys
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
-import sympy
-import logging
 import seaborn as sns
-from sklearn.metrics import ndcg_score as sk_ndcg_score
+import sympy as sp
+from sklearn.metrics import roc_curve, auc
+import sympy as sp
+from sympy.parsing.sympy_parser import parse_expr
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-
+# Set plotting style
 sns.set_context("paper")
-
-def load_test_data(base_path):
-    """Load X_test and y_test data."""
-    scores_path = os.path.join(base_path, "outputs/binding_score_function/4_processed_scores/")
-    
-    logger.info(f"Loading test data from {scores_path}")
-    #random_X_test = pd.read_csv(os.path.join(scores_path, "random_X_test.csv"))
-    #shuffle_X_test = pd.read_csv(os.path.join(scores_path, "shuffle_X_test.csv"))
-    X_test = pd.read_csv(os.path.join(scores_path, "real_X_test.csv"))
-    complex_filenames = X_test["complex_filename"].copy()
-    X_test = X_test.set_index("complex_filename")
-    
-    y_test = pd.read_csv(os.path.join(scores_path, "real_y_test.csv"))
-    
-    if "complex_filename" in y_test.columns:
-        y_test = y_test.set_index("complex_filename")["pKd"].values
-    else:
-        y_test = y_test["pKd"].values
-    
-    logger.info(f"Loaded X_test with shape {X_test.shape} and y_test with shape {y_test.shape}")
-    
-    return X_test, y_test, complex_filenames
+color_palette = {
+    "real": "#2C8C99",
+    "shuffled": "#E88873", 
+    "random": "#F46036",
+    "prediction": "#124E78",
+    "real_test": "#2C8C99",  # Same as real but will be used with different marker/style
+    "real_all": "#124E78"    # Different color for 'all' dataset
+}
 
 
-def get_scaling_parameters(output_dir):
-    """Load scaling parameters from the saved file."""
-    scaling_path = os.path.join(output_dir, "scaling_params.csv")
-    
-    if not os.path.exists(scaling_path):
-        logger.warning(f"Scaling parameters not found at {scaling_path}")
-        return None
-    
-    scaling_params = pd.read_csv(scaling_path, index_col=0)
-    logger.info(f"Loaded scaling parameters for {len(scaling_params)} features")
-    
-    return scaling_params
+def load_data(data="test", base_path="/srv/data1/general/immunopeptides_data/"):
 
-
-def scale_features_with_params(X, scaling_params):
-    """Scale features using pre-computed mean and std values."""
-    X_scaled = X.copy()
+    assert data in {"train", "val", "test", "all"}, "data must be one of 'train', 'val', 'test', or 'all'"
+    scores_path = os.path.join(base_path, "outputs/binding_score_function_prod/4_processed_scores/")
     
-    for col in X.columns:
-        if col in scaling_params.index:
-            mean = scaling_params.loc[col, "mean"]
-            std = scaling_params.loc[col, "std"]
-            X_scaled[col] = (X[col] - mean) / std
-        else:
-            logger.warning(f"Feature {col} not found in scaling parameters")
-    
-    return X_scaled
+    def load_split(split):
+        X_real = pd.read_csv(os.path.join(scores_path, f"real_X_{split}.csv")).set_index("complex_filename")
+        y_real = pd.read_csv(os.path.join(scores_path, f"real_y_{split}.csv"))["pKd"]
+        X_shuffle = pd.read_csv(os.path.join(scores_path, f"shuffle_X_{split}.csv")).set_index("complex_filename")
+        X_random = pd.read_csv(os.path.join(scores_path, f"random_X_{split}.csv")).set_index("complex_filename")
 
+        for df in [X_real, X_shuffle, X_random]:
+            df.drop(columns=[col for col in df.columns if col.startswith("Unnamed:")], inplace=True, errors='ignore')
 
-def load_best_symbolic_equation(output_dir):
-    """Load the best symbolic regression equation from the saved file."""
-    equations_path = os.path.join(output_dir, "symbolic_regression_equations.csv")
-    all_equations_path = os.path.join(output_dir, "symbolic_regression_all_equations.csv")
-    
-    if os.path.exists(all_equations_path):
-        logger.info(f"Loading all symbolic equations from {all_equations_path}")
-        equations = pd.read_csv(all_equations_path)
-        # Sort by validation RMSE (lower is better)
-        valid_eqs = equations[equations["val_r2"].notna()].sort_values(by="val_r2")
+        return X_real, y_real, X_shuffle, X_random
+
+    if data == "all":
+        X_real_all, y_real_all, X_shuffle_all, X_random_all = [], [], [], []
+        for split in ["train", "val", "test"]:
+            X_r, y_r, X_s, X_rand = load_split(split)
+            X_real_all.append(X_r)
+            y_real_all.append(y_r)
+            X_shuffle_all.append(X_s)
+            X_random_all.append(X_rand)
         
-        if len(valid_eqs) > 0:
-            best_eq = valid_eqs.iloc[0]
-            logger.info(f"Best equation (by val_r2): {best_eq['equation']}")
-            return best_eq["equation"], equations
-    
-    if os.path.exists(equations_path):
-        logger.info(f"Loading top symbolic equations from {equations_path}")
-        equations = pd.read_csv(equations_path)
-        # Use the first equation (typically sorted by score)
-        best_eq = equations.iloc[0]
-        logger.info(f"Best equation (first in list): {best_eq['equation']}")
-        return best_eq["equation"], equations
-    
-    logger.error("No symbolic regression equations found")
-    return None, None
-
-def ndcg_score(y_true, y_pred, k=None):
-    """Compute Normalized Discounted Cumulative Gain (NDCG) for regression using sklearn."""
-    # Reshape to 2D arrays as required by sklearn's ndcg_score
-    y_true = np.asarray(y_true).reshape(1, -1)
-    y_pred = np.asarray(y_pred).reshape(1, -1)
-    if k is None:
-        k = y_true.shape[1]
-    return sk_ndcg_score(y_true, y_pred, k=k)
-
-def evaluate_equation(equation_str, X, y, is_scaled=True):
-    """Evaluate a symbolic equation on X and compare with y."""
-    expr = sympy.sympify(equation_str)
-    features = [str(symbol) for symbol in expr.free_symbols]
-    logger.info(f"Equation uses {len(features)} features: {features}")
-    for feature in features:
-        if feature not in X.columns:
-            logger.error(f"Feature {feature} not found in X_test")
-            return None
-    func = sympy.lambdify(features, expr)
-    inputs = [X[feature].values for feature in features]
-    try:
-        y_pred = func(*inputs)
-        rmse = np.sqrt(mean_squared_error(y, y_pred))
-        mae = mean_absolute_error(y, y_pred)
-        r2 = r2_score(y, y_pred)
-        ndcg = ndcg_score(y, y_pred)
-        logger.info(f"Test metrics - RMSE: {rmse:.4f}, MAE: {mae:.4f}, R²: {r2:.4f}, NDCG: {ndcg:.4f}")
-        return {
-            'y_pred': y_pred,
-            'rmse': rmse,
-            'mae': mae,
-            'r2': r2,
-            'ndcg': ndcg
-        }
-    except Exception as e:
-        logger.error(f"Error evaluating equation: {e}")
-        return None
-
-def evaluate_equation_ensemble(equations, X, y, top_n=5, weights=None):
-    """
-    Evaluate an ensemble of symbolic equations on X and combine predictions.
-    """
-    valid_eqs = equations[equations["val_r2"].notna()].sort_values(by="val_r2")
-    if len(valid_eqs) == 0:
-        logger.error("No valid equations found for ensemble")
-        return None
-    top_eqs = valid_eqs.head(min(top_n, len(valid_eqs)))
-    logger.info(f"Creating ensemble with {len(top_eqs)} equations")
-    all_predictions = []
-    failed_equations = 0
-    for i, row in top_eqs.iterrows():
-        equation_str = row["equation"]
-        try:
-            expr = sympy.sympify(equation_str)
-            features = [str(symbol) for symbol in expr.free_symbols]
-            for feature in features:
-                if feature not in X.columns:
-                    logger.warning(f"Feature {feature} not found in X_test, skipping equation")
-                    failed_equations += 1
-                    continue
-            func = sympy.lambdify(features, expr)
-            inputs = [X[feature].values for feature in features]
-            y_pred = func(*inputs)
-            all_predictions.append(y_pred)
-            logger.info(f"Added equation to ensemble: {equation_str[:60]}{'...' if len(equation_str) > 60 else ''}")
-        except Exception as e:
-            logger.warning(f"Error evaluating equation for ensemble: {e}")
-            failed_equations += 1
-    if not all_predictions:
-        logger.error("No valid predictions for ensemble")
-        return None
-    if failed_equations > 0:
-        logger.warning(f"{failed_equations} equations failed and were excluded from ensemble")
-    if weights is None and len(all_predictions) > 1:
-        weights = top_eqs["val_r2"].values
-        weights = weights / np.sum(weights)
-    elif weights is None:
-        weights = [1.0]
-    all_predictions = np.array(all_predictions)
-    ensemble_pred = np.average(all_predictions, axis=0, weights=weights)
-    rmse = np.sqrt(mean_squared_error(y, ensemble_pred))
-    mae = mean_absolute_error(y, ensemble_pred)
-    r2 = r2_score(y, ensemble_pred)
-    ndcg = ndcg_score(y, ensemble_pred)
-    logger.info(f"Ensemble test metrics - RMSE: {rmse:.4f}, MAE: {mae:.4f}, R²: {r2:.4f}, NDCG: {ndcg:.4f}")
-    return {
-        'y_pred': ensemble_pred,
-        'rmse': rmse,
-        'mae': mae,
-        'r2': r2,
-        'ndcg': ndcg,
-        'individual_predictions': all_predictions,
-        'weights': weights,
-        'equations': top_eqs["equation"].values
-    }
-
-
-def plot_results(y_true, y_pred, output_path=None):
-    """Create a scatter plot of actual vs. predicted values, including NDCG."""
-    plt.figure(figsize=(4,4))
-    
-    # Scatter plot
-    sns.regplot(x=y_true, y=y_pred)
-    
-    # Perfect prediction line
-    min_val = min(min(y_true), min(y_pred))
-    max_val = max(max(y_true), max(y_pred))
-    plt.plot([min_val, max_val], [min_val, max_val], 'k--', alpha=0.8)
-    
-    plt.xlabel('Actual pKd')
-    plt.ylabel('Predicted pKd')
-    plt.title('Symbolic Regression: Actual vs. Predicted on Test Set')
-    
-    # Add metrics as text
-    rmse = np.sqrt(mean_squared_error(y_true, y_pred))
-    r2 = r2_score(y_true, y_pred)
-    mae = mean_absolute_error(y_true, y_pred)
-    ndcg = ndcg_score(y_true, y_pred)
-    
-    plt.text(
-        0.05, 0.95, 
-        f'RMSE: {rmse:.3f}\nR²: {r2:.3f}\nMAE: {mae:.3f}\nNDCG: {ndcg:.3f}', 
-        transform=plt.gca().transAxes,
-        verticalalignment='top',
-        bbox=dict(boxstyle='round', facecolor='white', alpha=0.8)
-    )
-    
-    plt.grid(alpha=0.3)
-    plt.tight_layout()
-    
-    if output_path:
-        plt.savefig(output_path, dpi=300)
-        logger.info(f"Saved plot to {output_path}")
+        X_real = pd.concat(X_real_all)
+        y_real = pd.concat(y_real_all).values
+        X_shuffle = pd.concat(X_shuffle_all)
+        X_random = pd.concat(X_random_all)
     else:
-        plt.show()
-    
-    plt.close()
+        X_real, y_real, X_shuffle, X_random = load_split(data)
+        y_real = y_real.values
 
-def compare_with_validation_results(output_dir, test_metrics):
-    """Compare test results with validation results from model comparison, including NDCG if available."""
-    model_comparison_path = os.path.join(output_dir, "model_comparison.csv")
-    
-    if not os.path.exists(model_comparison_path):
-        logger.warning(f"Model comparison file not found at {model_comparison_path}")
-        return
-    
-    model_comparison = pd.read_csv(model_comparison_path)
-    symbolic_row = model_comparison[model_comparison["Model"] == "Symbolic"].iloc[0]
-    
-    validation_metrics = {
-        "RMSE": symbolic_row["Val RMSE"],
-        "R²": symbolic_row["Val R²"],
-        "MAE": symbolic_row["Val MAE"]
-    }
-    # Add NDCG if present in test_metrics
-    if "ndcg" in test_metrics:
-        validation_metrics["NDCG"] = symbolic_row["Val NDCG"] if "Val NDCG" in symbolic_row else None
-    
-    test_metrics_dict = {
-        "RMSE": test_metrics["rmse"],
-        "R²": test_metrics["r2"],
-        "MAE": test_metrics["mae"]
-    }
-    if "ndcg" in test_metrics:
-        test_metrics_dict["NDCG"] = test_metrics["ndcg"]
-    
-    # Create comparison dataframe
-    comparison = pd.DataFrame({
-        "Metric": list(validation_metrics.keys()),
-        "Validation": list(validation_metrics.values()),
-        "Test": [test_metrics_dict[m] for m in validation_metrics.keys()]
-    })
-    
-    logger.info("Comparison with validation results:")
-    logger.info("\n" + comparison.to_string())
-    
-    return comparison
+    print(f"Loaded '{data}' data:")
+    print(f"  Real: {X_real.shape} samples")
+    print(f"  Shuffled: {X_shuffle.shape} samples")
+    print(f"  Random: {X_random.shape} samples")
 
-def save_predictions(complex_filenames, y_true, y_pred, output_path):
-    """Save predictions with complex filenames to a CSV file."""
-    predictions_df = pd.DataFrame({
-        "complex_filename": complex_filenames,
-        "y_true": y_true,
-        "y_pred": y_pred
-    })
-    
-    predictions_df.to_csv(output_path, index=False)
-    logger.info(f"Saved predictions to {output_path}")
+    return X_real, y_real, X_shuffle, X_random
 
-def main():
-    """Main function to load data, evaluate the best equation, and visualize results."""
-    # Configuration
-    base_path = "/srv/data1/general/immunopeptides_data/"
-    output_dir = "./plots/test"
-    regression_dir = "./plots/regression"
+
+
+def load_scaling_params(scaling_type="regression"):
+    """Load scaling parameters from training."""
+    scaling_path = f"/home/er8813ha/immunopeptides/plots/{scaling_type}/scaling_params.csv"
+    return pd.read_csv(scaling_path, index_col=0)
+
+def scale_data(X, scaling_params, scaler_type="standard"):
+    """
+    Scale data using provided scaling parameters.
+    
+    """
+    if scaler_type == "standard":
+        # Standard scaling: (X - mean) / std
+        feature_means = scaling_params['mean']
+        feature_stds = scaling_params['std']
+        return (X - feature_means) / feature_stds
+    
+    elif scaler_type == "minmax":
+        # Min-Max scaling using mean and std to calculate min and max
+        # This assumes that the min is approximately mean - 2*std
+        # and max is approximately mean + 2*std
+        feature_means = scaling_params['mean']
+        feature_stds = scaling_params['std']
+        feature_mins = feature_means - 2 * feature_stds
+        feature_maxs = feature_means + 2 * feature_stds
+        return (X - feature_mins) / (feature_maxs - feature_mins)
+    
+    else:
+        raise ValueError(f"Unknown scaler type: {scaler_type}. Use 'standard' or 'minmax'.")
+
+
+def save_predictions(results, y_true, output_dir="/home/er8813ha/immunopeptides/plots/test"):
+    """Save predictions to CSV files."""
     os.makedirs(output_dir, exist_ok=True)
     
-    # Load test data
-    X_test, y_test, complex_filenames = load_test_data(base_path)
+    # Save real data predictions
+    real_df = pd.DataFrame({
+        'complex_filename': results['real']['data'].index.tolist(),
+        'y_true': y_true,
+        'y_pred': results['real']['predictions']
+    })
     
-    # Load best symbolic equation
-    best_equation, all_equations = load_best_symbolic_equation(regression_dir)
+    real_path = os.path.join(output_dir, "test_predictions.csv")
+    real_df.to_csv(real_path, index=False)
+    print(f"Real test predictions saved to: {real_path}")
     
-    if best_equation is None:
-        logger.error("Could not find the best symbolic equation, exiting.")
-        sys.exit(1)
+    # Save decoy predictions
+    decoy_data = []
     
-    # Load and apply scaling if needed
-    scaling_params = get_scaling_parameters(regression_dir)
-    if scaling_params is not None:
-        X_test_scaled = scale_features_with_params(X_test, scaling_params)
-        logger.info("Applied feature scaling to X_test")
+    if results['shuffled'] is not None:
+        for name, pred in zip(results['shuffled']['data'].index, results['shuffled']['predictions']):
+            decoy_data.append({'complex_filename': name, 'data_type': 'shuffled', 'prediction': pred})
+    
+    if results['random'] is not None:
+        for name, pred in zip(results['random']['data'].index, results['random']['predictions']):
+            decoy_data.append({'complex_filename': name, 'data_type': 'random', 'prediction': pred})
+    
+    if decoy_data:
+        decoy_df = pd.DataFrame(decoy_data)
+        decoy_path = os.path.join(output_dir, "decoy_predictions.csv")
+        decoy_df.to_csv(decoy_path, index=False)
+        print(f"Decoy predictions saved to: {decoy_path}")
+
+
+
+def equation_string_to_pandas(equation_string, X):
+    
+    # Parse the equation string
+    expr = sp.sympify(equation_string)
+    
+    # Get all symbols (variables) from the equation
+    symbols = list(expr.free_symbols)
+    
+    # Create a mapping from symbol names to DataFrame columns
+    substitutions = {}
+    for symbol in symbols:
+        col_name = str(symbol)
+        if col_name in X.columns:
+            substitutions[symbol] = X[col_name].values
+        else:
+            raise ValueError(f"Column '{col_name}' not found in DataFrame. Available columns: {list(X.columns)}")
+    
+    # Convert sympy expression to numpy function
+    # Create a lambda function that can handle numpy arrays
+    func = sp.lambdify(symbols, expr, modules=['numpy'])
+    
+    # Apply the function
+    if len(symbols) == 1:
+        # Single variable case
+        result = func(list(substitutions.values())[0])
     else:
-        X_test_scaled = X_test
+        # Multiple variables case
+        result = func(*substitutions.values())
     
-    # Evaluate individual best equation on test data
-    single_results = evaluate_equation(best_equation, X_test_scaled, y_test)
+    return result
+
+def scoring_func_regression(X, equation_string):
+    """Apply regression equation from string to DataFrame."""
+    return equation_string_to_pandas(equation_string, X)
+
+def scoring_func_classification(X, equation_string):
+    """Apply classification equation from string to DataFrame."""
+    scores = equation_string_to_pandas(equation_string, X)
+    return scores
+
+def combined_scoring_function(X, reg_equation, class_equation, 
+                             scaling_params_reg=None, scaling_params_class=None,
+                             scaler_type="standard"):
+    """
+    Apply combined scoring using both regression and classification models with proper scaling.
+    """
+    # Scale data appropriately for each model
+    if scaling_params_reg is not None:
+        X_reg_scaled = scale_data(X, scaling_params_reg, scaler_type=scaler_type)
+    else:
+        X_reg_scaled = X 
+        
+    if scaling_params_class is not None:
+        X_class_scaled = scale_data(X, scaling_params_class, scaler_type=scaler_type)
+    else:
+        X_class_scaled = X
     
-    if single_results is None:
-        logger.error("Error evaluating single equation on test data, exiting.")
-        sys.exit(1)
+    reg_predictions = scoring_func_regression(X_reg_scaled, reg_equation)
+    class_predictions = scoring_func_classification(X_class_scaled, class_equation)
     
-    # Plot single model results
-    test_plot_path = os.path.join(output_dir, "symbolic_regression_test_predictions.png")
-    plot_results(y_test, single_results["y_pred"], test_plot_path)
+
+    combined_scores = reg_predictions * class_predictions
     
-    # Compare with validation results
-    comparison = compare_with_validation_results(output_dir, single_results)
-    if comparison is not None:
-        comparison.to_csv(os.path.join(output_dir, "test_vs_validation.csv"), index=False)
+    return combined_scores
+
+def generate_combined_equation(reg_equation_str, class_equation_str, 
+                              scaling_params_reg, scaling_params_class):
+    """
+    Generate a single mathematical expression that combines both models with proper scaling.
     
-    # Save predictions for single model
-    save_predictions(
-        complex_filenames, y_test, single_results["y_pred"],
-        os.path.join(output_dir, "test_predictions.csv")
+    """
+
+    features = list(set(scaling_params_reg.index) | set(scaling_params_class.index))
+    
+    feature_symbols = {f: sp.Symbol(f) for f in features}
+    
+    reg_expr = parse_expr(reg_equation_str)
+    class_expr = parse_expr(class_equation_str)
+    
+    reg_scaled_vars = {}
+    for feature in scaling_params_reg.index:
+        if feature in feature_symbols:
+            mean = scaling_params_reg.loc[feature, 'mean']
+            std = scaling_params_reg.loc[feature, 'std']
+            reg_scaled_vars[feature] = (feature_symbols[feature] - mean) / std
+    
+    class_scaled_vars = {}
+    for feature in scaling_params_class.index:
+        if feature in feature_symbols:
+            mean = scaling_params_class.loc[feature, 'mean']
+            std = scaling_params_class.loc[feature, 'std']
+            class_scaled_vars[feature] = (feature_symbols[feature] - mean) / std
+    
+    reg_scaled_expr = reg_expr.subs({sp.Symbol(f): expr for f, expr in reg_scaled_vars.items()})
+    class_scaled_expr = class_expr.subs({sp.Symbol(f): expr for f, expr in class_scaled_vars.items()})
+    
+    combined_expr = reg_scaled_expr * class_scaled_expr
+    simplified = sp.simplify(combined_expr)
+    
+    return str(combined_expr), str(simplified)
+
+
+def generate_combined_equation(reg_equation_str, class_equation_str, 
+                              scaling_params_reg, scaling_params_class,
+                              scaler_type="standard"):
+    """
+    Generate a single mathematical expression that combines both models with proper scaling.
+    """
+    # Get all features used in both models
+    features = list(set(scaling_params_reg.index) | set(scaling_params_class.index))
+    
+    # Create symbolic variables for all features
+    feature_symbols = {f: sp.Symbol(f) for f in features}
+    
+    # Parse the equations
+    reg_expr = parse_expr(reg_equation_str)
+    class_expr = parse_expr(class_equation_str)
+    
+    # Apply appropriate scaling to the variables in each model
+    if scaler_type == "standard":
+        # Standard scaling: (X - mean) / std
+        reg_scaled_vars = {}
+        for feature in scaling_params_reg.index:
+            if feature in feature_symbols:
+                mean = scaling_params_reg.loc[feature, 'mean']
+                std = scaling_params_reg.loc[feature, 'std']
+                reg_scaled_vars[feature] = (feature_symbols[feature] - mean) / std
+        
+        class_scaled_vars = {}
+        for feature in scaling_params_class.index:
+            if feature in feature_symbols:
+                mean = scaling_params_class.loc[feature, 'mean']
+                std = scaling_params_class.loc[feature, 'std']
+                class_scaled_vars[feature] = (feature_symbols[feature] - mean) / std
+                
+    elif scaler_type == "minmax":
+        # Min-Max scaling using mean and std to calculate min and max
+        reg_scaled_vars = {}
+        for feature in scaling_params_reg.index:
+            if feature in feature_symbols:
+                mean = scaling_params_reg.loc[feature, 'mean']
+                std = scaling_params_reg.loc[feature, 'std']
+                feature_min = mean - 2 * std
+                feature_max = mean + 2 * std
+                reg_scaled_vars[feature] = (feature_symbols[feature] - feature_min) / (feature_max - feature_min)
+        
+        class_scaled_vars = {}
+        for feature in scaling_params_class.index:
+            if feature in feature_symbols:
+                mean = scaling_params_class.loc[feature, 'mean']
+                std = scaling_params_class.loc[feature, 'std']
+                feature_min = mean - 2 * std
+                feature_max = mean + 2 * std
+                class_scaled_vars[feature] = (feature_symbols[feature] - feature_min) / (feature_max - feature_min)
+    else:
+        raise ValueError(f"Unknown scaler type: {scaler_type}. Use 'standard' or 'minmax'.")
+    
+    # Substitute the scaled variables into the expressions
+    reg_scaled_expr = reg_expr.subs({sp.Symbol(f): expr for f, expr in reg_scaled_vars.items()})
+    class_scaled_expr = class_expr.subs({sp.Symbol(f): expr for f, expr in class_scaled_vars.items()})
+    
+    # Combine the expressions (multiplication as per combined_scoring_function)
+    combined_expr = reg_scaled_expr * class_scaled_expr
+    
+    
+    return str(combined_expr)
+
+def main():
+    """Run the analysis pipeline with the specified configuration."""
+    # Create output directory
+    output_dir = "/home/er8813ha/immunopeptides/plots/test"
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Define equation strings for both models
+    regression_equation_string = "(3.374078 - 4.3519845*interface_dG)*(distance_score + instability_index) + 5.4904785"
+    classification_equation_string = "-iptm*(peptide_pae - 1.2075188)"
+
+    # Load test data
+    data_split = 'all'
+    X_real, y_real, X_shuffle, X_random = load_data(data_split)
+    
+    # Load scaling parameters for each model type
+    scaling_params_reg = load_scaling_params("regression")
+    scaling_params_class = load_scaling_params("classification")
+    
+    # Set scaling type
+    scaler_type = "minmax"  # "minmax" or "standard"
+
+    combined_eq = generate_combined_equation(
+        regression_equation_string,
+        classification_equation_string,
+        scaling_params_reg,
+        scaling_params_class,
+        scaler_type=scaler_type
+    )
+
+    print("Combined equation:")
+    print(combined_eq)
+    
+    # Regression predictions with proper scaling
+    X_real_scaled_predictions_reg = scoring_func_regression(
+        scale_data(X_real, scaling_params_reg, scaler_type=scaler_type), 
+        regression_equation_string
+    )
+    X_shuffle_scaled_predictions_reg = scoring_func_regression(
+        scale_data(X_shuffle, scaling_params_reg, scaler_type=scaler_type), 
+        regression_equation_string
+    )
+    X_random_scaled_predictions_reg = scoring_func_regression(
+        scale_data(X_random, scaling_params_reg, scaler_type=scaler_type), 
+        regression_equation_string
     )
     
-    # If we have multiple equations, try an ensemble approach
-    if all_equations is not None and len(all_equations) > 1:
-        logger.info("Creating ensemble model from top equations")
-        # Try with top 5 equations
-        ensemble_results = evaluate_equation_ensemble(all_equations, X_test_scaled, y_test, top_n=5)
-        
-        if ensemble_results is not None:
-            # Plot ensemble results
-            ensemble_plot_path = os.path.join(output_dir, "symbolic_regression_ensemble_test_predictions.png")
-            plot_results(y_test, ensemble_results["y_pred"], ensemble_plot_path)
-            
-            # Save ensemble predictions
-            save_predictions(
-                complex_filenames, y_test, ensemble_results["y_pred"],
-                os.path.join(output_dir, "ensemble_test_predictions.csv")
-            )
-            
-            # Compare single model vs ensemble, including NDCG
-            comparison_df = pd.DataFrame({
-                "Metric": ["RMSE", "MAE", "R²", "NDCG"],
-                "Single Model": [
-                    single_results["rmse"], 
-                    single_results["mae"], 
-                    single_results["r2"],
-                    single_results["ndcg"]
-                ],
-                "Ensemble": [
-                    ensemble_results["rmse"], 
-                    ensemble_results["mae"], 
-                    ensemble_results["r2"],
-                    ensemble_results["ndcg"]
-                ]
-            })
-            
-            logger.info("Comparison between single model and ensemble:")
-            logger.info("\n" + comparison_df.to_string())
-            comparison_df.to_csv(os.path.join(output_dir, "single_vs_ensemble.csv"), index=False)
+    # Classification predictions with proper scaling
+    X_real_scaled_predictions_class = scoring_func_classification(
+        scale_data(X_real, scaling_params_class, scaler_type=scaler_type), 
+        classification_equation_string
+    )
+    X_shuffle_scaled_predictions_class = scoring_func_classification(
+        scale_data(X_shuffle, scaling_params_class, scaler_type=scaler_type), 
+        classification_equation_string
+    )
+    X_random_scaled_predictions_class = scoring_func_classification(
+        scale_data(X_random, scaling_params_class, scaler_type=scaler_type), 
+        classification_equation_string
+    )
     
-    logger.info("Evaluation on test set complete!")
+    # Apply the combined scoring function with proper scaling for each component
+    X_real_scaled_predictions_both = combined_scoring_function(
+        X_real, 
+        regression_equation_string, 
+        classification_equation_string,
+        scaling_params_reg=scaling_params_reg,
+        scaling_params_class=scaling_params_class,
+        scaler_type=scaler_type
+    )
+    
+    X_shuffle_scaled_predictions_both = combined_scoring_function(
+        X_shuffle, 
+        regression_equation_string, 
+        classification_equation_string,
+        scaling_params_reg=scaling_params_reg,
+        scaling_params_class=scaling_params_class,
+        scaler_type=scaler_type
+    )
+    
+    X_random_scaled_predictions_both = combined_scoring_function(
+        X_random, 
+        regression_equation_string, 
+        classification_equation_string,
+        scaling_params_reg=scaling_params_reg,
+        scaling_params_class=scaling_params_class,
+        scaler_type=scaler_type
+    )
+
+    fig, axs = plt.subplots(1, 3, figsize=(9,2))
+    
+    sns.regplot(x=y_real, y=X_real_scaled_predictions_reg, ax=axs[0], scatter_kws={'s':8})
+    axs[0].set_xlabel("True pKd")
+    axs[0].set_ylabel("Predicted pKd")
+    axs[0].annotate(
+        f"r = {np.corrcoef(y_real, X_real_scaled_predictions_reg)[0, 1]:.2f}",
+        xy=(0.05, 0.9), xycoords='axes fraction'
+    )
+    
+    sns.histplot(X_real_scaled_predictions_reg, kde=True, color=color_palette['real'], ax=axs[2], label='Real')
+    sns.histplot(X_shuffle_scaled_predictions_reg, kde=True, color=color_palette['shuffled'], ax=axs[2], label='Shuffled')
+    sns.histplot(X_random_scaled_predictions_reg, kde=True, color=color_palette['random'], ax=axs[2], label='Random')
+    axs[2].set_xlabel("Predicted pKd")
+    axs[2].set_ylabel("Density")
+    axs[2].legend(frameon=False)
+    
+    y_combined_all_decoys = np.concatenate([
+        np.ones(len(X_real_scaled_predictions_reg)),
+        np.zeros(len(X_shuffle_scaled_predictions_reg) + len(X_random_scaled_predictions_reg))
+    ])
+    scores_combined_all_decoys = np.concatenate([
+        X_real_scaled_predictions_reg, 
+        X_shuffle_scaled_predictions_reg,
+        X_random_scaled_predictions_reg
+    ])
+    fpr_vs_all_decoys, tpr_vs_all_decoys, _ = roc_curve(y_combined_all_decoys, scores_combined_all_decoys)
+    roc_auc_vs_all_decoys = auc(fpr_vs_all_decoys, tpr_vs_all_decoys)
+    
+    axs[1].plot(fpr_vs_all_decoys, tpr_vs_all_decoys,  
+              label=f'AUC = {roc_auc_vs_all_decoys:.2f}')
+
+    axs[1].set_xlabel('False Positive Rate')
+    axs[1].set_ylabel('True Positive Rate')
+    axs[1].legend(loc='lower right', frameon=False)
+    
+    plt.tight_layout()
+    plt.savefig(f"/home/er8813ha/immunopeptides/plots/test/regression_{data_split}.svg", dpi=300)
+    
+    fig, axs = plt.subplots(1, 3, figsize=(9,2))
+    
+    sns.regplot(x=y_real, y=X_real_scaled_predictions_class, ax=axs[0], scatter_kws={'s':8})
+    axs[0].set_xlabel("True pKd")
+    axs[0].set_ylabel("Predicted score")
+    axs[0].annotate(
+        f"r = {np.corrcoef(y_real, X_real_scaled_predictions_class)[0, 1]:.2f}",
+        xy=(0.05, 0.9), xycoords='axes fraction'
+    )
+
+
+    sns.histplot(X_real_scaled_predictions_class, kde=True, color=color_palette['real'], ax=axs[2], label='Real')
+    sns.histplot(X_shuffle_scaled_predictions_class, kde=True, color=color_palette['shuffled'], ax=axs[2], label='Shuffled')
+    sns.histplot(X_random_scaled_predictions_class, kde=True, color=color_palette['random'], ax=axs[2], label='Random')
+    axs[2].set_xlabel("Predicted score")
+    axs[2].set_ylabel("Density")
+    axs[2].legend(frameon=False)
+    
+
+    y_combined_all_decoys = np.concatenate([
+        np.ones(len(X_real_scaled_predictions_class)),
+        np.zeros(len(X_shuffle_scaled_predictions_class) + len(X_random_scaled_predictions_class))
+    ])
+    scores_combined_all_decoys = np.concatenate([
+        X_real_scaled_predictions_class, 
+        X_shuffle_scaled_predictions_class,
+        X_random_scaled_predictions_class
+    ])
+    fpr_vs_all_decoys, tpr_vs_all_decoys, _ = roc_curve(y_combined_all_decoys, scores_combined_all_decoys)
+    roc_auc_vs_all_decoys = auc(fpr_vs_all_decoys, tpr_vs_all_decoys)
+    
+    # Plot ROC curves - only Real vs All Decoys
+    axs[1].plot(fpr_vs_all_decoys, tpr_vs_all_decoys,  
+              label=f'AUC = {roc_auc_vs_all_decoys:.2f}')
+
+    axs[1].set_xlabel('False Positive Rate')
+    axs[1].set_ylabel('True Positive Rate')
+    axs[1].legend(loc='lower right', frameon=False)
+    
+    plt.tight_layout()
+    plt.savefig(f"/home/er8813ha/immunopeptides/plots/test/classification_{data_split}.svg", dpi=300)
+
+
+
+    fig, axs = plt.subplots(1, 3, figsize=(9,2))
+    
+
+    sns.regplot(x=y_real, y=X_real_scaled_predictions_both, ax=axs[0], scatter_kws={'s':8})
+
+    axs[0].annotate(
+        f"r = {np.corrcoef(y_real, X_real_scaled_predictions_both)[0, 1]:.2f}",
+        xy=(0.05, 0.9), xycoords='axes fraction'
+    )
+    axs[0].set_xlabel("True pKd")
+    axs[0].set_ylabel("Combined Score")
+    
+    sns.histplot(X_real_scaled_predictions_both, kde=True, color=color_palette['real'], 
+                ax=axs[2], label='Real')
+    sns.histplot(X_shuffle_scaled_predictions_both, kde=True, color=color_palette['shuffled'], 
+                ax=axs[2], label='Shuffled')
+    sns.histplot(X_random_scaled_predictions_both, kde=True, color=color_palette['random'], 
+                ax=axs[2], label='Random')
+    
+    axs[2].set_xlabel("Combined Score")
+    axs[2].set_ylabel("Density")
+    axs[2].legend(loc='upper right', frameon=False)
+    
+
+    y_combined_all_decoys = np.concatenate([
+        np.ones(len(X_real_scaled_predictions_both)),
+        np.zeros(len(X_shuffle_scaled_predictions_both) + len(X_random_scaled_predictions_both))
+    ])
+    scores_combined_all_decoys = np.concatenate([
+        X_real_scaled_predictions_both, 
+        X_shuffle_scaled_predictions_both,
+        X_random_scaled_predictions_both
+    ])
+    fpr_vs_all_decoys, tpr_vs_all_decoys, _ = roc_curve(y_combined_all_decoys, scores_combined_all_decoys)
+    roc_auc_vs_all_decoys = auc(fpr_vs_all_decoys, tpr_vs_all_decoys)
+    
+    # Plot ROC curves - only Real vs All Decoys
+    axs[1].plot(fpr_vs_all_decoys, tpr_vs_all_decoys, 
+              label=f'AUC = {roc_auc_vs_all_decoys:.2f}')
+    axs[1].set_xlabel('False Positive Rate')
+    axs[1].set_ylabel('True Positive Rate')
+    axs[1].legend(loc='lower right', frameon=False)
+    
+    plt.tight_layout()
+    # Save the figure with the combination method in the filename
+    plt.savefig(f"/home/er8813ha/immunopeptides/plots/test/combined_{data_split}.svg", dpi=300)
+    
+
+
+
 if __name__ == "__main__":
     main()
