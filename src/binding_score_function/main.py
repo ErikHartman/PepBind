@@ -30,20 +30,27 @@ def main():
 
     # Default configuration for docking
     docking_config = {
-        "num_models": 5,
-        "num_recycles": 50,
-        "recycle_early_stop_tolerance": 0.1,
-        "amber": True,
-        "num_relax": 1,
-        "gpu_ids": ["1", "2", "3"],
-        "overwrite_results": False,
-        "output_dir": os.path.join(paths["2_docked"], "pdbs"),
+    "models": ["alphafold", "boltz"],
+    "num_models": 5,
+    "num_recycles": 20,
+    "recycle_early_stop_tolerance": 0.1,
+    "amber": True,
+    "num_relax": 1,
+    "gpu_ids": ["1", "2"],
+    "overwrite_results": False,
+    "output_dir": os.path.join(paths["2_docked"], "pdbs"),
+
+    # Boltz-specific options (add as needed)
+    "recycling_steps": 20,
+    "diffusion_samples": 5,
+    "output_format": "pdb",     
     }
 
     n_decoy_shuffle = 150
     n_decoy_random = 150
 
     decoy_docking_config = {
+        "models": ["alphafold", "boltz"],
         "num_models": 5,
         "num_recycles": 50,
         "recycle_early_stop_tolerance": 0.1,
@@ -70,16 +77,19 @@ def main():
                 min_peptide_length=args.min_length,
                 max_peptide_length=args.max_length,
                 overwrite=args.force_redownload,
-                manual_csv_path=paths["manually_curated_pdbs"],
             )
             downloaded_df.to_csv(os.path.join(paths["0_complexes"], "pdbs.csv"))
 
         if args.process or args.all:
             logger.info("Processing pdbs")
+            manual_csv_path = paths["manually_curated_pdbs"]
+            if not os.path.isfile(manual_csv_path):
+                logger.info(f"Manually curated PDBs file not found at {manual_csv_path}. Not including manually curated PDBs.")
+                manual_csv_path = None
             processed_downloaded_df = process_pdbs(
                 raw_pdbs_dir=os.path.join(paths["0_complexes"], "pdbs"),
                 pdb_csv_dir=os.path.join(paths["0_complexes"], "pdbs.csv"),
-                manual_csv_path=paths["manually_curated_pdbs"],
+                manual_csv_path=manual_csv_path,
             )
             processed_downloaded_df["peptide_length"] = processed_downloaded_df[
                 "peptide_sequence"
@@ -225,8 +235,8 @@ def parse_arguments():
 
 def setup_directory_structure() -> Dict[str, str]:
     load_dotenv()
-    base_dir = os.getenv("DATA_DIR", "/srv/data1/general/immunopeptides_data/")
-    output_dir = os.getenv("OUTPUT_DIR", "/srv/data1/general/immunopeptides_data/outputs/binding_score_function_prod/")
+    base_dir = os.getenv("DATA_DIR", "/srv/data1/ma7631si/immunopeptides_data/")
+    output_dir = os.getenv("OUTPUT_DIR", "/srv/data1/ma7631si/immunopeptides_data/outputs/binding_score_function/")
     paths = {
         "base_dir": base_dir,
         "manually_curated_pdbs": os.path.abspath(

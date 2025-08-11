@@ -177,12 +177,12 @@ def download_pdb_from_rcsb(
                 file_path = os.path.join(output_dir, f"{pdb_code}.pdb")
                 with open(file_path, "w") as file:
                     file.write(pdb_text)
-                logger.info(f"{pdb_code}.pdb was downloaded", end="\r")
+                logger.info(f"{pdb_code}.pdb was downloaded")
                 return True, reason
             else:
                 rejection_reason = reason if not meets_criteria else "cyclic_peptide"
                 logger.info(
-                    f"{pdb_code}.pdb wasn't downloaded: {rejection_reason}", end="\r"
+                    f"{pdb_code}.pdb wasn't downloaded: {rejection_reason}"
                 )
                 return False, rejection_reason
         else:
