@@ -5,12 +5,14 @@ from bopep import Scorer
 from bopep import get_binding_site
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
+from Bio.PDB import MMCIFParser, PDBIO
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
+
 
 
 def score_pdb(
@@ -70,13 +72,10 @@ def score_pdbs_in_dir(
 
     def process_pdb(colab_docking_dirs):
         pdb_id = os.path.basename(colab_docking_dirs).split("_")[0]
-        original_pdb_path = os.path.join(
-            complexes_dir, f"{pdb_id}.pdb"
+        base_path = os.path.join(
+            complexes_dir, f"{pdb_id}"
         )
-        if not os.path.exists(original_pdb_path):
-            logger.warning(f"Original PDB not found for {colab_docking_dirs}")
-            return None
-        return score_pdb(colab_docking_dirs, original_pdb_path, binding_residue_distance_cutoff)
+        return score_pdb(colab_docking_dirs, base_path, binding_residue_distance_cutoff)
 
     scores = []
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -93,10 +92,4 @@ def score_pdbs_in_dir(
 
 
 if __name__ == "__main__":
-    original_pdb = "/srv/data1/general/immunopeptides_data/outputs/binding_score_function/1_processed/pdbs/2djy.pdb"
-    docked_pdb = "/srv/data1/general/immunopeptides_data/outputs/binding_score_function/2_scored/pdbs/docked_peptides/2djy_GPLGSELESPPPPYSRYPMD/2djy_GPLGSELESPPPPYSRYPMD_relaxed_rank_001_alphafold2_multimer_v3_model_5_seed_000.pdb"
-
-    receptor_binding_site_atoms, receptor_binding_site_residue_indices, peptide_binding_site_residue_indices, peptide_atoms = get_binding_site(original_pdb)
-    print(receptor_binding_site_residue_indices)
-    receptor_binding_site_atoms, receptor_binding_site_residue_indices, peptide_binding_site_residue_indices, peptide_atoms = get_binding_site(docked_pdb)
-    print(receptor_binding_site_residue_indices)
+    pass

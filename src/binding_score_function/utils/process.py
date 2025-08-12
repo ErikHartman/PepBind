@@ -1,11 +1,8 @@
 import os
-from typing import Union
 import pyrosetta
 from concurrent.futures import ThreadPoolExecutor
-from Bio.PDB import PDBParser, PDBIO
-from Bio.PDB.Structure import Structure
-from Bio.PDB.Model import Model
-from Bio.PDB.Chain import Chain
+from Bio.PDB import MMCIFParser
+
 import pandas as pd
 import logging
 import numpy as np
@@ -39,19 +36,22 @@ residue_map = {
 
 
 def throws_rosetta_error(pdb_file: str) -> bool:
+    # Try loading directly (Rosetta may support CIF)
     try:
         pyrosetta.pose_from_file(pdb_file)
         return False
     except Exception:
-        return True
+        pass
+
+    return True
 
 def is_peptide_cyclic(pdb_file, cutoff: float = 1.7) -> bool:
     """
-    Detect if the peptide (chain B) in the given PDB file is cyclic.
+    Detect if the peptide (chain B) in the given CIF file is cyclic.
     Checks if there's a covalent bond (distance < cutoff Å) between the
     C-terminal carbonyl carbon and N-terminal nitrogen atoms.
     """
-    parser = PDBParser(QUIET=True)
+    parser = MMCIFParser(QUIET=True)
     structure = parser.get_structure("peptide", pdb_file)
     model = structure[0]
     
@@ -82,62 +82,23 @@ def is_peptide_cyclic(pdb_file, cutoff: float = 1.7) -> bool:
     is_cyclic = distance <= cutoff
     return is_cyclic
 
-def ensure_peptide_is_chain_b(pdb_path: str, output_pdb_path: str) -> str:
-    """
-    Ensures that the shortest chain is labeled as chain B (peptide) and
-    the longest chain is labeled as chain A (protein).
-    """
-    parser = PDBParser(QUIET=True)
-    structure = parser.get_structure("complex", pdb_path)
-    model = structure[0]
-
-    # Determine chain lengths (only counting standard residues)
-    chain_lengths = {}
-    for chain in model:
-        residue_count = sum(
-            1 for residue in chain.get_residues() if residue.id[0] == " "
-        )
-        chain_lengths[chain.id] = residue_count
-
-    # Identify shortest chain as new 'B' and another chain as 'A'
-    sorted_chains = sorted(chain_lengths.items(), key=lambda x: x[1])
-    peptide_chain_id = sorted_chains[0][0]
-    protein_chain_id = sorted_chains[-1][0]
-
-    # Create a new structure with renamed chains
-    new_structure = Structure("complex")
-    new_model = Model(0)
-    new_structure.add(new_model)
-
-    for chain in model:
-        new_chain = Chain("")
-        if chain.id == peptide_chain_id:
-            new_chain.id = "B"
-        elif chain.id == protein_chain_id:
-            new_chain.id = "A"
-        else:
-            # Skip or assign a different ID if needed
-            continue
-
-        # Copy all residues to the new chain
-        for residue in chain:
-            new_chain.add(residue.copy())
-
-        new_model.add(new_chain)
-
-    io = PDBIO()
-    io.set_structure(new_structure)
-    io.save(output_pdb_path)
-    return output_pdb_path
-
-
 def process_pdbs(raw_pdbs_dir: str, pdb_csv_dir: str, manual_csv_path: str = None) -> pd.DataFrame:
     pdbs_df = pd.read_csv(os.path.join(pdb_csv_dir))
+
+    # If the CSV is empty or lacks 'pdb_code', infer from filenames
+    if pdbs_df.empty or "pdb_code" not in pdbs_df.columns:
+        logger.warning("pdbs.csv is empty or missing 'pdb_code'. Inferring codes from CIF files in raw directory.")
+        inferred_codes = [
+            os.path.splitext(f)[0]
+            for f in os.listdir(raw_pdbs_dir)
+            if f.endswith(".cif")
+        ]
+        pdbs_df = pd.DataFrame({"pdb_code": inferred_codes})
 
     pdb_files_in_raw_pdbs_dir = [
         os.path.join(raw_pdbs_dir, filename)
         for filename in os.listdir(raw_pdbs_dir)
-        if filename.endswith(".pdb")
+        if filename.endswith(".cif")
     ]
 
     # Check for Rosetta compatibility in parallel
@@ -154,15 +115,11 @@ def process_pdbs(raw_pdbs_dir: str, pdb_csv_dir: str, manual_csv_path: str = Non
             os.remove(pdb_file)
             logger.info(f"Removed {pdb_file}")
 
-    # Ensure peptide is in chain B for all remaining files
     remaining_pdb_files = [
         os.path.join(raw_pdbs_dir, filename)
         for filename in os.listdir(raw_pdbs_dir)
-        if filename.endswith(".pdb")
+        if filename.endswith(".cif")
     ]
-
-    for pdb_file in remaining_pdb_files:
-        ensure_peptide_is_chain_b(pdb_file, pdb_file)
 
     for pdb_file in remaining_pdb_files:
         if is_peptide_cyclic(pdb_file):
@@ -172,7 +129,7 @@ def process_pdbs(raw_pdbs_dir: str, pdb_csv_dir: str, manual_csv_path: str = Non
     remaining_pdb_files = [
         os.path.join(raw_pdbs_dir, filename)
         for filename in os.listdir(raw_pdbs_dir)
-        if filename.endswith(".pdb")]
+        if filename.endswith(".cif")]
             
     
     # Load manually curated data if provided
@@ -182,11 +139,11 @@ def process_pdbs(raw_pdbs_dir: str, pdb_csv_dir: str, manual_csv_path: str = Non
         manual_data['pdb_code'] = manual_data['pdb_code'].str.replace('.pdb', '')
         logger.info(f"Loaded {len(manual_data)} manually curated entries")
     
-    # Filter to only valid PDB files
+    # Filter to only valid CIF files
     valid_pdb_filenames = set(os.listdir(raw_pdbs_dir))
 
     pdbs_df = pdbs_df[
-        pdbs_df["pdb_code"].apply(lambda x: f"{x}.pdb" in valid_pdb_filenames)
+        pdbs_df["pdb_code"].apply(lambda x: f"{x}.cif" in valid_pdb_filenames)
     ]
 
     manual_pdb_codes = []
@@ -194,31 +151,43 @@ def process_pdbs(raw_pdbs_dir: str, pdb_csv_dir: str, manual_csv_path: str = Non
         manual_pdb_codes = manual_data["pdb_code"].unique().tolist()
         pdbs_df = pdbs_df[~pdbs_df["pdb_code"].isin(manual_pdb_codes)]
     
-    # Process regular PDB entries
-    logger.info(f"Processing {len(pdbs_df)} regular PDB entries")
+    # Process regular CIF entries
+    logger.info(f"Processing {len(pdbs_df)} regular CIF entries")
     protein_sequences = []
     peptide_sequences = []
     
     for pdb_code in pdbs_df["pdb_code"]:
-        pdb_path = os.path.join(raw_pdbs_dir, f"{pdb_code}.pdb")
-        parser = PDBParser(QUIET=True)
+        pdb_path = os.path.join(raw_pdbs_dir, f"{pdb_code}.cif")
+        parser = MMCIFParser(QUIET=True)
         structure = parser.get_structure("complex", pdb_path)
         model = structure[0]
+
+            # Only allow chains A and B
+        allowed_chains = {"A", "B"}
+        present_chains = {chain.id for chain in model}
+        if not present_chains.issubset(allowed_chains):
+            logger.info(f"Skipping {pdb_code}: contains chains other than A and B ({present_chains})")
+            protein_sequences.append("")
+            peptide_sequences.append("")
+            continue
         
-        protein_sequence = ""
-        peptide_sequence = ""
-        
+        # Build a dict of chain_id -> sequence
+        chain_seqs = {}
         for chain in model:
             seq = "".join(
                 residue_map.get(res.resname, "X")
                 for res in chain
                 if res.id[0] == " "
             )
-            if chain.id == "A":
-                protein_sequence = seq
-            elif chain.id == "B":
-                peptide_sequence = seq
-        
+            chain_seqs[chain.id] = seq
+        # Sort chains by length
+        sorted_chains = sorted(chain_seqs.items(), key=lambda x: len(x[1]))
+        if len(sorted_chains) >= 2:
+            peptide_sequence = sorted_chains[0][1]
+            protein_sequence = sorted_chains[-1][1]
+        else:
+            peptide_sequence = ""
+            protein_sequence = ""
         protein_sequences.append(protein_sequence)
         peptide_sequences.append(peptide_sequence)
     
@@ -230,12 +199,12 @@ def process_pdbs(raw_pdbs_dir: str, pdb_csv_dir: str, manual_csv_path: str = Non
         logger.info(f"Processing {len(manual_data)} manually curated entries")
         manual_entries = []
         
-        # For each manually curated PDB, extract the protein sequence once
+        # For each manually curated CIF, extract the protein sequence once
         protein_seq_map = {}
         for pdb_code in manual_pdb_codes:
-            if f"{pdb_code}.pdb" in valid_pdb_filenames:
-                pdb_path = os.path.join(raw_pdbs_dir, f"{pdb_code}.pdb")
-                parser = PDBParser(QUIET=True)
+            if f"{pdb_code}.cif" in valid_pdb_filenames:
+                pdb_path = os.path.join(raw_pdbs_dir, f"{pdb_code}.cif")
+                parser = MMCIFParser(QUIET=True)
                 structure = parser.get_structure("complex", pdb_path)
                 model = structure[0]
                 
