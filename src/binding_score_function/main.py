@@ -50,15 +50,20 @@ def main():
     n_decoy_random = 150
 
     decoy_docking_config = {
-        "models": ["alphafold", "boltz"],
-        "num_models": 5,
-        "num_recycles": 50,
-        "recycle_early_stop_tolerance": 0.1,
-        "amber": True,
-        "num_relax": 1,
-        "gpu_ids": ["1", "2", "3"],
-        "overwrite_results": False,
-        "output_dir": os.path.join(paths["2_docked"], "decoy_pdbs"),
+    "models": ["alphafold", "boltz"],
+    "num_models": 5,
+    "num_recycles": 20,
+    "recycle_early_stop_tolerance": 0.1,
+    "amber": True,
+    "num_relax": 1,
+    "gpu_ids": ["1", "2"],
+    "overwrite_results": False,
+    "output_dir": os.path.join(paths["2_docked"], "pdbs"),
+
+    # Boltz-specific options (add as needed)
+    "recycling_steps": 20,
+    "diffusion_samples": 5,
+    "output_format": "pdb",     
     }
 
     processed_downloaded_df = pd.DataFrame()
