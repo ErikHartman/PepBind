@@ -4,8 +4,49 @@ import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Any
 from bopep import Docker
+from Bio.Data import PDBData
+from Bio.PDB import MMCIFParser, PDBParser
+
 
 logger = logging.getLogger(__name__)
+
+def _get_template_structure_path(template_dir: str, pdb_code: str) -> str:
+    """
+    Prefer a CIF template if present; otherwise fall back to PDB.
+    """
+    cif_path = os.path.join(template_dir, f"{pdb_code}.cif")
+    if os.path.exists(cif_path):
+        return cif_path
+    pdb_path = os.path.join(template_dir, f"{pdb_code}.pdb")
+    if os.path.exists(pdb_path):
+        return pdb_path
+    raise FileNotFoundError(f"No template found for {pdb_code} (.cif or .pdb) in {template_dir}")
+
+
+def _select_longest_chain(structure_path: str):
+    """Return ID of longest non-empty standard AA chain."""
+
+    parser = MMCIFParser(QUIET=True) if structure_path.lower().endswith('.cif') else PDBParser(QUIET=True)
+    structure = parser.get_structure("tmp", structure_path)
+    model = next(structure.get_models())
+    max_length = 0
+    longest_chain = None
+    three_to_one_dict = PDBData.protein_letters_3to1
+    for chain in model:
+        length = 0
+        for r in chain:
+            if r.id[0] == ' ':
+                resname = r.resname.strip().upper()
+                if resname in three_to_one_dict:
+                    _ = three_to_one_dict[resname]
+                    length += 1
+        if length > max_length:
+            longest_chain = chain.id
+            max_length = length
+    if longest_chain is None:
+        raise ValueError(f"No valid standard amino acid chain found in {structure_path}")
+    return longest_chain
+
 
 def dock_complexes(
     template_pdb_dir: str,
@@ -63,19 +104,19 @@ def dock_complexes(
             f"Processing {idx+1}/{len(docking_tasks)}: {pdb_code} {peptide_sequence} on GPU {gpu_id}"
         )
         try:
-            target_structure_path = os.path.join(template_pdb_dir, f"{pdb_code}.pdb")
-            docker = Docker(docker_kwargs=this_config)
+            target_structure_path = _get_template_structure_path(template_pdb_dir, pdb_code)
+            keep_chains_arg = _select_longest_chain(target_structure_path)
+            print(f"Selected chain {keep_chains_arg} for {pdb_code}")
+            docker = Docker(kwargs=this_config)
             docker.set_target_structure(
                 target_structure_path=target_structure_path,
-                strip_template=True,
-                get_first_model=True,
-                keep_chains="A",
+                keep_chains=keep_chains_arg,
             )
             docker.dock_peptides([peptide_sequence])
             return True
 
         except Exception as e:
-            logger.warning(f"Could not score existing docking for {pdb_code}: {e}")
+            logger.warning(f"Could not dock {pdb_code}: {e}")
             return False
 
     # Run tasks in parallel
