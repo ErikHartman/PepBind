@@ -1,3 +1,5 @@
+![ply1](immunopeptides_logo.png)
+
 # Immunomodulating peptides
 
 ### TODO
