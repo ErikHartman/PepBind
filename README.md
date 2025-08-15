@@ -1,4 +1,4 @@
-![ply1](immunopeptides_logo.png)
+![ply1](ply_render.png)
 
 # Immunomodulating peptides
 
