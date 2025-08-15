@@ -1,4 +1,4 @@
-![ply1](ply_render.png)
+![ply1](ply1_render.png)
 
 # Immunomodulating peptides
 
