@@ -5,7 +5,6 @@ from bopep import Scorer
 from bopep import get_binding_site
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
-from Bio.PDB import MMCIFParser, PDBIO
 
 logging.basicConfig(
     level=logging.INFO,
@@ -38,7 +37,8 @@ def score_pdb(
         # Calculate scores
         scores = scorer.score(
             scores_to_include=scores_to_include,
-            colab_dir=docking_result_path,
+            template_pdb=original_pdb_path,
+            processed_dir=docking_result_path,
             binding_site_residue_indices=binding_site_residues,
         )
         scores = list(scores.values())
@@ -73,7 +73,7 @@ def score_pdbs_in_dir(
     def process_pdb(colab_docking_dirs):
         pdb_id = os.path.basename(colab_docking_dirs).split("_")[0]
         base_path = os.path.join(
-            complexes_dir, f"{pdb_id}"
+            complexes_dir, f"{pdb_id}.cif"
         )
         return score_pdb(colab_docking_dirs, base_path, binding_residue_distance_cutoff)
 

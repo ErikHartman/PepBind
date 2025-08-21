@@ -76,7 +76,9 @@ def dock_complexes(
     logger.info(f"Found {len(docking_tasks)} complexes to dock")
 
     parallel_config = docking_config.copy()
-    gpu_ids = docking_config.get("gpu_ids", ["0"])
+    gpu_ids = docking_config.get("gpu_ids") # No default, should be provided
+    if not gpu_ids:
+        raise ValueError("No GPU IDs provided in docking configuration")
     num_gpus = len(gpu_ids)
 
     # Process a single docking task

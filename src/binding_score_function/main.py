@@ -44,6 +44,7 @@ def main():
     "recycling_steps": 20,
     "diffusion_samples": 5,
     "output_format": "pdb",     
+    "cache": "/srv/data1/general/tmp/cache",
     }
 
     n_decoy_shuffle = 150
@@ -58,12 +59,13 @@ def main():
     "num_relax": 1,
     "gpu_ids": ["1", "2"],
     "overwrite_results": False,
-    "output_dir": os.path.join(paths["2_docked"], "pdbs"),
+    "output_dir": paths["2_docked_decoy"],
 
     # Boltz-specific options (add as needed)
     "recycling_steps": 20,
     "diffusion_samples": 5,
-    "output_format": "pdb",     
+    "output_format": "pdb",
+    "cache": "/srv/data1/general/tmp/cache",
     }
 
     processed_downloaded_df = pd.DataFrame()
@@ -131,7 +133,7 @@ def main():
         if args.score or args.all:
             logger.info("Starting scoring")
             scores_df = score_pdbs_in_dir(
-                docking_dir=docking_config["output_dir"],
+                docking_dir=os.path.join(paths["2_docked"], "pdbs", "processed"),
                 complexes_dir=os.path.join(paths["0_complexes"], "pdbs"),
                 binding_residue_distance_cutoff=5.0,
                 max_workers=20,
@@ -180,7 +182,7 @@ def main():
 
             logger.info("Scoring decoy dataset")
             decoy_scores_df = score_pdbs_in_dir(
-                docking_dir=decoy_docking_config["output_dir"],
+                docking_dir=os.path.join(paths["2_docked"], "pdbs", "processed"),
                 complexes_dir=os.path.join(paths["0_complexes"], "pdbs"),
                 binding_residue_distance_cutoff=5.0,
                 max_workers=20,
