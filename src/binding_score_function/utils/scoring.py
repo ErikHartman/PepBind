@@ -30,9 +30,18 @@ def score_pdb(
             peptide_chain="B",
             threshold=binding_residue_distance_cutoff,
         )
+        # Subtract indices by the first n_0 - 1
+
+        if binding_site_residues is None:
+            logger.error(
+                f"Binding site residues not found for {complex_filename}. Skipping scoring."
+            )
+            return None
+
         # Configure scoring
         scorer = Scorer()
         scores_to_include = scorer.available_scores
+
 
         # Calculate scores
         scores = scorer.score(
