@@ -320,7 +320,7 @@ def plot_symbolic_complexity_tradeoff_simple(
     df = df.dropna(subset=[f"val_{metric}"])
     
     # Create figure with two subplots
-    fig = plt.figure(figsize=(3,2))
+    fig = plt.figure(figsize=(3.5,2.5))
     
    
     # Plot complexity vs val metric
@@ -338,10 +338,10 @@ def plot_symbolic_complexity_tradeoff_simple(
         label="Train",
     )
     plt.legend(frameon=False)
-    plt.ylabel("Complexity")
-    plt.xlabel(metric)
+    plt.xlabel("Complexity")
+    plt.ylabel(metric)
 
-    
+    sns.despine()
     plt.tight_layout()
 
     

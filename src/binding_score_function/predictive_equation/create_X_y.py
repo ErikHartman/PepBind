@@ -13,7 +13,7 @@ import argparse
 BASE_DIR = Path("/srv/data1/general/immunopeptides_data/outputs/binding_score_function_prod")
 DIR_SCORES = BASE_DIR / "3_scores"
 DIR_COMPLEXES = BASE_DIR / "1_processed_complexes"
-DIR_PROCESSED = BASE_DIR / "4_processed_scores"
+DIR_PROCESSED = BASE_DIR / "4_processed_scores_temp"
 PLOTS_DIR = Path.home() / "immunopeptides" / "plots"
 PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -175,6 +175,7 @@ def plot_feature_correlation_matrix(
     for col in common_cols:
         if pd.api.types.is_numeric_dtype(real_df[col]):
             numeric_cols.append(col)
+
     
     print(f"Creating correlation matrix for {len(numeric_cols)} features: {numeric_cols}")
     

@@ -355,8 +355,6 @@ if __name__ == "__main__":
             val_probabilities,
             model_names,
             output_path=os.path.join(output_dir, "pkd_probability_correlation.svg"),
-            pkd_values_train=real_train_pkd["pKd"].values,
-            probabilities_train=train_probabilities
         )
         print(f"Generated pKd-probability correlation plot at {output_dir}/pkd_probability_correlation.svg")
 
