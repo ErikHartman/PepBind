@@ -1,16 +1,78 @@
 import logging
 import os
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, Tuple
 from bopep import Scorer
 from bopep import get_binding_site
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
+from Bio.PDB import PDBParser, MMCIFParser
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
+
+
+def determine_chain_assignments(pdb_file: str) -> Tuple[str, str]:
+    """
+    Determine which chain is the receptor and which is the peptide.
+    
+    Parameters
+    ----------
+    pdb_file : str
+        Path to the PDB file
+        
+    Returns
+    -------
+    tuple
+        (receptor_chain_id, peptide_chain_id)
+    """
+    if pdb_file.endswith('.cif'):
+        parser = MMCIFParser(QUIET=True, auth_residues=False)
+    else:
+        parser = PDBParser(QUIET=True)
+    
+    try:
+        structure = parser.get_structure("structure", pdb_file)
+        model = structure[0]
+        
+        # Get chains A and B
+        try:
+            chain_a = model["A"]
+        except KeyError:
+            chain_a = None
+            
+        try:
+            chain_b = model["B"]
+        except KeyError:
+            chain_b = None
+        
+        if not chain_a or not chain_b:
+            logger.warning(f"Missing chain A or B in {pdb_file}, using default assignment")
+            return "A", "B"
+        
+        # Count residues in each chain (excluding hetero residues)
+        count_a = len([res for res in chain_a.get_residues() if res.id[0] == " "])
+        count_b = len([res for res in chain_b.get_residues() if res.id[0] == " "])
+        
+        # Receptor is the longer chain, peptide is the shorter chain
+        if count_a >= count_b:
+            receptor_chain = "A"
+            peptide_chain = "B"
+        else:
+            receptor_chain = "B"
+            peptide_chain = "A"
+            
+        logger.info(f"Chain assignment for {os.path.basename(pdb_file)}: "
+                   f"receptor={receptor_chain} ({count_a if receptor_chain=='A' else count_b} residues), "
+                   f"peptide={peptide_chain} ({count_b if peptide_chain=='B' else count_a} residues)")
+        
+        return receptor_chain, peptide_chain
+        
+    except Exception as e:
+        logger.warning(f"Error determining chain assignments for {pdb_file}: {e}, using default")
+        return "A", "B"
 
 
 
@@ -22,15 +84,19 @@ def score_pdb(
     try:
         complex_filename = os.path.basename(docking_result_path)
         logger.info(f"Processing PDB: {complex_filename}")
-
+        
+        # Determine which chain is receptor vs peptide based on length
+        receptor_chain, peptide_chain = determine_chain_assignments(original_pdb_path)
+        
         # Identify binding site residues
         _, binding_site_residues, _, _ = get_binding_site(
             original_pdb_path,
-            receptor_chain="A",
-            peptide_chain="B",
+            receptor_chain=receptor_chain,
+            peptide_chain=peptide_chain,
             threshold=binding_residue_distance_cutoff,
         )
-        # Subtract indices by the first n_0 - 1
+
+        logger.info(f"Binding site residues for {complex_filename}: {binding_site_residues}")
 
         if binding_site_residues is None:
             logger.error(
@@ -40,8 +106,8 @@ def score_pdb(
 
         # Configure scoring
         scorer = Scorer()
-        scores_to_include = scorer.available_scores
-
+        scores_to_include = scorer.get_available_scores(processed_dir=docking_result_path, binding_site_residue_indices=binding_site_residues, template_pdb=original_pdb_path)
+        logging.info(f"Scores to include for {complex_filename}: {scores_to_include}")
 
         # Calculate scores
         scores = scorer.score(
@@ -67,7 +133,7 @@ def score_pdbs_in_dir(
     docking_dir: str,
     complexes_dir: str,
     binding_residue_distance_cutoff: float = 5.0,
-    max_workers: int = 20,
+    max_workers: int = 60,
 ) -> pd.DataFrame:
     """
     Score all PDB files in the docking directory and save results to a CSV.

@@ -7,7 +7,7 @@ import pandas as pd
 import logging
 import numpy as np
 from Bio.PDB.Polypeptide import is_aa
-
+from utils.scoring import determine_chain_assignments
 
 logger = logging.getLogger(__name__)
 
@@ -47,16 +47,16 @@ def throws_rosetta_error(pdb_file: str) -> bool:
 
 def is_peptide_cyclic(pdb_file, cutoff: float = 1.7) -> bool:
     """
-    Detect if the peptide (chain B) in the given CIF file is cyclic.
+    Detect if the peptide in the given CIF file is cyclic.
     Checks if there's a covalent bond (distance < cutoff Å) between the
     C-terminal carbonyl carbon and N-terminal nitrogen atoms.
     """
-    parser = MMCIFParser(QUIET=True)
+    parser = MMCIFParser(QUIET=True, auth_residues=False)
     structure = parser.get_structure("peptide", pdb_file)
     model = structure[0]
     
     try:
-        chain = model["B"]
+        chain = model[determine_chain_assignments(pdb_file)[1]]  # Peptide chain
     except KeyError:
         return False
 
@@ -158,7 +158,7 @@ def process_pdbs(raw_pdbs_dir: str, pdb_csv_dir: str, manual_csv_path: str = Non
     
     for pdb_code in pdbs_df["pdb_code"]:
         pdb_path = os.path.join(raw_pdbs_dir, f"{pdb_code}.cif")
-        parser = MMCIFParser(QUIET=True)
+        parser = MMCIFParser(QUIET=True, auth_residues=False)
         structure = parser.get_structure("complex", pdb_path)
         model = structure[0]
 
@@ -171,7 +171,6 @@ def process_pdbs(raw_pdbs_dir: str, pdb_csv_dir: str, manual_csv_path: str = Non
             peptide_sequences.append("")
             continue
         
-        # Build a dict of chain_id -> sequence
         chain_seqs = {}
         for chain in model:
             seq = "".join(
@@ -180,7 +179,7 @@ def process_pdbs(raw_pdbs_dir: str, pdb_csv_dir: str, manual_csv_path: str = Non
                 if res.id[0] == " "
             )
             chain_seqs[chain.id] = seq
-        # Sort chains by length
+        
         sorted_chains = sorted(chain_seqs.items(), key=lambda x: len(x[1]))
         if len(sorted_chains) >= 2:
             peptide_sequence = sorted_chains[0][1]
@@ -194,17 +193,17 @@ def process_pdbs(raw_pdbs_dir: str, pdb_csv_dir: str, manual_csv_path: str = Non
     pdbs_df["protein_sequence"] = protein_sequences
     pdbs_df["peptide_sequence"] = peptide_sequences
     
-    # Now, handle manually curated entries
+    
     if manual_data is not None and len(manual_pdb_codes) > 0:
         logger.info(f"Processing {len(manual_data)} manually curated entries")
         manual_entries = []
         
-        # For each manually curated CIF, extract the protein sequence once
+        
         protein_seq_map = {}
         for pdb_code in manual_pdb_codes:
             if f"{pdb_code}.cif" in valid_pdb_filenames:
                 pdb_path = os.path.join(raw_pdbs_dir, f"{pdb_code}.cif")
-                parser = MMCIFParser(QUIET=True)
+                parser = MMCIFParser(QUIET=True, auth_residues=False)
                 structure = parser.get_structure("complex", pdb_path)
                 model = structure[0]
                 
