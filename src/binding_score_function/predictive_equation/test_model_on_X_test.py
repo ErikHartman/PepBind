@@ -6,7 +6,6 @@ import seaborn as sns
 import sympy as sp
 from sklearn.metrics import roc_curve, auc
 import sympy as sp
-from sympy.parsing.sympy_parser import parse_expr
 
 # Set plotting style
 sns.set_context("paper")
@@ -15,8 +14,8 @@ color_palette = {
     "shuffled": "#E88873", 
     "random": "#F46036",
     "prediction": "#124E78",
-    "real_test": "#2C8C99",  # Same as real but will be used with different marker/style
-    "real_all": "#124E78"    # Different color for 'all' dataset
+    "real_test": "#2C8C99", 
+    "real_all": "#124E78" 
 }
 
 
@@ -73,19 +72,13 @@ def scale_data(X, scaling_params, scaler_type="standard"):
     
     """
     if scaler_type == "standard":
-        # Standard scaling: (X - mean) / std
         feature_means = scaling_params['mean']
         feature_stds = scaling_params['std']
         return (X - feature_means) / feature_stds
     
     elif scaler_type == "minmax":
-        # Min-Max scaling using mean and std to calculate min and max
-        # This assumes that the min is approximately mean - 2*std
-        # and max is approximately mean + 2*std
-        feature_means = scaling_params['mean']
-        feature_stds = scaling_params['std']
-        feature_mins = feature_means - 2 * feature_stds
-        feature_maxs = feature_means + 2 * feature_stds
+        feature_mins = scaling_params['min']
+        feature_maxs =  scaling_params['max']
         return (X - feature_mins) / (feature_maxs - feature_mins)
     
     else:
@@ -95,8 +88,6 @@ def scale_data(X, scaling_params, scaler_type="standard"):
 def save_predictions(results, y_true, output_dir="/home/er8813ha/immunopeptides/plots/test"):
     """Save predictions to CSV files."""
     os.makedirs(output_dir, exist_ok=True)
-    
-    # Save real data predictions
     real_df = pd.DataFrame({
         'complex_filename': results['real']['data'].index.tolist(),
         'y_true': y_true,
@@ -106,8 +97,6 @@ def save_predictions(results, y_true, output_dir="/home/er8813ha/immunopeptides/
     real_path = os.path.join(output_dir, "test_predictions.csv")
     real_df.to_csv(real_path, index=False)
     print(f"Real test predictions saved to: {real_path}")
-    
-    # Save decoy predictions
     decoy_data = []
     
     if results['shuffled'] is not None:
@@ -127,14 +116,9 @@ def save_predictions(results, y_true, output_dir="/home/er8813ha/immunopeptides/
 
 
 def equation_string_to_pandas(equation_string, X):
-    
-    # Parse the equation string
     expr = sp.sympify(equation_string)
-    
-    # Get all symbols (variables) from the equation
     symbols = list(expr.free_symbols)
     
-    # Create a mapping from symbol names to DataFrame columns
     substitutions = {}
     for symbol in symbols:
         col_name = str(symbol)
@@ -143,17 +127,8 @@ def equation_string_to_pandas(equation_string, X):
         else:
             raise ValueError(f"Column '{col_name}' not found in DataFrame. Available columns: {list(X.columns)}")
     
-    # Convert sympy expression to numpy function
-    # Create a lambda function that can handle numpy arrays
     func = sp.lambdify(symbols, expr, modules=['numpy'])
-    
-    # Apply the function
-    if len(symbols) == 1:
-        # Single variable case
-        result = func(list(substitutions.values())[0])
-    else:
-        # Multiple variables case
-        result = func(*substitutions.values())
+    result = func(*substitutions.values())
     
     return result
 
@@ -191,107 +166,6 @@ def combined_scoring_function(X, reg_equation, class_equation,
     
     return combined_scores
 
-def generate_combined_equation(reg_equation_str, class_equation_str, 
-                              scaling_params_reg, scaling_params_class):
-    """
-    Generate a single mathematical expression that combines both models with proper scaling.
-    
-    """
-
-    features = list(set(scaling_params_reg.index) | set(scaling_params_class.index))
-    
-    feature_symbols = {f: sp.Symbol(f) for f in features}
-    
-    reg_expr = parse_expr(reg_equation_str)
-    class_expr = parse_expr(class_equation_str)
-    
-    reg_scaled_vars = {}
-    for feature in scaling_params_reg.index:
-        if feature in feature_symbols:
-            mean = scaling_params_reg.loc[feature, 'mean']
-            std = scaling_params_reg.loc[feature, 'std']
-            reg_scaled_vars[feature] = (feature_symbols[feature] - mean) / std
-    
-    class_scaled_vars = {}
-    for feature in scaling_params_class.index:
-        if feature in feature_symbols:
-            mean = scaling_params_class.loc[feature, 'mean']
-            std = scaling_params_class.loc[feature, 'std']
-            class_scaled_vars[feature] = (feature_symbols[feature] - mean) / std
-    
-    reg_scaled_expr = reg_expr.subs({sp.Symbol(f): expr for f, expr in reg_scaled_vars.items()})
-    class_scaled_expr = class_expr.subs({sp.Symbol(f): expr for f, expr in class_scaled_vars.items()})
-    
-    combined_expr = reg_scaled_expr * class_scaled_expr
-    simplified = sp.simplify(combined_expr)
-    
-    return str(combined_expr), str(simplified)
-
-
-def generate_combined_equation(reg_equation_str, class_equation_str, 
-                              scaling_params_reg, scaling_params_class,
-                              scaler_type="standard"):
-    """
-    Generate a single mathematical expression that combines both models with proper scaling.
-    """
-    # Get all features used in both models
-    features = list(set(scaling_params_reg.index) | set(scaling_params_class.index))
-    
-    # Create symbolic variables for all features
-    feature_symbols = {f: sp.Symbol(f) for f in features}
-    
-    # Parse the equations
-    reg_expr = parse_expr(reg_equation_str)
-    class_expr = parse_expr(class_equation_str)
-    
-    # Apply appropriate scaling to the variables in each model
-    if scaler_type == "standard":
-        # Standard scaling: (X - mean) / std
-        reg_scaled_vars = {}
-        for feature in scaling_params_reg.index:
-            if feature in feature_symbols:
-                mean = scaling_params_reg.loc[feature, 'mean']
-                std = scaling_params_reg.loc[feature, 'std']
-                reg_scaled_vars[feature] = (feature_symbols[feature] - mean) / std
-        
-        class_scaled_vars = {}
-        for feature in scaling_params_class.index:
-            if feature in feature_symbols:
-                mean = scaling_params_class.loc[feature, 'mean']
-                std = scaling_params_class.loc[feature, 'std']
-                class_scaled_vars[feature] = (feature_symbols[feature] - mean) / std
-                
-    elif scaler_type == "minmax":
-        # Min-Max scaling using mean and std to calculate min and max
-        reg_scaled_vars = {}
-        for feature in scaling_params_reg.index:
-            if feature in feature_symbols:
-                mean = scaling_params_reg.loc[feature, 'mean']
-                std = scaling_params_reg.loc[feature, 'std']
-                feature_min = mean - 2 * std
-                feature_max = mean + 2 * std
-                reg_scaled_vars[feature] = (feature_symbols[feature] - feature_min) / (feature_max - feature_min)
-        
-        class_scaled_vars = {}
-        for feature in scaling_params_class.index:
-            if feature in feature_symbols:
-                mean = scaling_params_class.loc[feature, 'mean']
-                std = scaling_params_class.loc[feature, 'std']
-                feature_min = mean - 2 * std
-                feature_max = mean + 2 * std
-                class_scaled_vars[feature] = (feature_symbols[feature] - feature_min) / (feature_max - feature_min)
-    else:
-        raise ValueError(f"Unknown scaler type: {scaler_type}. Use 'standard' or 'minmax'.")
-    
-    # Substitute the scaled variables into the expressions
-    reg_scaled_expr = reg_expr.subs({sp.Symbol(f): expr for f, expr in reg_scaled_vars.items()})
-    class_scaled_expr = class_expr.subs({sp.Symbol(f): expr for f, expr in class_scaled_vars.items()})
-    
-    # Combine the expressions (multiplication as per combined_scoring_function)
-    combined_expr = reg_scaled_expr * class_scaled_expr
-    
-    
-    return str(combined_expr)
 
 def main():
     """Run the analysis pipeline with the specified configuration."""
@@ -300,11 +174,11 @@ def main():
     os.makedirs(output_dir, exist_ok=True)
 
     # Define equation strings for both models
-    regression_equation_string = "(3.374078 - 4.3519845*interface_dG)*(distance_score + instability_index) + 5.4904785"
+    regression_equation_string = "-rosetta_score - (distance_score + 3.0185924)*(interface_dG - 2.4250882)"
     classification_equation_string = "-iptm*(peptide_pae - 1.2075188)"
 
     # Load test data
-    data_split = 'all'
+    data_split = 'test'
     X_real, y_real, X_shuffle, X_random = load_data(data_split)
     
     # Load scaling parameters for each model type
@@ -314,17 +188,6 @@ def main():
     # Set scaling type
     scaler_type = "minmax"  # "minmax" or "standard"
 
-    combined_eq = generate_combined_equation(
-        regression_equation_string,
-        classification_equation_string,
-        scaling_params_reg,
-        scaling_params_class,
-        scaler_type=scaler_type
-    )
-
-    print("Combined equation:")
-    print(combined_eq)
-    
     # Regression predictions with proper scaling
     X_real_scaled_predictions_reg = scoring_func_regression(
         scale_data(X_real, scaling_params_reg, scaler_type=scaler_type), 
@@ -383,7 +246,7 @@ def main():
 
     fig, axs = plt.subplots(1, 3, figsize=(9,2))
     
-    sns.regplot(x=y_real, y=X_real_scaled_predictions_reg, ax=axs[0], scatter_kws={'s':8})
+    sns.regplot(x=y_real, y=X_real_scaled_predictions_reg, ax=axs[0], scatter_kws={'s':5}, line_kws={"color": "#E88873"})
     axs[0].set_xlabel("True pKd")
     axs[0].set_ylabel("Predicted pKd")
     axs[0].annotate(
@@ -391,9 +254,24 @@ def main():
         xy=(0.05, 0.9), xycoords='axes fraction'
     )
     
-    sns.histplot(X_real_scaled_predictions_reg, kde=True, color=color_palette['real'], ax=axs[2], label='Real')
-    sns.histplot(X_shuffle_scaled_predictions_reg, kde=True, color=color_palette['shuffled'], ax=axs[2], label='Shuffled')
-    sns.histplot(X_random_scaled_predictions_reg, kde=True, color=color_palette['random'], ax=axs[2], label='Random')
+    hist_data_reg = pd.DataFrame({
+        'Score': np.concatenate([X_real_scaled_predictions_reg, X_shuffle_scaled_predictions_reg, X_random_scaled_predictions_reg]),
+        'Type': np.concatenate([
+            np.repeat('Real', len(X_real_scaled_predictions_reg)),
+            np.repeat('Shuffled', len(X_shuffle_scaled_predictions_reg)),
+            np.repeat('Random', len(X_random_scaled_predictions_reg))
+        ])
+    })
+    
+    sns.histplot(
+        data=hist_data_reg,
+        x='Score',
+        hue='Type',
+        kde=True,
+        bins=10,
+        palette={'Real': color_palette['real'], 'Shuffled': color_palette['shuffled'], 'Random': color_palette['random']},
+        ax=axs[2]
+    )
     axs[2].set_xlabel("Predicted pKd")
     axs[2].set_ylabel("Density")
     axs[2].legend(frameon=False)
@@ -422,7 +300,7 @@ def main():
     
     fig, axs = plt.subplots(1, 3, figsize=(9,2))
     
-    sns.regplot(x=y_real, y=X_real_scaled_predictions_class, ax=axs[0], scatter_kws={'s':8})
+    sns.regplot(x=y_real, y=X_real_scaled_predictions_class, ax=axs[0], scatter_kws={'s':5}, line_kws={"color": "#E88873"})
     axs[0].set_xlabel("True pKd")
     axs[0].set_ylabel("Predicted score")
     axs[0].annotate(
@@ -431,12 +309,24 @@ def main():
     )
 
 
-    sns.histplot(X_real_scaled_predictions_class, kde=True, color=color_palette['real'], ax=axs[2], label='Real')
-    sns.histplot(X_shuffle_scaled_predictions_class, kde=True, color=color_palette['shuffled'], ax=axs[2], label='Shuffled')
-    sns.histplot(X_random_scaled_predictions_class, kde=True, color=color_palette['random'], ax=axs[2], label='Random')
-    axs[2].set_xlabel("Predicted score")
-    axs[2].set_ylabel("Density")
-    axs[2].legend(frameon=False)
+    hist_data_class = pd.DataFrame({
+    'Score': np.concatenate([X_real_scaled_predictions_class, X_shuffle_scaled_predictions_class, X_random_scaled_predictions_class]),
+    'Type': np.concatenate([
+        np.repeat('Real', len(X_real_scaled_predictions_class)),
+        np.repeat('Shuffled', len(X_shuffle_scaled_predictions_class)),
+        np.repeat('Random', len(X_random_scaled_predictions_class))
+        ])
+    })
+
+    # Plot histogram with a single call
+    sns.histplot(
+        data=hist_data_class,
+        x='Score',
+        hue='Type',
+        kde=True,
+        palette={'Real': color_palette['real'], 'Shuffled': color_palette['shuffled'], 'Random': color_palette['random']},
+        ax=axs[2]
+    )
     
 
     y_combined_all_decoys = np.concatenate([
@@ -467,22 +357,36 @@ def main():
     fig, axs = plt.subplots(1, 3, figsize=(9,2))
     
 
-    sns.regplot(x=y_real, y=X_real_scaled_predictions_both, ax=axs[0], scatter_kws={'s':8})
+    sns.regplot(x=y_real, y=X_real_scaled_predictions_both, ax=axs[0], scatter_kws={'s':5}, line_kws={"color": "#E88873"})
 
     axs[0].annotate(
+        
         f"r = {np.corrcoef(y_real, X_real_scaled_predictions_both)[0, 1]:.2f}",
         xy=(0.05, 0.9), xycoords='axes fraction'
     )
     axs[0].set_xlabel("True pKd")
     axs[0].set_ylabel("Combined Score")
     
-    sns.histplot(X_real_scaled_predictions_both, kde=True, color=color_palette['real'], 
-                ax=axs[2], label='Real')
-    sns.histplot(X_shuffle_scaled_predictions_both, kde=True, color=color_palette['shuffled'], 
-                ax=axs[2], label='Shuffled')
-    sns.histplot(X_random_scaled_predictions_both, kde=True, color=color_palette['random'], 
-                ax=axs[2], label='Random')
-    
+    hist_data_both = pd.DataFrame({
+    'Score': np.concatenate([X_real_scaled_predictions_both, X_shuffle_scaled_predictions_both, X_random_scaled_predictions_both]),
+    'Type': np.concatenate([
+        np.repeat('Real', len(X_real_scaled_predictions_both)),
+        np.repeat('Shuffled', len(X_shuffle_scaled_predictions_both)),
+        np.repeat('Random', len(X_random_scaled_predictions_both))
+        ])
+    })
+
+    # Plot histogram with a single call
+    sns.histplot(
+        data=hist_data_both,
+        x='Score',
+        hue='Type',
+        kde=True,
+        bins=10,
+        palette={'Real': color_palette['real'], 'Shuffled': color_palette['shuffled'], 'Random': color_palette['random']},
+        ax=axs[2]
+    )
+        
     axs[2].set_xlabel("Combined Score")
     axs[2].set_ylabel("Density")
     axs[2].legend(loc='upper right', frameon=False)
@@ -510,6 +414,52 @@ def main():
     plt.tight_layout()
     # Save the figure with the combination method in the filename
     plt.savefig(f"/home/er8813ha/immunopeptides/plots/test/combined_{data_split}.svg", dpi=300)
+
+    # save all predictions and real values to csv
+    results = {
+        'real': {
+            'data': X_real,
+            'predictions': X_real_scaled_predictions_both
+        },
+        'shuffled': {
+            'data': X_shuffle,
+            'predictions': X_shuffle_scaled_predictions_both
+        },
+        'random': {
+            'data': X_random,
+            'predictions': X_random_scaled_predictions_both
+        }
+    }
+    save_predictions(results, y_real, output_dir=output_dir)
+
+    from bopep.scoring.scores_to_objective import ScoresToObjective, benchmark_objective
+
+    # build the raw-scores dict in the shape your benchmark_objective expects
+    raw_scores = {}
+    for idx, row in X_real.iterrows():
+        raw_scores[idx] = {
+            "rosetta_score":    row["rosetta_score"],
+            "interface_dG":     row["interface_dG"],
+            "distance_score":   row["distance_score"],
+            "iptm":             row["iptm"],
+            "peptide_pae":      row["peptide_pae"],
+            "in_binding_site":  True
+        }
+
+    # compute benchmarked objectives
+    objective = ScoresToObjective()
+    bench_results = objective.create_objective(raw_scores, benchmark_objective)
+
+    # extract in the same order as X_real.index
+    bench_preds = np.array([bench_results[name] for name in X_real.index])
+
+    # quick sanity check: print the first five from each
+    print("First 5 combined_scoring_function preds:", X_real_scaled_predictions_both[:5])
+    print("First 5 benchmark_objective preds:    ", bench_preds[:5])
+
+    # optionally compute correlation to see how well they agree
+    corr = np.corrcoef(X_real_scaled_predictions_both, bench_preds)[0,1]
+    print(f"Pearson r between pipelines: {corr:.3f}")
     
 
 

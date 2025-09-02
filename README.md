@@ -1,10 +1,11 @@
+
+# Peptide-protein binding prediction score
+
 ![ply1](ply1_render.png)
 
-# Immunomodulating peptides
 
 ### TODO
-
-[ ] Might want to remove scaling?? Interpretability.
+-
 
 The aim of this project is to get an understanding of the peptides that exist in infected/inflamed conditions and how these interact with immunomodulatory proteins.
 
