@@ -18,7 +18,7 @@ If no `.env` file is provided, the code will default to `/srv/data1/general/immu
 
 ### Data
 
-The data used in this benchmark is based on the collection on <http://www.pdbbind.org.cn/>. The INDEX files contain complex PDB IDs along with their corresponding affinity values. Using this data, we fetch the PDB files from RCSB and extract the protein and ligand sequences. The sequences are then docked and scored.
+The data used in this benchmark is based on the first revised 2020 collection (2020R1) of protein-protein and protein-ligand complexes on <http://www.pdbbind.org.cn/>. The INDEX files contain complex PDB IDs along with their corresponding affinity values. Using this data, we fetch the PDB files from RCSB and extract the protein and ligand sequences. The sequences are then docked and scored.
 
 ### Project Structure
 
