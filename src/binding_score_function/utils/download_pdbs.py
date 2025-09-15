@@ -3,13 +3,12 @@ import io
 import requests
 from concurrent.futures import ThreadPoolExecutor
 import pandas as pd
-from typing import Dict, List, Tuple, Union
-import numpy as np
+from typing import Dict, List, Tuple
 import logging
 
 from Bio import PDB
-from Bio.PDB import PDBParser
 from Bio.PDB.Polypeptide import is_aa
+from Bio.PDB import MMCIFParser
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +66,7 @@ def remove_long_and_short_binders_from_dataframe(
             try:
                 peptide_length = int(
                     ligand_name.split("-mer")[0].split("(")[-1]
-                )  # ARE WE SURE THIS IS ROBUST? NOTE
+                )
                 if peptide_length < min_length:
                     return False
                 if peptide_length > max_length:
@@ -90,8 +89,11 @@ def has_peptide_and_protein(
     """
     parser = PDB.PDBParser(QUIET=True)
 
-    pdb_file_handle = io.StringIO(pdb_contents)
-    structure = parser.get_structure("temp_struct", pdb_file_handle)
+    try:
+        pdb_file_handle = io.StringIO(pdb_contents)
+        structure = parser.get_structure("temp_struct", pdb_file_handle)
+    except Exception:
+        return False, "pdb_parse_failed"
 
     chain_residue_counts = []
     model = structure[0]
@@ -110,11 +112,49 @@ def has_peptide_and_protein(
     # Since chain A might be peptide or protein and chain B might be peptide or protein,
     chain_residue_counts.sort() # here [0] is the peptide and [1] is the protein
     if chain_residue_counts[0] >= max_peptide_length: # peptide is too long
-        return False, "no_peptide"
+        return False, "peptide_too_long"
     if chain_residue_counts[0] < min_peptide_length: # peptide is too short
-        return False, "too_short_peptide"
-    if chain_residue_counts[1] < max_peptide_length: # protein is too short
-        return False, "no_protein"
+        return False, "peptide_too_short"
+
+
+    return True, "meets_condition"
+
+
+def has_peptide_and_protein_cif(
+    cif_contents: str, max_peptide_length: int = 40, min_peptide_length: int = 7
+) -> Tuple[bool, str]:
+    """
+    Checks whether the CIF (provided as a string) contains exactly two polypeptide chains:
+      1) One chain with fewer than `max_peptide_length` amino acids (and >= min_peptide_length),
+      2) One chain with >= `max_peptide_length` amino acids.
+    Returns (True, "meets_condition") if passed, else (False, reason).
+    """
+    try:
+        parser = MMCIFParser(QUIET=True)
+        cif_handle = io.StringIO(cif_contents)
+        structure = parser.get_structure("temp_struct", cif_handle)
+    except Exception:
+        return False, "cif_parse_failed"
+
+    chain_residue_counts = []
+    model = structure[0]
+
+    for chain in model:
+        count_aa = 0
+        for residue in chain.get_residues():
+            if is_aa(residue, standard=True):
+                count_aa += 1
+        if count_aa > 0:
+            chain_residue_counts.append(count_aa)
+
+    if len(chain_residue_counts) != 2:
+        return False, "invalid_chain_count"
+
+    chain_residue_counts.sort()  # [0] peptide, [1] protein
+    if chain_residue_counts[0] >= max_peptide_length:
+        return False, "peptide_too_long"
+    if chain_residue_counts[0] < min_peptide_length:
+        return False, "peptide_too_short"
 
     return True, "meets_condition"
 
@@ -150,44 +190,40 @@ def load_manually_curated_pdbs(manual_csv_path: str) -> pd.DataFrame:
     return df
 
 
-def download_pdb_from_rcsb(
+def download_from_rcsb(
     pdb_code: str,
     output_dir: str,
     max_peptide_length: int = 40,
     min_peptide_length: int = 7,
 ) -> Tuple[bool, str]:
     """
-    Downloads a PDB from RCSB, checks if it has exactly two chains
-    (peptide+protein) using `has_peptide_and_protein`.
-    If it meets the condition, saves it to `output_dir`.
+    Downloads a CIF from RCSB, checks for exactly two chains (peptide+protein)
+    using has_peptide_and_protein_cif, and saves it to `output_dir` only if it meets the criteria.
     """
-
-    url = f"https://files.rcsb.org/download/{pdb_code}.pdb"
+    url = f"https://files.rcsb.org/download/{pdb_code}.cif"
     try:
         response = requests.get(url)
         if response.status_code == 200:
-            pdb_text = response.text
-            meets_criteria, reason = has_peptide_and_protein(
-                pdb_text,
+            cif_text = response.text
+            meets_criteria, reason = has_peptide_and_protein_cif(
+                cif_text,
                 max_peptide_length=max_peptide_length,
                 min_peptide_length=min_peptide_length,
             )
-
-            if meets_criteria:  # Only save if passes criterion
-                file_path = os.path.join(output_dir, f"{pdb_code}.pdb")
+            if meets_criteria:
+                file_path = os.path.join(output_dir, f"{pdb_code}.cif")
                 with open(file_path, "w") as file:
-                    file.write(pdb_text)
-                logger.info(f"{pdb_code}.pdb was downloaded", end="\r")
-                return True, reason
+                    file.write(cif_text)
+                logger.info(f"{pdb_code}.cif was downloaded")
+                return True, "downloaded"
             else:
-                rejection_reason = reason if not meets_criteria else "cyclic_peptide"
-                logger.info(
-                    f"{pdb_code}.pdb wasn't downloaded: {rejection_reason}", end="\r"
-                )
-                return False, rejection_reason
+                logger.info(f"{pdb_code}.cif wasn't downloaded: {reason}")
+                return False, reason
         else:
+            logger.info(f"{pdb_code}.cif wasn't downloaded: download_failed_{response.status_code}")
             return False, f"download_failed_{response.status_code}"
     except Exception as e:
+        logger.info(f"{pdb_code}.cif wasn't downloaded: download_exception_{str(e)}")
         return False, f"download_exception_{str(e)}"
 
 
@@ -201,20 +237,19 @@ def parallell_download(
 ) -> None:
     """
     Downloads multiple PDB IDs in parallel (up to `max_workers` threads),
-    checks if each meets the "peptide+protein" condition, and saves only
-    those that pass.
+    validates they contain peptide+protein by chain length, and saves only passing CIFs.
     """
     results = []
     total_attempts = len(pdb_codes)
-    logger.info(f"Total PDBs to download: {total_attempts}")
+    logger.info(f"Total CIFs to download: {total_attempts}")
     saved_count = 0
     reason_counts: Dict[str, int] = {}
 
     def worker(pdb_code: str) -> Tuple[str, bool, str]:
-        file_path = os.path.join(output_dir, f"{pdb_code}.pdb")
+        file_path = os.path.join(output_dir, f"{pdb_code}.cif")
         if not overwrite and os.path.exists(file_path):
             return pdb_code, False, "already_exists"
-        did_save, reason = download_pdb_from_rcsb(
+        did_save, reason = download_from_rcsb(
             pdb_code=pdb_code,
             output_dir=output_dir,
             max_peptide_length=max_peptide_length,
@@ -231,13 +266,12 @@ def parallell_download(
             saved_count += 1
         reason_counts[reason] = reason_counts.get(reason, 0) + 1
 
-    logger.info(f"PDBs saved (pass criterion): {saved_count}")
+    logger.info(f"CIFs saved: {saved_count}")
     logger.info("Reasons for skip/failure:")
     for reason, count in reason_counts.items():
-        if reason != "meets_condition":
+        if reason != "downloaded":
             logger.info(f"  {reason}: {count}")
-
-    logger.info(f"  meets_condition: {reason_counts.get('meets_condition', 0)}")
+    logger.info(f"  downloaded: {reason_counts.get('downloaded', 0)}")
 
 
 def download_pdbs(
@@ -304,11 +338,11 @@ def download_pdbs(
         )
 
     # Return the filtered dataframe of successfully downloaded PDBs
-    pdb_filenames = set(os.listdir(pdbs_dir))
+    cif_filenames = set(os.listdir(pdbs_dir))
     downloaded_pdb_codes = [
         filename.split(".")[0]
-        for filename in pdb_filenames
-        if filename.endswith(".pdb")
+        for filename in cif_filenames
+        if filename.endswith(".cif")
     ]
 
     df_downloaded = df_filtered[df_filtered["pdb_code"].isin(downloaded_pdb_codes)]

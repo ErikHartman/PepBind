@@ -68,7 +68,7 @@ def generate_decoy_dataset(
     random.seed(42)
     np.random.seed(42)
 
-    docked_complexes = os.listdir(os.path.join(docking_dir, "pdbs"))
+    docked_complexes = os.listdir(os.path.join(docking_dir, "pdbs", "processed"))
     decoy_data = []
 
     decoy_complexes = random.sample(
