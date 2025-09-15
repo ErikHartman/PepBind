@@ -13,7 +13,7 @@ import argparse
 BASE_DIR = Path("/srv/data1/general/immunopeptides_data/outputs/binding_score_function_prod")
 DIR_SCORES = BASE_DIR / "3_scores"
 DIR_COMPLEXES = BASE_DIR / "1_processed_complexes"
-DIR_PROCESSED = BASE_DIR / "4_processed_scores_temp"
+DIR_PROCESSED = BASE_DIR / "4_processed_scores"
 PLOTS_DIR = Path.home() / "immunopeptides" / "plots"
 PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 
