@@ -10,7 +10,7 @@ from scipy import stats
 import argparse
 
 
-BASE_DIR = Path("/srv/data1/general/immunopeptides_data/outputs/binding_score_function_prod")
+BASE_DIR = Path("/srv/data1/ma7631si/immunopeptides_data/outputs/binding_score_function")
 DIR_SCORES = BASE_DIR / "3_scores"
 DIR_COMPLEXES = BASE_DIR / "1_processed_complexes"
 DIR_PROCESSED = BASE_DIR / "4_processed_scores"
@@ -138,17 +138,17 @@ def plot_matrix(
 
     fig, axs = plt.subplots(1,2, figsize=(6,3))
     if kind == "correlation":
-        sns.regplot(x=X["iptm"], y=y, ax=axs[0], scatter_kws={'s':5}, line_kws={"color": "#E88873"})
-        sns.regplot(x=X["interface_dG"], y=y, ax=axs[1], scatter_kws={'s':5}, line_kws={"color": "#E88873"})
-        axs[0].annotate(f"r = {stats.pearsonr(X['iptm'], y)[0]:.2f}", xy=(0.05, 0.95), xycoords='axes fraction', ha='left', va='top')
-        axs[1].annotate(f"r = {stats.pearsonr(X['interface_dG'], y)[0]:.2f}", xy=(0.05, 0.95), xycoords='axes fraction', ha='left', va='top')
+        sns.regplot(x=X["alphafold_iptm"], y=y, ax=axs[0], scatter_kws={'s':5}, line_kws={"color": "#E88873"})
+        sns.regplot(x=X["alphafold_interface_dG"], y=y, ax=axs[1], scatter_kws={'s':5}, line_kws={"color": "#E88873"})
+        axs[0].annotate(f"r = {stats.pearsonr(X['alphafold_iptm'], y)[0]:.2f}", xy=(0.05, 0.95), xycoords='axes fraction', ha='left', va='top')
+        axs[1].annotate(f"r = {stats.pearsonr(X['alphafold_interface_dG'], y)[0]:.2f}", xy=(0.05, 0.95), xycoords='axes fraction', ha='left', va='top')
     elif kind == "distribution":
-        sns.histplot(X["iptm"], kde=True, bins=50,  label="Real", color ="#2C8C99", ax=axs[0])
-        sns.histplot(shuffled["iptm"], kde=True, bins=50,  label="Shuffled", color="#E88873", ax=axs[0])
-        sns.histplot(random["iptm"], kde=True, bins=50,  label="Random", color="#F46036", ax=axs[0])
-        sns.histplot(X["interface_dG"], kde=True, bins=50, label="Real",color ="#2C8C99", ax=axs[1])
-        sns.histplot(shuffled["interface_dG"], kde=True, bins=50,  label="Shuffled", color="#E88873", ax=axs[1])
-        sns.histplot(random["interface_dG"], kde=True, bins=50, label="Random", color="#F46036", ax=axs[1])
+        sns.histplot(X["alphafold_iptm"], kde=True, bins=50,  label="Real", color ="#2C8C99", ax=axs[0])
+        sns.histplot(shuffled["alphafold_iptm"], kde=True, bins=50,  label="Shuffled", color="#E88873", ax=axs[0])
+        sns.histplot(random["alphafold_iptm"], kde=True, bins=50,  label="Random", color="#F46036", ax=axs[0])
+        sns.histplot(X["alphafold_interface_dG"], kde=True, bins=50, label="Real",color ="#2C8C99", ax=axs[1])
+        sns.histplot(shuffled["alphafold_interface_dG"], kde=True, bins=50,  label="Shuffled", color="#E88873", ax=axs[1])
+        sns.histplot(random["alphafold_interface_dG"], kde=True, bins=50, label="Random", color="#F46036", ax=axs[1])
 
 
     plt.legend(frameon=False)
@@ -234,7 +234,11 @@ def split_and_save_real(df: pd.DataFrame):
     and return train/val/test splits.
     """
     df = df.set_index("complex_filename")
-    X = df.drop(columns=["in_binding_site", "is_decoy", "pKd", "fraction_in_binding_site", "in_binding_site_score", "peptide_plddt"])
+    X = df.drop(columns=[        
+        "alphafold_in_binding_site", "boltz_in_binding_site", "is_decoy_x", "is_decoy_y", "pKd",
+        "alphafold_in_binding_site_score", "boltz_in_binding_site_score", "alphafold_peptide_plddt", 
+        "boltz_peptide_plddt", "alphafold_receptor_contacts", "boltz_receptor_contacts"
+        ])
     y = df["pKd"].astype(float)
 
     plot_matrix(
@@ -260,12 +264,15 @@ def split_and_save_decoys(decoy_df: pd.DataFrame) -> dict:
     """
     Split shuffled and random decoys into train/val/test sets.
     """
-    df = decoy_df.drop(columns=["is_decoy", "in_binding_site", "in_binding_site_score", "fraction_in_binding_site", "peptide_plddt"])
+    df = decoy_df.drop(columns=[        
+        "alphafold_in_binding_site", "boltz_in_binding_site", "is_decoy_x", "is_decoy_y",
+        "alphafold_in_binding_site_score", "boltz_in_binding_site_score", "alphafold_peptide_plddt", 
+        "boltz_peptide_plddt", "alphafold_receptor_contacts", "boltz_receptor_contacts"
+        ])
     results = {}
     
     for t in ["shuffle", "random"]:
         subset = df[df.decoy_type == t].set_index("complex_filename").drop(columns="decoy_type")
-        
         temp_subset, test_subset = train_test_split(subset, test_size=0.1, random_state=42)
         train_subset, val_subset = train_test_split(temp_subset, test_size=0.2, random_state=42)
         
@@ -329,7 +336,7 @@ def validate_processed_files(
     
     # Check 1: Verify all complexes are accounted for in train/val/test splits
     all_real_complexes = set(X_train.index) | set(X_val.index) | set(X_test.index)
-    original_real_binding_site = set(original_real[original_real.in_binding_site]['complex_filename'])
+    original_real_binding_site = set(original_real[original_real.alphafold_in_binding_site]['complex_filename'])
     
     validation_results["all_real_complexes_accounted_for"] = (
         len(all_real_complexes) == len(original_real_binding_site)
@@ -626,7 +633,7 @@ def main():
     original_real = real.copy()
     original_decoys = decoys.copy()
 
-    for idx, row in real[~real.in_binding_site].iterrows():
+    for idx, row in real[~real.alphafold_in_binding_site].iterrows():
         pdb_id, _ = row.complex_filename.split("_", 1)
         orig = BASE_DIR / '0_complexes' / 'pdbs' / f"{pdb_id}.pdb"
         dock_dir = BASE_DIR / '2_docked' / 'pdbs' / row.complex_filename
@@ -635,17 +642,19 @@ def main():
             real.at[idx, 'in_binding_site'] = True
 
     # Filter binding site complexes
-    real_bs = real[real.in_binding_site]
+    real_bs = real[real.alphafold_in_binding_site]
 
     print("\nPlotting unfiltered feature–pKd correlations...")
-    real_full = real[real.in_binding_site].copy()
+    real_full = real[real.alphafold_in_binding_site].copy()
     real_full = real_full.set_index("complex_filename")
 
     X_all = real_full.drop(columns=[
-        "in_binding_site", "is_decoy", "pKd", "fraction_in_binding_site", 
-        "in_binding_site_score", "peptide_plddt"
+        "alphafold_in_binding_site", "boltz_in_binding_site", "is_decoy_x", "is_decoy_y", "pKd",
+        "alphafold_in_binding_site_score", "boltz_in_binding_site_score", "alphafold_peptide_plddt", 
+        "boltz_peptide_plddt", "alphafold_receptor_contacts", "boltz_receptor_contacts"
     ])
     y_all = real_full["pKd"].astype(float)
+    print(X_all.dtypes)
 
     plot_matrix(
         X_all,
