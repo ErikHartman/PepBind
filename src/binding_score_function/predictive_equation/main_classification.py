@@ -21,9 +21,8 @@ from plotting import (
 
 if __name__ == "__main__":
     # Data paths setup
-    base_path = "/srv/data1/general/immunopeptides_data/"
-    scores_path = os.path.join(base_path, "outputs/binding_score_function_prod/4_processed_scores/")
-    output_dir = "./plots/classification"
+    scores_path = "/home/er8813ha/immunopeptides/data/x_y_v2"
+    output_dir = "./plots_v2/classification"
     os.makedirs(output_dir, exist_ok=True)
 
     # Load data from pre-split files
@@ -43,8 +42,21 @@ if __name__ == "__main__":
     for df in [X_real_train_df, X_shuffle_train_df, X_random_train_df, 
                X_real_val_df, X_shuffle_val_df, X_random_val_df]:
         columns_to_drop = [col for col in df.columns if col.startswith('Unnamed:')]
+        columns_to_drop.append("receptor_contacts")
         if columns_to_drop:
-            df.drop(columns=columns_to_drop, inplace=True)
+            df.drop(columns=columns_to_drop, inplace=True, errors='ignore')
+
+    # Print columns that contain NaNs
+    for df, name in zip([X_real_train_df, X_shuffle_train_df, X_random_train_df,
+                         X_real_val_df, X_shuffle_val_df, X_random_val_df],
+                        ["X_real_train", "X_shuffle_train", "X_random_train",
+                         "X_real_val", "X_shuffle_val", "X_random_val"]):
+        nan_columns = df.columns[df.isna().any()].tolist()
+        if nan_columns:
+            print(f"Columns with NaNs in {name}: {nan_columns}")
+        else:
+            print(f"No NaN columns in {name}")
+
     
     # Set complex_filename as index for the feature DataFrames
     X_real_train = X_real_train_df.set_index("complex_filename")
@@ -106,11 +118,11 @@ if __name__ == "__main__":
         y_train,
         X_val,
         y_val,
-        niterations=300,
+        niterations=100,
         populations=50,
-        population_size=50,
+        population_size=20,
         model_selection="best",
-        select_k_features=15,
+        select_k_features=25,
         scale_features=True
     )
 

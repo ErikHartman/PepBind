@@ -1,7 +1,6 @@
 from pathlib import Path
 import numpy as np
 import pandas as pd
-from Bio.PDB import PDBParser, Superimposer
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split
@@ -10,11 +9,11 @@ from scipy import stats
 import argparse
 
 
-BASE_DIR = Path("/srv/data1/ma7631si/immunopeptides_data/outputs/binding_score_function")
+BASE_DIR = Path("/mnt/biomsarchive/biomsarchive/Data/personal/er8813ha/immunopeptides/results_ver2_boltz_af")
 DIR_SCORES = BASE_DIR / "3_scores"
 DIR_COMPLEXES = BASE_DIR / "1_processed_complexes"
 DIR_PROCESSED = BASE_DIR / "4_processed_scores"
-PLOTS_DIR = Path.home() / "immunopeptides" / "plots"
+PLOTS_DIR = Path.home() / "immunopeptides" / "plots_v2"
 PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 
 UNIT_CONVERSION = {
@@ -34,25 +33,9 @@ def process_binding_data(binding_series: pd.Series) -> pd.Series:
     print(f"Processing {len(binding_series)} entries; {binding_series.isna().sum()} missing.")
     
     # Analyze what would be excluded with the new regex
-    old_regex = r"[=<>~]?\s*(?P<value>\d+\.?\d*)\s*(?P<unit>[µa-zA-Z]*)"
     new_regex = r"[=]?\s*(?P<value>\d+\.?\d*)\s*(?P<unit>[µa-zA-Z]*)"
-    
-    old_parsed = binding_series.str.extract(old_regex)
     new_parsed = binding_series.str.extract(new_regex)
-    
-    # Check what would be excluded with the new regex
-    old_valid = ~old_parsed["value"].isna()
-    new_valid = ~new_parsed["value"].isna()
-    excluded = old_valid & ~new_valid
-    
-    if excluded.sum() > 0:
-        print(f"\nNOTE: Your new regex pattern would exclude {excluded.sum()} entries that contain '<', '>' or '~'")
-        print("Examples of excluded values:")
-        for val in binding_series[excluded].head(5).values:
-            print(f"  - '{val}'")
-        print("These will be parsed as NaN with your new regex pattern.")
-        
-    # Use the new regex pattern as requested
+
     parsed = new_parsed
     parsed["value"] = pd.to_numeric(parsed["value"], errors="coerce")
     parsed["unit"] = parsed["unit"].str.lower()
@@ -66,23 +49,6 @@ def process_binding_data(binding_series: pd.Series) -> pd.Series:
     return pKd
 
 
-def check_peptide_rmsd(orig_pdb: Path, dock_pdb: Path, chain: str = "B") -> float:
-    """Calculate RMSD between C-alpha atoms of two peptide chains."""
-    parser = PDBParser(QUIET=True)
-    orig = parser.get_structure("orig", orig_pdb)
-    dock = parser.get_structure("dock", dock_pdb)
-
-    def get_ca_atoms(chain_obj):
-        return [res["CA"] for res in chain_obj.get_residues() if res.id[0] == " " and "CA" in res]
-
-    orig_atoms = get_ca_atoms(orig[0][chain])
-    dock_atoms = get_ca_atoms(dock[0][chain])
-
-    sup = Superimposer()
-    sup.set_atoms(orig_atoms, dock_atoms)
-    return sup.rms
-
-
 def plot_matrix(
     X: pd.DataFrame,
     y: pd.Series,
@@ -94,7 +60,7 @@ def plot_matrix(
     n = len(X.columns)
     cols = 5
     rows = int(np.ceil(n / cols))
-    fig, axes = plt.subplots(rows, cols, figsize=(20, 20))
+    fig, axes = plt.subplots(rows, cols, figsize=(30, 30))
     plt.subplots_adjust(hspace=0.5)
 
     for i, col in enumerate(X.columns):
@@ -107,14 +73,7 @@ def plot_matrix(
             
             # Calculate and add Pearson correlation annotation
             correlation, p_value = stats.pearsonr(X[col], y)
-            significance = ""
-            if p_value < 0.001:
-                significance = "***"
-            elif p_value < 0.01:
-                significance = "**"
-            elif p_value < 0.05:
-                significance = "*"
-            
+
             # Format annotation text with correlation value and significance stars
             annotation_text = f"r = {correlation:.2f}"
             ax.annotate(annotation_text, xy=(0.05, 0.95), xycoords='axes fraction', 
@@ -234,12 +193,10 @@ def split_and_save_real(df: pd.DataFrame):
     Prepare features and labels for real complexes, plot correlations, 
     and return train/val/test splits.
     """
-    df = df.set_index("complex_filename")
     X = df.drop(columns=[        
         "alphafold_in_binding_site", "boltz_in_binding_site", "is_decoy_x", "is_decoy_y", "pKd",
-        "alphafold_in_binding_site_score", "boltz_in_binding_site_score", "alphafold_peptide_plddt", 
-        "boltz_peptide_plddt", "alphafold_receptor_contacts", "boltz_receptor_contacts"
-        ])
+        "alphafold_in_binding_site_score", "boltz_in_binding_site_score", "alphafold_receptor_contacts", "boltz_receptor_contacts"
+        ], errors='ignore')
     y = df["pKd"].astype(float)
 
     plot_matrix(
@@ -265,11 +222,7 @@ def split_and_save_decoys(decoy_df: pd.DataFrame) -> dict:
     """
     Split shuffled and random decoys into train/val/test sets.
     """
-    df = decoy_df.drop(columns=[        
-        "alphafold_in_binding_site", "boltz_in_binding_site", "is_decoy_x", "is_decoy_y",
-        "alphafold_in_binding_site_score", "boltz_in_binding_site_score", "alphafold_peptide_plddt", 
-        "boltz_peptide_plddt", "alphafold_receptor_contacts", "boltz_receptor_contacts"
-        ])
+    df = decoy_df.copy()
     results = {}
     
     for t in ["shuffle", "random"]:
@@ -534,12 +487,6 @@ def remove_outliers(df: pd.DataFrame) -> pd.DataFrame:
     """
     Remove outliers from the dataframe based on predefined thresholds.
     Also removes rows containing infinite values.
-    
-    Args:
-        df: DataFrame containing feature columns
-        
-    Returns:
-        DataFrame with outliers and infinite values removed
     """
     initial_rows = len(df)
     
@@ -567,9 +514,9 @@ def remove_outliers(df: pd.DataFrame) -> pd.DataFrame:
     
     # Define outlier thresholds for specific columns
     outlier_thresholds = {
-        "interface_dG": (-100, 25),  # interface_dG between -100 and 100
-        "rosetta_score": (-1200, 1500),        # rosetta_score less than 1500
-        "interface_sasa": 4000         # interface_sasa less than 4000
+        "alphafold_interface_dG": (-100, 25),  # interface_dG between -100 and 100
+        "alphafold_rosetta_score": (-1200, 1500),        # rosetta_score less than 1500
+        "alphafold_interface_sasa": 4000         # interface_sasa less than 4000
     }
     
     current_rows = len(df)
@@ -619,9 +566,28 @@ def main():
     pdbs["complex_filename"] = pdbs.pdb_code + '_' + pdbs.peptide_sequence
 
     real = pd.read_csv(DIR_SCORES / "scores.csv")
+
+    real = real[real["boltz_template_rmsd"] < 10]
+    real = real[real["alphafold_template_rmsd"] < 10]
+
+    real_columns_to_drop = [
+        "alphafold_in_binding_site", "boltz_in_binding_site", "is_decoy_x", "is_decoy_y", "pKd", "receptor_contacts", "alphafold_template_rmsd",
+          "boltz_template_rmsd", "peptide_pde",
+        "alphafold_in_binding_site_score", "boltz_in_binding_site_score", "alphafold_receptor_contacts", "boltz_receptor_contacts"
+    ]
+    decoy_columns_to_drop = ["rosetta_score","interface_sasa","interface_dG","interface_delta_hbond_unsat","packstat","distance_score","in_binding_site","n_contacts","in_binding_site_score","template_rmsd","receptor_contacts", 
+                             "peptide_plddt", "interface_peptide_plddt", "peptide_pae", "ipsae_max", "ipsae_min", "iptm", "receptor_contacts", "alphafold_receptor_contacts", "boltz_receptor_contacts",
+                             "boltz_template_rmsd", "alphafold_template_rmsd", "is_decoy", "peptide_pde"]
+
     dec_meta = pd.read_csv(DIR_COMPLEXES / "decoys.csv")
     dec_meta["complex_filename"] = dec_meta.pdb_code + '_' + dec_meta.peptide_sequence
     dec_scores = pd.read_csv(DIR_SCORES / "decoy_scores.csv")
+
+    dec_scores.drop(columns=real_columns_to_drop + decoy_columns_to_drop, inplace=True, errors='ignore')
+    dec_scores.dropna(inplace=True)
+
+    real = real.drop(columns=real_columns_to_drop + decoy_columns_to_drop, errors='ignore')
+    
     decoys = dec_meta[["complex_filename", "decoy_type"]].merge(
         dec_scores, on="complex_filename", how="inner"
     )
@@ -630,50 +596,33 @@ def main():
     real["pKd"] = process_binding_data(real.complex_filename.map(bind_map))
     real.dropna(inplace=True)
     
+    
     # Store original data for validation
     original_real = real.copy()
     original_decoys = decoys.copy()
 
-    for idx, row in real[~real.alphafold_in_binding_site].iterrows():
-        pdb_id, _ = row.complex_filename.split("_", 1)
-        orig = BASE_DIR / '0_complexes' / 'pdbs' / f"{pdb_id}.pdb"
-        dock_dir = BASE_DIR / '2_docked' / 'pdbs' / row.complex_filename
-        relaxed = next(dock_dir.glob('*_relaxed_*'), None)
-        if relaxed and check_peptide_rmsd(orig, relaxed) < 2:
-            real.at[idx, 'in_binding_site'] = True
+    print(original_decoys)
 
-    # Filter binding site complexes
-    real_bs = real[real.alphafold_in_binding_site]
 
     print("\nPlotting unfiltered feature–pKd correlations...")
-    real_full = real[real.alphafold_in_binding_site].copy()
-    real_full = real_full.set_index("complex_filename")
+    real_full = real.set_index("complex_filename")
 
-    X_all = real_full.drop(columns=[
-        "alphafold_in_binding_site", "boltz_in_binding_site", "is_decoy_x", "is_decoy_y", "pKd",
-        "alphafold_in_binding_site_score", "boltz_in_binding_site_score", "alphafold_peptide_plddt", 
-        "boltz_peptide_plddt", "alphafold_receptor_contacts", "boltz_receptor_contacts"
-    ])
+    X_all = real_full.copy()
     y_all = real_full["pKd"].astype(float)
     print(X_all.dtypes)
 
-    plot_matrix(
-        X_all,
-        y_all,
-        kind="correlation",
-        fname=PLOTS_DIR / "corr_real_unfiltered.png",
-    )
-    
     # Remove outliers from real data before splitting
     print("\nRemoving outliers from real data:")
-    real_bs = remove_outliers(real_bs)
+    real_full = remove_outliers(real_full)
+    print(f"Real data now has {len(real_full)} rows")
     
     # Remove outliers from decoy data
     print("\nRemoving outliers from decoy data:")
     decoys = remove_outliers(decoys)
+    print(f"Decoy data now has {len(decoys)} rows")
     decoy_splits = split_and_save_decoys(decoys)
 
-    X_train, X_val, X_test, y_train_df, y_val_df, y_test_df = split_and_save_real(real_bs)
+    X_train, X_val, X_test, y_train_df, y_val_df, y_test_df = split_and_save_real(real_full)
 
     print("Number of rows in the different files: ")
     print(f"Real train: {len(X_train)}, Real val: {len(X_val)}, Real test: {len(X_test)}")
@@ -688,11 +637,18 @@ def main():
     save_if_not_exists(y_val_df, DIR_PROCESSED / 'real_y_val.csv')
     save_if_not_exists(y_test_df, DIR_PROCESSED / 'real_y_test.csv')
 
-    set_permissions_to_777(DIR_PROCESSED)
+    #set_permissions_to_777(DIR_PROCESSED)
 
     for name, df in decoy_splits.items():
         if '_with_index' in name:
             save_if_not_exists(df, DIR_PROCESSED / f"{name.replace('_with_index', '')}.csv")
+
+    plot_matrix(
+        X_train,
+        y_train_df.set_index('complex_filename')['pKd'],
+        kind="correlation",
+        fname=PLOTS_DIR / "corr_real.png",
+    )
 
     plot_matrix(
         X_train,
@@ -711,18 +667,18 @@ def main():
     #    sample_size=1000  # Limit points for performance
     #)
     
-    print("\nValidating data integrity...\n")
-    validate_processed_files(
-        original_real=original_real,
-        original_decoys=original_decoys,
-        X_train=X_train,
-        X_val=X_val, 
-        X_test=X_test,
-        y_train_df=y_train_df,
-        y_val_df=y_val_df,
-        y_test_df=y_test_df,
-        decoy_splits=decoy_splits
-    )
+    #print("\nValidating data integrity...\n")
+    # validate_processed_files(
+    #     original_real=original_real,
+    #     original_decoys=original_decoys,
+    #     X_train=X_train,
+    #     X_val=X_val, 
+    #     X_test=X_test,
+    #     y_train_df=y_train_df,
+    #     y_val_df=y_val_df,
+    #     y_test_df=y_test_df,
+    #     decoy_splits=decoy_splits
+    # )
 
 
 if __name__ == "__main__":

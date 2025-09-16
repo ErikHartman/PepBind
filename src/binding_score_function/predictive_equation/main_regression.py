@@ -20,25 +20,23 @@ from plotting import (
 
 if __name__ == "__main__":
     # Data paths setup
-    base_path = "/srv/data1/general/immunopeptides_data/"
-    scores_path = os.path.join(
-        base_path, "outputs/binding_score_function_prod/4_processed_scores/"
-    )
-    output_dir = "./plots/regression"
+    scores_path = "/home/er8813ha/immunopeptides/data/x_y_v2"
+    output_dir = "./plots_v2/regression"
     os.makedirs(output_dir, exist_ok=True)
 
     # Load pre-split training and validation data files
+
     X_train_df = pd.read_csv(os.path.join(scores_path, "real_X_train.csv"))
     y_train_df = pd.read_csv(os.path.join(scores_path, "real_y_train.csv"))
     
     X_val_df = pd.read_csv(os.path.join(scores_path, "real_X_val.csv"))
     y_val_df = pd.read_csv(os.path.join(scores_path, "real_y_val.csv"))
-    
-    # Remove any 'Unnamed:_0' columns that might have been created during saving/loading
+
     for df in [X_train_df, X_val_df]:
         columns_to_drop = [col for col in df.columns if col.startswith('Unnamed:')]
+        columns_to_drop.append("receptor_contacts")
         if columns_to_drop:
-            df.drop(columns=columns_to_drop, inplace=True)
+            df.drop(columns=columns_to_drop, inplace=True, errors='ignore')
     
     # Set complex_filename as index for X DataFrames
     X_train = X_train_df.set_index("complex_filename")
@@ -65,11 +63,11 @@ if __name__ == "__main__":
         y_train,
         X_val,
         y_val,
-        niterations=300,
+        niterations=100,
         populations=50,
-        population_size=50,
+        population_size=20,
         model_selection="best",
-        select_k_features=15,
+        select_k_features=25,
         scale_features=True,
     )
 
