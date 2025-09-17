@@ -566,9 +566,8 @@ def main():
     pdbs["complex_filename"] = pdbs.pdb_code + '_' + pdbs.peptide_sequence
 
     real = pd.read_csv(DIR_SCORES / "scores.csv")
-
-    real = real[real["boltz_template_rmsd"] < 10]
-    real = real[real["alphafold_template_rmsd"] < 10]
+    real = real[real["boltz_in_binding_site"]]
+    real = real[real["alphafold_in_binding_site"]]
 
     real_columns_to_drop = [
         "alphafold_in_binding_site", "boltz_in_binding_site", "is_decoy_x", "is_decoy_y", "pKd", "receptor_contacts", "alphafold_template_rmsd",
