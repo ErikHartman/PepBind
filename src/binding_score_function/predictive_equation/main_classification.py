@@ -19,10 +19,13 @@ from plotting import (
     plot_pkd_probability_correlation,
 )
 
+from main_regression import drop_features
+    
+
 if __name__ == "__main__":
     # Data paths setup
     scores_path = "/home/er8813ha/immunopeptides/data/x_y_v2"
-    output_dir = "./plots_v2/classification"
+    output_dir = "./plots_v2_both/classification"
     os.makedirs(output_dir, exist_ok=True)
 
     # Load data from pre-split files
@@ -101,6 +104,9 @@ if __name__ == "__main__":
     X_val = pd.concat([X_fake_val, X_real_val], axis=0)
     y_val = X_val.pop('label').values
 
+    #X_train = drop_features(X_train, prefix="boltz")
+    #X_val = drop_features(X_val, prefix="boltz")
+
     # Save scaling parameters for later use
     scaling_params = X_train.describe().T[["mean", "std", "min", "max"]]
     scaling_params.to_csv(
@@ -119,7 +125,7 @@ if __name__ == "__main__":
         X_val,
         y_val,
         niterations=100,
-        populations=50,
+        populations=20,
         population_size=20,
         model_selection="best",
         select_k_features=25,

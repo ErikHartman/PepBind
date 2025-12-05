@@ -12,7 +12,7 @@ import argparse
 BASE_DIR = Path("/mnt/biomsarchive/biomsarchive/Data/personal/er8813ha/immunopeptides/results_ver2_boltz_af")
 DIR_SCORES = BASE_DIR / "3_scores"
 DIR_COMPLEXES = BASE_DIR / "1_processed_complexes"
-DIR_PROCESSED = BASE_DIR / "4_processed_scores"
+DIR_PROCESSED = Path("/home/er8813ha/immunopeptides/data/x_y_v2")
 PLOTS_DIR = Path.home() / "immunopeptides" / "plots_v2"
 PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -97,17 +97,17 @@ def plot_matrix(
 
     fig, axs = plt.subplots(1,2, figsize=(6,3))
     if kind == "correlation":
-        sns.regplot(x=X["alphafold_iptm"], y=y, ax=axs[0], scatter_kws={'s':5}, line_kws={"color": "#E88873"})
-        sns.regplot(x=X["alphafold_interface_dG"], y=y, ax=axs[1], scatter_kws={'s':5}, line_kws={"color": "#E88873"})
-        axs[0].annotate(f"r = {stats.pearsonr(X['alphafold_iptm'], y)[0]:.2f}", xy=(0.05, 0.95), xycoords='axes fraction', ha='left', va='top')
-        axs[1].annotate(f"r = {stats.pearsonr(X['alphafold_interface_dG'], y)[0]:.2f}", xy=(0.05, 0.95), xycoords='axes fraction', ha='left', va='top')
+        sns.regplot(x=X["boltz_iptm"], y=y, ax=axs[0], scatter_kws={'s':5}, line_kws={"color": "#E88873"})
+        sns.regplot(x=X["boltz_interface_dG"], y=y, ax=axs[1], scatter_kws={'s':5}, line_kws={"color": "#E88873"})
+        axs[0].annotate(f"r = {stats.pearsonr(X['boltz_iptm'], y)[0]:.2f}", xy=(0.05, 0.95), xycoords='axes fraction', ha='left', va='top')
+        axs[1].annotate(f"r = {stats.pearsonr(X['boltz_interface_dG'], y)[0]:.2f}", xy=(0.05, 0.95), xycoords='axes fraction', ha='left', va='top')
     elif kind == "distribution":
-        sns.histplot(X["alphafold_iptm"], kde=True, bins=50,  label="Real", color ="#2C8C99", ax=axs[0])
-        sns.histplot(shuffled["alphafold_iptm"], kde=True, bins=50,  label="Shuffled", color="#E88873", ax=axs[0])
-        sns.histplot(random["alphafold_iptm"], kde=True, bins=50,  label="Random", color="#F46036", ax=axs[0])
-        sns.histplot(X["alphafold_interface_dG"], kde=True, bins=50, label="Real",color ="#2C8C99", ax=axs[1])
-        sns.histplot(shuffled["alphafold_interface_dG"], kde=True, bins=50,  label="Shuffled", color="#E88873", ax=axs[1])
-        sns.histplot(random["alphafold_interface_dG"], kde=True, bins=50, label="Random", color="#F46036", ax=axs[1])
+        sns.histplot(X["boltz_iptm"], kde=True, bins=50,  label="Real", color ="#2C8C99", ax=axs[0])
+        sns.histplot(shuffled["boltz_iptm"], kde=True, bins=50,  label="Shuffled", color="#E88873", ax=axs[0])
+        sns.histplot(random["boltz_iptm"], kde=True, bins=50,  label="Random", color="#F46036", ax=axs[0])
+        sns.histplot(X["boltz_interface_dG"], kde=True, bins=50, label="Real",color ="#2C8C99", ax=axs[1])
+        sns.histplot(shuffled["boltz_interface_dG"], kde=True, bins=50,  label="Shuffled", color="#E88873", ax=axs[1])
+        sns.histplot(random["boltz_interface_dG"], kde=True, bins=50, label="Random", color="#F46036", ax=axs[1])
 
 
     plt.legend(frameon=False)
@@ -514,9 +514,12 @@ def remove_outliers(df: pd.DataFrame) -> pd.DataFrame:
     
     # Define outlier thresholds for specific columns
     outlier_thresholds = {
-        "alphafold_interface_dG": (-100, 25),  # interface_dG between -100 and 100
+        "boltz_interface_dG": (-100, 25),  # interface_dG between -100 and 100
         "alphafold_rosetta_score": (-1200, 1500),        # rosetta_score less than 1500
-        "alphafold_interface_sasa": 4000         # interface_sasa less than 4000
+        "alphafold_interface_sasa": 4000,         # interface_sasa less than 4000
+        "boltz_interface_dG": (-100, 200),  # interface_dG between -100 and 100
+        "boltz_rosetta_score": (-1200, 500),        # rosetta_score less than 1500
+        "boltz_interface_sasa": 4500         # interface_sasa less than 4000
     }
     
     current_rows = len(df)

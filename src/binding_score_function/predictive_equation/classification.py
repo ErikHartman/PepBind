@@ -277,7 +277,7 @@ def perform_symbolic_classification(
         populations=populations,
         population_size=population_size,
         select_k_features = select_k_features,
-        verbosity=0,
+        verbosity=1,
     )
     
     model.fit(X_train_data, y_train, variable_names=list(X_train.columns))

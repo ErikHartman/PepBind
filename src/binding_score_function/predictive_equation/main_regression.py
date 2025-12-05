@@ -18,10 +18,24 @@ from plotting import (
     plot_predictions_by_data_type,
 )
 
+def drop_features(df, prefix="boltz"):
+    # drop features with prefix
+    print("number of features before dropping:", df.shape[1])
+    columns_to_drop = [col for col in df.columns if col.startswith(prefix)]
+    columns_to_drop.append("intra_all_mean_rmsd")
+    columns_to_drop.append("turn_fraction")
+    columns_to_drop.append("helix_fraction")
+    columns_to_drop.append("sheet_fraction")
+    df = df.drop(columns=columns_to_drop, errors='ignore')
+    
+
+    print("number of features after dropping:", df.shape[1])
+    return df
+
 if __name__ == "__main__":
     # Data paths setup
     scores_path = "/home/er8813ha/immunopeptides/data/x_y_v2"
-    output_dir = "./plots_v2/regression"
+    output_dir = "./plots_v2_both/regression"
     os.makedirs(output_dir, exist_ok=True)
 
     # Load pre-split training and validation data files
@@ -41,6 +55,9 @@ if __name__ == "__main__":
     # Set complex_filename as index for X DataFrames
     X_train = X_train_df.set_index("complex_filename")
     X_val = X_val_df.set_index("complex_filename")
+
+    #X_train = drop_features(X_train, prefix="boltz")
+    #X_val = drop_features(X_val, prefix="boltz")
     
     # Extract pKd values as arrays for model training
     y_train = y_train_df["pKd"].values
@@ -64,7 +81,7 @@ if __name__ == "__main__":
         X_val,
         y_val,
         niterations=100,
-        populations=50,
+        populations=20,
         population_size=20,
         model_selection="best",
         select_k_features=25,
@@ -208,6 +225,9 @@ if __name__ == "__main__":
     # Set complex_filename as index for consistency
     X_shuffle = X_shuffle_df.set_index("complex_filename")
     X_random = X_random_df.set_index("complex_filename")
+
+    #X_shuffle = drop_features(X_shuffle, prefix="boltz")
+    #X_random = drop_features(X_random, prefix="boltz")
     
     print(f"Loaded shuffle data: {X_shuffle.shape} samples")
     print(f"Loaded random data: {X_random.shape} samples")
@@ -239,7 +259,7 @@ if __name__ == "__main__":
             if model_name == "Symbolic":
                 # Get the equation index to use
                 all_eqs = symb_results["all_equations"]
-                best_eq_idx = all_eqs.loc[all_eqs["val_rmse"].idxmin(), "equation_index"]
+                best_eq_idx = all_eqs.loc[all_eqs["val_r2"].idxmax(), "equation_index"]
                 
                 # Scale data if needed
                 if scaler is not None:

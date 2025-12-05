@@ -63,7 +63,7 @@ def load_data(data="test", base_path="/srv/data1/general/immunopeptides_data/"):
 
 def load_scaling_params(scaling_type="regression"):
     """Load scaling parameters from training."""
-    scaling_path = f"/home/er8813ha/immunopeptides/plots/{scaling_type}/scaling_params.csv"
+    scaling_path = f"/home/er8813ha/immunopeptides/plots_v2/{scaling_type}/scaling_params.csv"
     return pd.read_csv(scaling_path, index_col=0)
 
 def scale_data(X, scaling_params, scaler_type="standard"):
@@ -85,7 +85,7 @@ def scale_data(X, scaling_params, scaler_type="standard"):
         raise ValueError(f"Unknown scaler type: {scaler_type}. Use 'standard' or 'minmax'.")
 
 
-def save_predictions(results, y_true, output_dir="/home/er8813ha/immunopeptides/plots/test"):
+def save_predictions(results, y_true, output_dir="/home/er8813ha/immunopeptides/plots_v2/test"):
     """Save predictions to CSV files."""
     os.makedirs(output_dir, exist_ok=True)
     real_df = pd.DataFrame({
@@ -170,7 +170,7 @@ def combined_scoring_function(X, reg_equation, class_equation,
 def main():
     """Run the analysis pipeline with the specified configuration."""
     # Create output directory
-    output_dir = "/home/er8813ha/immunopeptides/plots/test"
+    output_dir = "/home/er8813ha/immunopeptides/plots_v1/test"
     os.makedirs(output_dir, exist_ok=True)
 
     # Define equation strings for both models
@@ -296,7 +296,7 @@ def main():
     axs[1].legend(loc='lower right', frameon=False)
     
     plt.tight_layout()
-    plt.savefig(f"/home/er8813ha/immunopeptides/plots/test/regression_{data_split}.svg", dpi=300)
+    plt.savefig(f"/home/er8813ha/immunopeptides/plots_v2/test/regression_{data_split}.svg", dpi=300)
     
     fig, axs = plt.subplots(1, 3, figsize=(9,2))
     
@@ -350,7 +350,7 @@ def main():
     axs[1].legend(loc='lower right', frameon=False)
     
     plt.tight_layout()
-    plt.savefig(f"/home/er8813ha/immunopeptides/plots/test/classification_{data_split}.svg", dpi=300)
+    plt.savefig(f"/home/er8813ha/immunopeptides/plots_v2/test/classification_{data_split}.svg", dpi=300)
 
 
 
@@ -413,7 +413,7 @@ def main():
     
     plt.tight_layout()
     # Save the figure with the combination method in the filename
-    plt.savefig(f"/home/er8813ha/immunopeptides/plots/test/combined_{data_split}.svg", dpi=300)
+    plt.savefig(f"/home/er8813ha/immunopeptides/plots_v2/test/combined_{data_split}.svg", dpi=300)
 
     # save all predictions and real values to csv
     results = {
@@ -431,36 +431,6 @@ def main():
         }
     }
     save_predictions(results, y_real, output_dir=output_dir)
-
-    from bopep.scoring.scores_to_objective import ScoresToObjective, benchmark_objective
-
-    # build the raw-scores dict in the shape your benchmark_objective expects
-    raw_scores = {}
-    for idx, row in X_real.iterrows():
-        raw_scores[idx] = {
-            "rosetta_score":    row["rosetta_score"],
-            "interface_dG":     row["interface_dG"],
-            "distance_score":   row["distance_score"],
-            "iptm":             row["iptm"],
-            "peptide_pae":      row["peptide_pae"],
-            "in_binding_site":  True
-        }
-
-    # compute benchmarked objectives
-    objective = ScoresToObjective()
-    bench_results = objective.create_objective(raw_scores, benchmark_objective)
-
-    # extract in the same order as X_real.index
-    bench_preds = np.array([bench_results[name] for name in X_real.index])
-
-    # quick sanity check: print the first five from each
-    print("First 5 combined_scoring_function preds:", X_real_scaled_predictions_both[:5])
-    print("First 5 benchmark_objective preds:    ", bench_preds[:5])
-
-    # optionally compute correlation to see how well they agree
-    corr = np.corrcoef(X_real_scaled_predictions_both, bench_preds)[0,1]
-    print(f"Pearson r between pipelines: {corr:.3f}")
-    
 
 
 

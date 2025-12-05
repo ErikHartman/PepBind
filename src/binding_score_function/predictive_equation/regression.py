@@ -228,7 +228,7 @@ def perform_symbolic_regression(
         populations=populations,
         population_size=population_size,
         select_k_features=select_k_features,
-        verbosity=0,
+        verbosity=1,
     )
     
     logger.info("Fitting symbolic regression model...")
@@ -264,9 +264,9 @@ def perform_symbolic_regression(
         except Exception as e:
             logger.warning(f"Error evaluating equation {i} on val set: {str(e)}")
 
-    # Select best equation based on RMSE on validation set
+    # Select best equation based on r2 on validation set  
     val_metrics_df = pd.DataFrame(val_metrics)
-    best_val_idx = val_metrics_df['val_rmse'].idxmin() # here we select based on RMSE on val set
+    best_val_idx = val_metrics_df['val_r2'].idxmax()
     best_val_eq_index = val_metrics_df.loc[best_val_idx, 'eq_index']
     best_expr = simplify_expression(model, best_val_eq_index)
     logger.info(f"Best symbolic expression on val set: eq_index={best_val_eq_index} | {best_expr}")
