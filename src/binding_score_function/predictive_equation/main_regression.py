@@ -21,7 +21,7 @@ from plotting import (
 def drop_features(df, prefix="boltz"):
     # drop features with prefix
     print("number of features before dropping:", df.shape[1])
-    columns_to_drop = [col for col in df.columns if col.startswith(prefix)]
+    columns_to_drop = [col for col in df.columns if prefix in col]
     columns_to_drop.append("intra_all_mean_rmsd")
     columns_to_drop.append("turn_fraction")
     columns_to_drop.append("helix_fraction")
@@ -35,7 +35,7 @@ def drop_features(df, prefix="boltz"):
 if __name__ == "__main__":
     # Data paths setup
     scores_path = "/home/er8813ha/immunopeptides/data/x_y_v2"
-    output_dir = "./plots_v2_both/regression"
+    output_dir = "./plots_v2_boltz/regression"
     os.makedirs(output_dir, exist_ok=True)
 
     # Load pre-split training and validation data files
@@ -56,8 +56,8 @@ if __name__ == "__main__":
     X_train = X_train_df.set_index("complex_filename")
     X_val = X_val_df.set_index("complex_filename")
 
-    #X_train = drop_features(X_train, prefix="boltz")
-    #X_val = drop_features(X_val, prefix="boltz")
+    X_train = drop_features(X_train, prefix="alphafold")
+    X_val = drop_features(X_val, prefix="alphafold")
     
     # Extract pKd values as arrays for model training
     y_train = y_train_df["pKd"].values

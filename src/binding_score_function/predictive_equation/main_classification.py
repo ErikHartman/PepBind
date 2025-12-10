@@ -25,7 +25,7 @@ from main_regression import drop_features
 if __name__ == "__main__":
     # Data paths setup
     scores_path = "/home/er8813ha/immunopeptides/data/x_y_v2"
-    output_dir = "./plots_v2_both/classification"
+    output_dir = "./plots_v2_boltz/classification"
     os.makedirs(output_dir, exist_ok=True)
 
     # Load data from pre-split files
@@ -104,8 +104,8 @@ if __name__ == "__main__":
     X_val = pd.concat([X_fake_val, X_real_val], axis=0)
     y_val = X_val.pop('label').values
 
-    #X_train = drop_features(X_train, prefix="boltz")
-    #X_val = drop_features(X_val, prefix="boltz")
+    X_train = drop_features(X_train, prefix="alphafold")
+    X_val = drop_features(X_val, prefix="alphafold")
 
     # Save scaling parameters for later use
     scaling_params = X_train.describe().T[["mean", "std", "min", "max"]]
