@@ -1,1 +1,1 @@
-All data is in `/srv/data1/general/immunopeptides_data`
+x_y_v2 contains the test/train splits for v2.
