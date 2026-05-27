@@ -18,31 +18,46 @@ from plotting import (
     plot_predictions_by_data_type,
 )
 
+def drop_features(df, prefix="boltz"):
+    # drop features with prefix
+    print("number of features before dropping:", df.shape[1])
+    columns_to_drop = [col for col in df.columns if prefix in col]
+    columns_to_drop.append("intra_all_mean_rmsd")
+    columns_to_drop.append("turn_fraction")
+    columns_to_drop.append("helix_fraction")
+    columns_to_drop.append("sheet_fraction")
+    df = df.drop(columns=columns_to_drop, errors='ignore')
+    
+
+    print("number of features after dropping:", df.shape[1])
+    return df
+
 if __name__ == "__main__":
     # Data paths setup
-    base_path = "/srv/data1/general/immunopeptides_data/"
-    scores_path = os.path.join(
-        base_path, "outputs/binding_score_function_prod/4_processed_scores/"
-    )
-    output_dir = "./plots/regression"
+    scores_path = "/home/er8813ha/immunopeptides/data/x_y_v2"
+    output_dir = "./plots_v2_boltz/regression"
     os.makedirs(output_dir, exist_ok=True)
 
     # Load pre-split training and validation data files
+
     X_train_df = pd.read_csv(os.path.join(scores_path, "real_X_train.csv"))
     y_train_df = pd.read_csv(os.path.join(scores_path, "real_y_train.csv"))
     
     X_val_df = pd.read_csv(os.path.join(scores_path, "real_X_val.csv"))
     y_val_df = pd.read_csv(os.path.join(scores_path, "real_y_val.csv"))
-    
-    # Remove any 'Unnamed:_0' columns that might have been created during saving/loading
+
     for df in [X_train_df, X_val_df]:
         columns_to_drop = [col for col in df.columns if col.startswith('Unnamed:')]
+        columns_to_drop.append("receptor_contacts")
         if columns_to_drop:
-            df.drop(columns=columns_to_drop, inplace=True)
+            df.drop(columns=columns_to_drop, inplace=True, errors='ignore')
     
     # Set complex_filename as index for X DataFrames
     X_train = X_train_df.set_index("complex_filename")
     X_val = X_val_df.set_index("complex_filename")
+
+    X_train = drop_features(X_train, prefix="alphafold")
+    X_val = drop_features(X_val, prefix="alphafold")
     
     # Extract pKd values as arrays for model training
     y_train = y_train_df["pKd"].values
@@ -65,11 +80,11 @@ if __name__ == "__main__":
         y_train,
         X_val,
         y_val,
-        niterations=300,
-        populations=50,
-        population_size=50,
+        niterations=100,
+        populations=20,
+        population_size=20,
         model_selection="best",
-        select_k_features=15,
+        select_k_features=25,
         scale_features=True,
     )
 
@@ -210,6 +225,9 @@ if __name__ == "__main__":
     # Set complex_filename as index for consistency
     X_shuffle = X_shuffle_df.set_index("complex_filename")
     X_random = X_random_df.set_index("complex_filename")
+
+    #X_shuffle = drop_features(X_shuffle, prefix="boltz")
+    #X_random = drop_features(X_random, prefix="boltz")
     
     print(f"Loaded shuffle data: {X_shuffle.shape} samples")
     print(f"Loaded random data: {X_random.shape} samples")
@@ -241,7 +259,7 @@ if __name__ == "__main__":
             if model_name == "Symbolic":
                 # Get the equation index to use
                 all_eqs = symb_results["all_equations"]
-                best_eq_idx = all_eqs.loc[all_eqs["val_rmse"].idxmin(), "equation_index"]
+                best_eq_idx = all_eqs.loc[all_eqs["val_r2"].idxmax(), "equation_index"]
                 
                 # Scale data if needed
                 if scaler is not None:

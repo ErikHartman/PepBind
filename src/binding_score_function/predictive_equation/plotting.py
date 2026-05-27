@@ -281,7 +281,7 @@ def plot_model_comparison(comparison_df, roc_data=None, regression_data=None, ou
                 
                 ax.set_xlabel('pKd')
                 ax.set_ylabel('Predicted pKd')
-                ax.legend(frameon=False)
+                ax.legend(title="Pearson r", frameon=False)
                 
         plt.tight_layout()
         
