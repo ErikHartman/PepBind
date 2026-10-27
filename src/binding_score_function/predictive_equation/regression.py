@@ -283,6 +283,24 @@ def perform_symbolic_regression(
         complexity = row['complexity']
         loss = row['loss']
         score = row['score']
+        train_results = {
+            'train_rmse': np.nan,
+            'train_r2': np.nan,
+            'train_mae': np.nan,
+            'train_pearson_r': np.nan,
+            'train_spearman_r': np.nan,
+            'train_kendall_tau': np.nan,
+            'train_top_k_accuracy_true': np.nan,
+        }
+        val_results = {
+            'val_rmse': np.nan,
+            'val_r2': np.nan,
+            'val_mae': np.nan,
+            'val_pearson_r': np.nan,
+            'val_spearman_r': np.nan,
+            'val_kendall_tau': np.nan,
+            'val_top_k_accuracy_true': np.nan,
+        }
         try:
             X_train_array = X_train_data if isinstance(X_train_data, np.ndarray) else X_train_data.values
             eq_pred_train = model.predict(X_train_array, index=eq_index)
@@ -292,13 +310,9 @@ def perform_symbolic_regression(
                 y_train_filtered = y_train[valid_mask_train] if not valid_mask_train.all() else y_train
                 eq_pred_train_filtered = eq_pred_train[valid_mask_train] if not valid_mask_train.all() else eq_pred_train
                 train_results = get_regression_results(y_train_filtered, eq_pred_train_filtered, prefix="train_")
-                train_rmse_eq = train_results['train_rmse']
-                train_r2_eq = train_results['train_r2']
                 
                 if not valid_mask_train.all():
                     logger.warning(f"Equation {i}: {valid_mask_train.sum()}/{len(valid_mask_train)} valid predictions on train")
-            else:
-                train_rmse_eq, train_r2_eq = np.nan, np.nan
             
             X_val_array = X_val_data if isinstance(X_val_data, np.ndarray) else X_val_data.values
             eq_pred_val = model.predict(X_val_array, index=eq_index)
@@ -309,32 +323,26 @@ def perform_symbolic_regression(
                 y_val_filtered = y_val[valid_mask_val] if not valid_mask_val.all() else y_val
                 eq_pred_val_filtered = eq_pred_val[valid_mask_val] if not valid_mask_val.all() else eq_pred_val
                 val_results = get_regression_results(y_val_filtered, eq_pred_val_filtered, prefix="val_")
-                val_rmse_eq = val_results['val_rmse']
-                val_r2_eq = val_results['val_r2']
-                val_mae_eq = val_results['val_mae']
                 
                 if not valid_mask_val.all():
                     logger.warning(f"Equation {i}: {valid_mask_val.sum()}/{len(valid_mask_val)} valid predictions on val")
-            else:
-                val_rmse_eq, val_r2_eq, val_mae_eq = np.nan, np.nan, np.nan
         except Exception as e:
             logger.warning(f"Error calculating metrics for equation {i}: {str(e)}")
-            train_rmse_eq, train_r2_eq = np.nan, np.nan
-            val_rmse_eq, val_r2_eq, val_mae_eq = np.nan, np.nan, np.nan
         
-        all_eqs.append({
+        equation_results = {
             'equation': eq_str,
             'complexity': complexity,
             'loss': loss,
             'score': score,
-            'train_rmse': train_rmse_eq,
-            'train_r2': train_r2_eq,
-            'val_rmse': val_rmse_eq,
-            'val_r2': val_r2_eq,
-            'val_mae': val_mae_eq,
             'equation_index': eq_index
-        })
-        logger.debug(f"Equation {i}: train_rmse={train_rmse_eq}, val_rmse={val_rmse_eq}")
+        }
+        equation_results.update(train_results)
+        equation_results.update(val_results)
+        all_eqs.append(equation_results)
+        logger.debug(
+            f"Equation {i}: train_rmse={train_results['train_rmse']}, "
+            f"val_rmse={val_results['val_rmse']}"
+        )
     
     valid_mask_train = np.isfinite(train_pred)
     if not valid_mask_train.all():
