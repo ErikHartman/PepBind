@@ -1,0 +1,1775 @@
+{
+  "url": "https://data.rcsb.org/graphql",
+  "parameters": {
+    "query": "{entries(entry_ids:[\"3C0R\", \"3C7I\", \"3CBX\", \"3CBY\", \"3CBZ\", \"3CC0\", \"3CH8\", \"3CMM\", \"3COH\", \"3COI\", \"3COK\", \"3CQT\", \"3CQU\", \"3CQW\", \"3CW1\", \"3D0E\", \"3D14\", \"3D15\", \"3D2I\", \"3D2K\"]){\n          rcsb_id rcsb_accession_info{initial_release_date}\n          exptl{method} rcsb_entry_info{resolution_combined}\n          polymer_entities{rcsb_id entity_poly{pdbx_seq_one_letter_code_can type}\n            rcsb_polymer_entity{pdbx_description}\n            rcsb_polymer_entity_container_identifiers{entity_id asym_ids auth_asym_ids\n              reference_sequence_identifiers{database_name database_accession}}}\n          assemblies{rcsb_id pdbx_struct_assembly_gen{asym_id_list oper_expression}}\n        }}"
+  },
+  "retrieved_utc": "2026-10-30T19:09:49.183121+00:00",
+  "response": {
+    "data": {
+      "entries": [
+        {
+          "rcsb_id": "3C0R",
+          "rcsb_accession_info": {
+            "initial_release_date": "2008-02-19T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.315
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3C0R_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRG",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Ubiquitin"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "B",
+                  "D"
+                ],
+                "auth_asym_ids": [
+                  "B",
+                  "D"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P0CG48"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "3C0R_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MKRVLKSTEMSIGGSGENVLSVHPVLDDNSCLFHAIAYGIFKQDSVRDLREMVSKEVLNNPVKFNDAILDKPNKDYAQWILKMESWGGAIEIGIISDALAVAIYVVDIDAVKIEKFNEDKFDNYILILFNGIHYDSLTMNEFKTVFNKNQPESDDVLTAALQLASNLKQTGYSFNTHKAQIKCNTCQMTFVGEREVARHAESTGHVDFGQNR",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Ubiquitin thioesterase OTU1"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "C"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "C"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P43558"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3C0R-2",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "E",
+                    "G",
+                    "H"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "3C0R-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "C",
+                    "D",
+                    "F",
+                    "I",
+                    "J"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3CBX",
+          "rcsb_accession_info": {
+            "initial_release_date": "2009-03-03T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              1.7
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3CBX_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GSHMNIITVTLNMEKYNFLGISIVGQSNERGDGGIYIGSIMKGGAVAADGRIEPGDMLLQVNDMNFENMSNDDAVRVLRDIVHKPGPIVLTVAKSGGGWKWYGWF",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Dishevelled-2"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "O14641"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3CBX-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                    "G"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3CBY",
+          "rcsb_accession_info": {
+            "initial_release_date": "2009-03-03T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              1.5
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3CBY_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GSHMNIITVTLNMEKYNFLGISIVGQSNERGDGGIYIGSIMKGGAVAADGRIEPGDMLLQVNDMNFENMSNDDAVRVLRDIVHKPGPIVLTVAKSGGGWKDYGWIDGK",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Dishevelled-2"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "O14641"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3CBY-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3CBZ",
+          "rcsb_accession_info": {
+            "initial_release_date": "2009-03-03T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              1.38
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3CBZ_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GSHMNIITVTLNMEKYNFLGISIVGQSNERGDGGIYIGSIMKGGAVAADGRIEPGDMLLQVNDMNFENMSNDDAVRVLRDIVHKPGPIVLTVAKSGGGSGNEVWIDGP",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Dishevelled-2"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "A"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "O14641"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3CBZ-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3CC0",
+          "rcsb_accession_info": {
+            "initial_release_date": "2009-03-03T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              1.75
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3CC0_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GSHMNIITVTLNMEKYNFLGISIVGQSNERGDGGIYIGSIMKGGAVAADGRIEPGDMLLQVNDMNFENMSNDDAVRVLRDIVHKPGPIVLTVAKSGGGGEIVLWSDIP",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Dishevelled-2"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "O14641"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3CC0-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3CH8",
+          "rcsb_accession_info": {
+            "initial_release_date": "2009-03-31T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              1.9
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3CH8_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "PQPVDSWV",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "C-terminal octapeptide from protein ARVCF"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "P"
+                ],
+                "reference_sequence_identifiers": null
+              }
+            },
+            {
+              "rcsb_id": "3CH8_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GSPELGFSISGGVGGRGNPFRPDDDGIFVTRVQPEGPASKLLQPGDKIIQANGYSFINIEHGQAVSLLKTFQNTVELIIVREVGNGAKQEIRVRVEKDGGSGGVSSVPTNLEVVAATPTSLLISWDAYRELPVSYYRITYGETGGNSPVQEFTVPGSKSTATISGLKPGVDYTITVYAHYNYHYYSSPISINYRT",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "fusion protein PDZ-Fibronectin,Fibronectin"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "A"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q96RT1"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3CH8-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3CMM",
+          "rcsb_accession_info": {
+            "initial_release_date": "2008-08-05T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.7
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3CMM_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MQIFVKTLTGKTITLEVESSDTIDNVKSKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGG",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Ubiquitin"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "C",
+                  "D"
+                ],
+                "auth_asym_ids": [
+                  "B",
+                  "D"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P0CG63"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "3CMM_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "AAGEIDESLYSRQLYVLGKEAMLKMQTSNVLILGLKGLGVEIAKNVVLAGVKSMTVFDPEPVQLADLSTQFFLTEKDIGQKRGDVTRAKLAELNAYVPVNVLDSLDDVTQLSQFQVVVATDTVSLEDKVKINEFCHSSGIRFISSETRGLFGNTFVDLGDEFTVLDPTGEEPRTGMVSDIEPDGTVTMLDDNRHGLEDGNFVRFSEVEGLDKLNDGTLFKVEVLGPFAFRIGSVKEYGEYKKGGIFTEVKVPRKISFKSLKQQLSNPEFVFSDFAKFDRAAQLHLGFQALHQFAVRHNGELPRTMNDEDANELIKLVTDLSVQQPEVLGEGVDVNEDLIKELSYQARGDIPGVVAFFGGLVAQEVLKACSGKFTPLKQFMYFDSLESLPDPKNFPRNEKTTQPVNSRYDNQIAVFGLDFQKKIANSKVFLVGSGAIGCEMLKNWALLGLGSGSDGYIVVTDNDSIEKSNLNRQFLFRPKDVGKNKSEVAAEAVCAMNPDLKGKINAKIDKVGPETEEIFNDSFWESLDFVTNALDNVDARTYVDRRCVFYRKPLLESGTLGTKGNTQVIIPRLTESYSSSRDPPEKSIPLCTLRSFPNKIDHTIAWAKSLFQGYFTDSAENVNMYLTQPNFVEQTLKQSGDVKGVLESISDSLSSKPHNFEDCIKWARLEFEKKFNHDIKQLLFNFPKDAKTSNGEPFWSGAKRAPTPLEFDIYNNDHFHFVVAGASLRAYNYGIKSDDSNSKPNVDEYKSVIDHMIIPEFTPNANLKIQVNDDDPDPNANAANGSDEIDQLVSSLPDPSTLAGFKLEPVDFEKDDDTNHHIEFITACSNCRAQNYFIETADRQKTKFIAGRIIPAIATTTSLVTGLVNLELYKLIDNKTDIEQYKNGFVNLALPFFGFSEPIASPKGEYNNKKYDKIWDRFDIKGDIKLSDLIEHFEKDEGLEITMLSYGVSLLYASFFPPKKLKERLNLPITQLVKLVTKKDIPAHVSTMILEICADDKEGEDVEVPFITIHL",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Ubiquitin-activating enzyme E1 1"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "C"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P22515"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3CMM-2",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "B",
+                    "D",
+                    "F",
+                    "H",
+                    "J"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "3CMM-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "C",
+                    "E",
+                    "G",
+                    "I"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3COH",
+          "rcsb_accession_info": {
+            "initial_release_date": "2009-02-17T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.7
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3COH_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "AKRQWALEDFEIGRPLGKGKFGNVYLAREKNSKFILALKVLFKAQLEKAGVEHQLRREVEIQSHLRHPNILRLYGYFHDSTRVYLILEYAPLGTVYRELQKLSKFDEQRTATYITELANALSYCHSKKVIHRDIKPENLLLGSAGELKIADFGWSVHAPSSRRAALCGTLDYLPPEMIEGRMHDEKVDLWSLGVLCYEFLVGKPPFEANTYQDTYKRISRVEFTFPDFVTEGARDLISRLLKHNPSQRPMLREVLEHPWITANSSKPS",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Serine/threonine-protein kinase 6"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "O14965"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3COH-2",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "B",
+                    "D"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "3COH-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "C"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3COI",
+          "rcsb_accession_info": {
+            "initial_release_date": "2008-04-15T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.09
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3COI_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SLSLIRKKGFYKQDVNKTAWELPKTYVSPTHVGSGAYGSVCSAIDKRSGEKVAIKKLSRPFQSEIFAKRAYRELLLLKHMQHENVIGLLDVFTPASSLRNFYDFYLVMPFMQTDLQKIMGLKFSEEKIQYLVYQMLKGLKYIHSAGVVHRDLKPGNLAVNEDCELKILDFGLARHADAEMTGYVVTRWYRAPEVILSWMHYNQTVDIWSVGCIMAEMLTGKTLFKGKDYLDQLTQILKVTGVPGTEFVQKLNDKAAKSYIQSLPQTPRKDFTQLFPRASPQAADLLEKMLELDVDKRLTAAQALTHPFFEPFRDPEEETEAQQPFDDSLEHEKLTVDEWKQHIYKEIVNFSPI",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Mitogen-activated protein kinase 13"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "A"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "O15264"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3COI-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3COK",
+          "rcsb_accession_info": {
+            "initial_release_date": "2008-04-15T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.25
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3COK_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SLATCIGEKIEDFKVGNLLGKGSFAGVYRAESIHTGLEVAIKMIDKKAMYKAGMVQRVQNEVKIHCQLKHPSILELYNYFEDSNYVYLVLEMCHNGEMNRYLKNRVKPFSENEARHFMHQIITGMLYLHSHGILHRDLTLSNLLLTRNMNIKIADFGLATQLKMPHEKHYTLCGTPNYISPEIATRSAHGLESDVWSLGCMFYTLLIGRPPFDTDTVKNTLNKVVLADYEMPSFLSIEAKDLIHQLLRRNPADRLSLSSVLDHPFMSRNSSTKSKDEG",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Serine/threonine-protein kinase PLK4"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "O00444"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3COK-2",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "B",
+                    "F",
+                    "G",
+                    "H",
+                    "J"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "3COK-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "C",
+                    "D",
+                    "E",
+                    "I"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3CQT",
+          "rcsb_accession_info": {
+            "initial_release_date": "2008-07-01T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              1.6
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3CQT_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MVQISTLFEALYDYEARTEDDLSFHKGEKFQILNSSEGDWWEARSLTTGETGYIPSIYLAPVDRLDYKDDDDKHHHHHH",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Proto-oncogene tyrosine-protein kinase Fyn"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "A"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q05876"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3CQT-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3CQU",
+          "rcsb_accession_info": {
+            "initial_release_date": "2008-05-27T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.2
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3CQU_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GAMDPRVTMNEFEYLKLLGKGTFGKVILVKEKATGRYYAMKILKKEVIVAKDEVAHTLTENRVLQNSRHPFLTALKYSFQTHDRLCFVMEYANGGELFFHLSRERVFSEDRARFYGAEIVSALDYLHSEKNVVYRDLKLENLMLDKDGHIKITDFGLCKEGIKDGATMKTFCGTPEYLAPEVLEDNDYGRAVDWWGLGVVMYEMMCGRLPFYNQDHEKLFELILMEEIRFPRTLGPEAKSLLSGLLKKDPKQRLGGGSEDAKEIMQHRFFAGIVWQHVYEKKLSPPFKPQVTSETDTRYFDEEFTAQMITITPPDQDDSMECVDSERRPHFPQFDYSASSTA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "RAC-alpha serine/threonine-protein kinase"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "A"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P31749"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "3CQU_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GRPRTTSFAE",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Glycogen synthase kinase-3 beta"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "C"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P49841"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3CQU-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3CQW",
+          "rcsb_accession_info": {
+            "initial_release_date": "2008-05-27T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.0
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3CQW_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GRPRTTSFAE",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Glycogen synthase kinase-3 beta"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "C"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P49841"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "3CQW_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GAMDPRVTMNEFEYLKLLGKGTFGKVILVKEKATGRYYAMKILKKEVIVAKDEVAHTLTENRVLQNSRHPFLTALKYSFQTHDRLCFVMEYANGGELFFHLSRERVFSEDRARFYGAEIVSALDYLHSEKNVVYRDLKLENLMLDKDGHIKITDFGLCKEGIKDGATMKTFCGTPEYLAPEVLEDNDYGRAVDWWGLGVVMYEMMCGRLPFYNQDHEKLFELILMEEIRFPRTLGPEAKSLLSGLLKKDPKQRLGGGSEDAKEIMQHRFFAGIVWQHVYEKKLSPPFKPQVTSETDTRYFDEEFTAQMITITPPDQDDSMECVDSERRPHFPQFDYSASSTA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "RAC-alpha serine/threonine-protein kinase"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "A"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P31749"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3CQW-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3CW1",
+          "rcsb_accession_info": {
+            "initial_release_date": "2009-03-24T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              5.493
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3CW1_9",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MTQFLPPNLLALFAPRDPIPYLPPLEKLPHEKHHNQPYCGIAPYIREFEDPRDAPPPTRAETREERMERKRREKIERRQQEVETELKMWDPHNDPNAQGDAFKTLFVARVNYDTTESKLRREFEVYGPIKRIHMVYSKRSGKPRGYAFIEYEHERDMHSAYKHADGKKIDGRRVLVDVERGRTVKGWRPRRLGGGLGGTRRGGADVNIRHSGRDDT",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "U1 small nuclear ribonucleoprotein 70 kDa"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "9",
+                "asym_ids": [
+                  "DA",
+                  "L",
+                  "MA",
+                  "U"
+                ],
+                "auth_asym_ids": [
+                  "6",
+                  "7",
+                  "8",
+                  "K"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P08621"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "3CW1_8",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MSKAHPPELKKFMDKKLSLKLNGGRHVQGILRGFDPFMNLVIDECVEMATSGQQNNIGMVVIRGNSIIMLEALERV",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Small nuclear ribonucleoprotein G"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "8",
+                "asym_ids": [
+                  "CA",
+                  "K",
+                  "LA",
+                  "T"
+                ],
+                "auth_asym_ids": [
+                  "3",
+                  "4",
+                  "5",
+                  "G"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62308"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "3CW1_7",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAYRGQGQKVQKVMVQPINLIFRYLQNRSRIQVWLYEQVNMRIEGCIIGFDEYMNLVLDDAEEIHSKTKSRKQLGRIMLKGDNITLLQSVSN",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Small nuclear ribonucleoprotein E"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "7",
+                "asym_ids": [
+                  "BA",
+                  "J",
+                  "KA",
+                  "S"
+                ],
+                "auth_asym_ids": [
+                  "E",
+                  "W",
+                  "X",
+                  "Y"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62304"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "3CW1_6",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MSLPLNPKPFLNGLTGKPVMVKLKWGMEYKGYLVSVDGYMNMQLANTEEYIDGALSGHLGEVLIRCNNVLYIRGVEEEEEDGEMRE",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Small nuclear ribonucleoprotein F"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "6",
+                "asym_ids": [
+                  "AA",
+                  "I",
+                  "JA",
+                  "R"
+                ],
+                "auth_asym_ids": [
+                  "1",
+                  "2",
+                  "F",
+                  "Z"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62306"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "3CW1_5",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MSLLNKPKSEMTPEELQKREEEEFNTGPLSVLTQSVKNNTQVLINCRNNKKLLGRVKAFDRHCNMVLENVKEMWTEVPKSGKGKKKSKPVNKDRYISKMFLRGDSVIVVLRNPLIAGK",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Small nuclear ribonucleoprotein Sm D2"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "5",
+                "asym_ids": [
+                  "H",
+                  "IA",
+                  "Q",
+                  "Z"
+                ],
+                "auth_asym_ids": [
+                  "C",
+                  "P",
+                  "Q",
+                  "R"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62316"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "3CW1_4",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MKLVRFLMKLSHETVTIELKNGTQVHGTITGVDVSMNTHLKAVKMTLKNREPVQLETLSIRGNNIRYFILPDSLPLDTLLVDVEPKVKSKKREAVAGRGRGRGRGRGRGRGRGRGGPRR",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Small nuclear ribonucleoprotein Sm D1"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "4",
+                "asym_ids": [
+                  "G",
+                  "HA",
+                  "P",
+                  "Y"
+                ],
+                "auth_asym_ids": [
+                  "B",
+                  "M",
+                  "N",
+                  "O"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62314"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "3CW1_3",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MTVGKSSKMLQHIDYRMRCILQDGRIFIGTFKAFDKHMNLILCDCDEFRKIKPKNSKQAEREEKRVLGLVLLRGENLVSMTVEGPPPKDTGIARVPLAGAAGGPGIGRAAGRGIPAGVPMPQAPAGLAGPVRGVGGPSQQVMTPQGRGTVAAAAAAATASIAGAPTQYPPGRGG",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Small nuclear ribonucleoprotein-associated proteins B and B'"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "3",
+                "asym_ids": [
+                  "F",
+                  "GA",
+                  "O",
+                  "X"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "H",
+                  "I",
+                  "J"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P14678"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "3CW1_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MSIGVPIKVLHEAEGHIVTCETNTGEVYRGKLIEAEDNMNCQMSNITVTYRDGRVAQLEQVYIRGCKIRFLILPDMLKNAPMLKSMKNKNQGSGAGRGKAAILKAQVAARGRGRGMGRGNIFQKRR",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Small nuclear ribonucleoprotein Sm D3"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "E",
+                  "FA",
+                  "N",
+                  "W"
+                ],
+                "auth_asym_ids": [
+                  "D",
+                  "S",
+                  "T",
+                  "U"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62318"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "3CW1_10",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MPKFYCDYCDTYLTHDSPSVRKTHCSGRKHKENVKDYYCKWMEEQAQSLIDKTTAAFQQGKIPPTPFSAPPPAGAMI",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "U1 small nuclear ribonucleoprotein C"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "10",
+                "asym_ids": [
+                  "EA",
+                  "M",
+                  "NA",
+                  "V"
+                ],
+                "auth_asym_ids": [
+                  "0",
+                  "9",
+                  "L",
+                  "l"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P09234"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "3CW1_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "AUACUUACCUGGCAGGGGAGAUACCAUGAUCACGAAGGUGGUUUUCCCAGGGGAGACGUCCCCUGCGAUUUCCCCAAAUGUGGGAAACUCGACUGCAUAAUUUGUGGUAGUGGGGGACUGCGUUCGCGCUUUCCCCUG",
+                "type": "polyribonucleotide"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "U1 snRNA"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "auth_asym_ids": [
+                  "V",
+                  "v",
+                  "w",
+                  "x"
+                ],
+                "reference_sequence_identifiers": null
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3CW1-4",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "D",
+                    "FA",
+                    "GA",
+                    "HA",
+                    "IA",
+                    "JA",
+                    "KA",
+                    "LA",
+                    "MA",
+                    "NA",
+                    "RA"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "3CW1-3",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "C",
+                    "W",
+                    "X",
+                    "Y",
+                    "Z",
+                    "AA",
+                    "BA",
+                    "CA",
+                    "DA",
+                    "EA",
+                    "QA"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "3CW1-2",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "B",
+                    "N",
+                    "O",
+                    "P",
+                    "Q",
+                    "R",
+                    "S",
+                    "T",
+                    "U",
+                    "V",
+                    "PA"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "3CW1-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "E",
+                    "F",
+                    "G",
+                    "H",
+                    "I",
+                    "J",
+                    "K",
+                    "L",
+                    "M",
+                    "OA"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3D0E",
+          "rcsb_accession_info": {
+            "initial_release_date": "2008-10-21T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.0
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3D0E_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "KVTMNDFDYLKLLGKGTFGKVILVREKATGRYYAMKILRKEVIIAKDEVAHTVTESRVLQNTRHPFLTALKYAFQTHDRLCFVMEYANGGELFFHLSRERVFTEERARFYGAEIVSALEYLHSRDVVYRDIKLENLMLDKDGHIKITDFGLCKEGISDGATMKTFCGTPEYLAPEVLEDNDYGRAVDWWGLGVVMYEMMCGRLPFYNQDHERLFELILMEEIRFPRTLSPEAKSLLAGLLKKDPKQRLGGGPSDAKEVMEHRFFLSINWQDVVQKKLLPPFKPQVTSEVDTRYFDDEFTAQSITITPPDRYDSLGLLELDQRTHFPQFDYSASIR",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "RAC-beta serine/threonine-protein kinase"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P31751"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3D0E-3",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "B",
+                    "D",
+                    "F"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "3D0E-2",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "C",
+                    "E"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "3D0E-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3D14",
+          "rcsb_accession_info": {
+            "initial_release_date": "2008-08-26T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              1.9
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3D14_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GPLGSKRQWTLEDFDIGRPLGKGKFGNVYLARERQSKFILALKVLFKTQLEKAGVEHQLRREVEIQSHLRHPNILRLYGYFHDATRVYLILEYAPLGTVYRELQKLSRFDEQRTATYITELANALSYCHSKRVIHRDIKPENLLLGSNGELKIADFGWSVHAPSSRRTTLCGTLDYLPPEMIEGRMHDEKVDLWSLGVLCYEFLVGMPPFEAHTYQETYRRISRVEFTFPDFVTEGARDLISRLLKHNASQRLTLAEVLEHPWIKANSSKPS",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "serine/threonine kinase 6"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "A"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P97477"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3D14-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3D15",
+          "rcsb_accession_info": {
+            "initial_release_date": "2009-05-12T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.3
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3D15_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GPLGSKRQWTLEDFDIGRPLGKGKFGNVYLARERQSKFILALKVLFKTQLEKAGVEHQLRREVEIQSHLRHPNILRLYGYFHDATRVYLILEYAPLGTVYRELQKLSRFDEQRTATYITELANALSYCHSKRVIHRDIKPENLLLGSNGELKIADFGWSVHAPSSRRTTLCGTLDYLPPEMIEGRMHDEKVDLWSLGVLCYEFLVGMPPFEAHTYQETYRRISRVEFTFPDFVTEGARDLISRLLKHNASQRLTLAEVLEHPWIKANSSKPS",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "serine/threonine kinase 6"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "A"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P97477"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3D15-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3D2I",
+          "rcsb_accession_info": {
+            "initial_release_date": "2009-05-12T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.9
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3D2I_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GPLGSKRQWTLEDFDIGRPLGKGKFGNVYLARERQSKFILALKVLFKTQLEKAGVEHQLRREVEIQSHLRHPNILRLYGYFHDATRVYLILEYAPLGTVYRELQKLSRFDEQRTATYITELANALSYCHSKRVIHRDIKPENLLLGSNGELKIADFGWSVHAPSSRRTTLCGTLDYLPPEMIEGRMHDEKVDLWSLGVLCYEFLVGMPPFEAHTYQETYRRISRVEFTFPDFVTEGARDLISRLLKHNASQRLTLAEVLEHPWIKANSSKPS",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "serine/threonine kinase 6"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "A"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P97477"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3D2I-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3D2K",
+          "rcsb_accession_info": {
+            "initial_release_date": "2009-05-12T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.5
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3D2K_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GPLGSKRQWTLEDFDIGRPLGKGKFGNVYLARERQSKFILALKVLFKTQLEKAGVEHQLRREVEIQSHLRHPNILRLYGYFHDATRVYLILEYAPLGTVYRELQKLSRFDEQRTATYITELANALSYCHSKRVIHRDIKPENLLLGSNGELKIADFGWSVHAPSSRRTTLCGTLDYLPPEMIEGRMHDEKVDLWSLGVLCYEFLVGMPPFEAHTYQETYRRISRVEFTFPDFVTEGARDLISRLLKHNASQRLTLAEVLEHPWIKANSSKPS",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "serine/threonine kinase 6"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "A"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P97477"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3D2K-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "3C7I",
+          "rcsb_accession_info": {
+            "initial_release_date": "2008-08-12T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              1.7
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "3C7I_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "IEMKPHPWFFGKIPRAKAEEMLSKQRHDGAFLIRESESAPGDFSLSVKFGNDVQHFKVLRDGAGKYFLWVVKFNSLNELVDYHRSTSVSRNQQIFLRDIEQVPQQPTYVQHHHHHH",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Growth factor receptor-bound protein 2"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "A"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62993"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "3C7I-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                  ],
+                  "oper_expression": "1,2"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

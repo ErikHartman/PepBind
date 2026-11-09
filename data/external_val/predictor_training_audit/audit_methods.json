@@ -1,0 +1,42 @@
+{
+  "audited_utc": "2026-10-30T19:16:18.709865+00:00",
+  "cutoff": "2021-09-30",
+  "n_pairs": 54,
+  "n_pre_cutoff_entries_screened": 3458,
+  "status_counts": {
+    "no_pair_match_detected_in_screen": 46,
+    "sequence_fragment_coordinates_unresolved": 3,
+    "fragment_only_contact_receptor_homolog": 3,
+    "related_peptide_contact_receptor_homolog": 1,
+    "exact_peptide_segment_contact_identical_receptor": 1
+  },
+  "receptor_search": "RCSB MMseqs2 identity>=0.30, E<=0.001; all same-UniProt entries also included",
+  "receptor_confirmation": "BLOSUM62 local alignment identity>=0.30 and query coverage>=0.80",
+  "partner_screen": "All protein entity lengths; exact full peptide, or local identity>=0.80 and query coverage>=0.80; separate exact fragments>=8 aa and>=50% coverage",
+  "interface_check": "Deposited biological assembly transforms, first coordinate model, at least 3 peptide residues with heavy atoms within 5 angstrom of receptor domain",
+  "chemistry": "Canonical sequence comparison; modified observed partner residues are explicitly retained in contact_evidence.csv",
+  "limitations": [
+    "No checkpoint-specific filtered/sampled training manifest was available; pre-cutoff PDB overlap does not certify checkpoint membership.",
+    "Current released PDB records with pre-cutoff initial-release dates were used; historical coordinate versions were not reconstructed.",
+    "Sequence-search thresholds and local alignment are a defined screen, not an exhaustive proof against all structural/sequence homologs or alternative alignments.",
+    "Only first coordinate models were examined; unobserved residues remain unresolved.",
+    "Self-distillation datasets and non-PDB sources were not exhaustively screened.",
+    "Terminal chemical modifications and peptide truncations can differ between the affinity assay and a structural counterpart."
+  ],
+  "sources": [
+    "https://github.com/google-deepmind/alphafold/blob/main/docs/technical_note_v2.3.0.md",
+    "https://doi.org/10.1101/2021.10.04.463034",
+    "https://search.rcsb.org/",
+    "https://data.rcsb.org/"
+  ],
+  "features_sha256": "d23866b3b0801578f42b003c9c74f5e1d1b6f722ccafb84d23307a993f0141ab",
+  "collected_sha256": "1101678cbd232cb80ba9b55f3fa831c8b4d5074bee2f65167637538c8153379e",
+  "structure_sha256": {
+    "1P9D.cif.gz": "dd1a80e2f4700619b020a6afc3f6731b882278d1efdabfa56c6100edd140f403",
+    "1UEF.cif.gz": "5c989fa29ca0381d0894a556eb6e81455290e1ceda94cd23dca7a3dbe8a07ea9",
+    "1UEL.cif.gz": "3dbdb461c7018de0e1aad8a245ddb7190f576bd715c6e6cbe80022865a7b13fb",
+    "2HO2.cif.gz": "593e681f9edf52e82ca80b3947e31370a32a479fd2bdcbaa84d36988640b0f50",
+    "2OEI.cif.gz": "d2a4a5532c927ed48e5db650f4f6ba3bde5aa31d57dd7caa14615628b1c95a25",
+    "7ABG.cif.gz": "3b425379f5f004a4870dbbeee558590fce96b77f3e57f367458b192aac33aecb"
+  }
+}

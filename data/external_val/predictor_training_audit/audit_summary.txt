@@ -1,0 +1,24 @@
+AlphaFold-Multimer v3 external-cohort structural overlap audit
+54 original pairs; 3458 pre-cutoff PDB entries screened; cutoff 2021-09-30.
+
+status
+no_pair_match_detected_in_screen                    46
+sequence_fragment_coordinates_unresolved             3
+fragment_only_contact_receptor_homolog               3
+related_peptide_contact_receptor_homolog             1
+exact_peptide_segment_contact_identical_receptor     1
+
+RAD23B--PSMD4: exact complete peptide segment with identical receptor domain in 1UEL (2004-02-10), with 9 of 14 peptide residues contacting within 5 A.
+DOK1--RET: 13/16-residue canonical segment in 1UEF (2004-05-25), receptor identity 88.6%; the structural peptide contains phosphotyrosine (PTR), unlike the canonical assay sequence.
+SETD2--KMT2E/CDK13/FMN2: only short polyproline fragments on homologous FE65 WW domains (2HO2/2OEI); not identical peptide--receptor pairs.
+Additional fragment sequence matches in 7ABG have unobserved aligned segments and remain unresolved.
+
+These are structural-overlap findings, not verified membership of any AlphaFold checkpoint. No-match results do not certify predictor-training exclusion.
+The notebook and cohort inclusion flags were not changed.
+
+Reproduce in the BoPep environment:
+  python src/binding_score_function/audit_predictor_overlap.py
+  python src/binding_score_function/predictor_overlap_analysis.py
+  python src/binding_score_function/audit_predictor_overlap.py --download-structures 1P9D 1UEF 1UEL 2HO2 2OEI 7ABG
+  python src/binding_score_function/predictor_overlap_contacts.py
+  python src/binding_score_function/audit_predictor_overlap.py --summarize

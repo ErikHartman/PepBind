@@ -1,0 +1,4673 @@
+{
+  "url": "https://data.rcsb.org/graphql",
+  "parameters": {
+    "query": "{entries(entry_ids:[\"6LK8\", \"6LNM\", \"6LP2\", \"6LQ9\", \"6LQM\", \"6M60\", \"6M6X\", \"6MD7\", \"6MD9\", \"6MDA\", \"6MDB\", \"6MDC\", \"6MDD\", \"6MM5\", \"6MM6\", \"6MM7\", \"6MM8\", \"6MNH\", \"6MS1\", \"6MSB\"]){\n          rcsb_id rcsb_accession_info{initial_release_date}\n          exptl{method} rcsb_entry_info{resolution_combined}\n          polymer_entities{rcsb_id entity_poly{pdbx_seq_one_letter_code_can type}\n            rcsb_polymer_entity{pdbx_description}\n            rcsb_polymer_entity_container_identifiers{entity_id asym_ids auth_asym_ids\n              reference_sequence_identifiers{database_name database_accession}}}\n          assemblies{rcsb_id pdbx_struct_assembly_gen{asym_id_list oper_expression}}\n        }}"
+  },
+  "retrieved_utc": "2026-10-30T19:10:02.772905+00:00",
+  "response": {
+    "data": {
+      "entries": [
+        {
+          "rcsb_id": "6LK8",
+          "rcsb_accession_info": {
+            "initial_release_date": "2021-07-21T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "ELECTRON MICROSCOPY"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              5.5
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6LK8_9",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MDMLSPVVREAEVSRAARRQSSNRKNPADESWSNATPTRGPSSRTTGQTLFRQHMTPQTWNSSRPPDVSAILGTVGRSPRLLQTPGRLANLSMMSNPDDSVWTTTFSPGRTGMYTTLDSPSFTEDITLSAVMLQEEDPGEAATMSMYPDFLKSFLEHPSSAVFELIEQYEATCNTQITLLKKIVKRVTPGQQKFSKTASILWLLQQEMVTWRLIAALYRDRIQSALEEENMFEIAAPNASEKTIVDKLFQRDTLVRQSQLVVDWLESIAKDEVGDFSDNIEYYAKSVYWENTLHTLKQRSMLSLGSSRPLVSELDPDAPIRQKLPLDDLDREDDIRLLKYLFTLIRAGMTDEAQRLCKRCGQAWRAATLEGWKLYHDANINGGTELQAVEGNPYRCVWKTCCWRMAEDEQFNKYERAIYATLSGNLKQLLPVCESWEDTVWAHFKVMVDSLVEQEIRASIISFNEANELPREYLEANWTLDSVFEELQATDKKRVLEENREHYHIIQKFVILADVDGLMDEFSEWLSNGKNLLLGHLLRFMTHLLLFFRTLGLQAKEEVSVEVLKTYIQRLINEKQIELIAFYVSHLPQELAISQYAVFLENITDPDQRQRCLELAKEAGLDVASITKTVVENTRKKDAGEFAHHDFAPALDSGTSEEDRAKIDVIDWLVFDPAQRAEALKQSNAIMRKFLASKKHEAAKEVFAKIPQDSIAEIYSQWEEQAMDSALPAEDDNAIREHLCIRAYLESHEAFNEWFKHINSPPQKPTLVGQASFTEKVAHEHKEKKYEMDFGIWKGHLDALTSDVKEKIYNVLLFVDGGWMVDVREDTEEDPERSHQMVLLRRLCLPMMCFLLHTVLHNTKQYKDCLRLADIVSSENQKLYTVFSKTEMRNLLQKLRESSLMLLDLQLDPLGYEIQS",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Nuclear pore complex protein"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "9",
+                "asym_ids": [
+                  "EA",
+                  "I"
+                ],
+                "auth_asym_ids": [
+                  "I",
+                  "i"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "A2RV69"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LK8_8",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MVSVINTVDTSHEDMIHDAQMDYYGIRLATCSSDRSVKIFDVKNGGQILIADLRGHDGPVWQVAWAHPMYGNILASCSYDRKVIIWKEENGTWEKTYEYTGHDSSVNSVCWAPHDFGLVLACGSSDGAISILTFTGDGPWEVKKISNAHTIGCNAVSWAPSVIPGSLVDQPSSQKPNYIKRFVSGGCDNLVKIWREEDGQWKEDQKLEAHSDWVRDVAWAPSIGLPTSTIASCSQDGRVYIWTSDDAATNCWTPKLLHKFNDVVWHVSWSITANILAVSGGDNKVTLWKESVDGQWACISDVNKGQGAVSTVTEGQLNDQ",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "GATOR complex protein SEC13"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "8",
+                "asym_ids": [
+                  "DA",
+                  "H"
+                ],
+                "auth_asym_ids": [
+                  "H",
+                  "h"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q7ZYJ8"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LK8_7",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SKYGLQDSDEEDDQLNNAEAKKLKAAPVPPQGKPPPLQQATLPGKVTPPPQSPAVDQLDRVLELDSDMADITQDQDLDSVAEEQDITEEQEPLSASSHIASSLGINPHALQVMKASLLLEEEDGEMINRFSSFPSSMDPYPDVRSPRLFPSSHAKRTSSMGLLQSKFASPSISRISETAQGSHSPRILPVTPWSVPAPLAPTFVIPRPAPETHLRTVGTRRQQELVPLEKSVTHGRGSLLIDMGLFMGRSFRVGWGPNWTLVHNGDKLTERLNAEEDQNMDTIDYGFLPKPTSAKSLTESPFKVHMEKLSLEQKSRELQSYLMPLEIELKNSSVDRSAQCPHFKPNAGVAAIHDYAGWVRNLSNEAGELEAVVKQWGLTWTLCESLWGQLKELEASLDEPNEYVRNLERRKAFSHWLAHTAEERIEEEVSLYGPERHVEAVFSFLTGGRISDACRLAQKSGDHRLSLLLSQMVGSQEMRELISLQLVDWNKLQVDHYIQEERLRVFCLLSGTPVWRSSDNRSINVCSQLDWKRTLAVHLWYMLPPTATIAQALRLYERAFQEHEEGEPYACYPLPPYLEDCSISLGDEPSAKFSSLQRDVCVHLLKLYSERQYDLCQLLDPSSVTPDPLDYRLSWHLWMVLQALNYTHLSEHRQGTLHASYAAQLENVGLWEWAIFVLLHIPHPHIREAGVRELLNRQCVVRESPESLAKENFLIHRLCVPAQWVHEAKAIRSRRDGDRHKEALYLLKGHQWNPCHKLVTRHLAADAVINENYRYLQSFLGELSNPEHCKHIQDWETAGKVYLDYIRVIDMLNLIQQDESSGCELEKLHTKVMSLCKWVELIHCYTAKDRLAQSEMAKRVANILRVVLSLQQPPESMSDSSEPRVPLRLLAPHIGRLPMPEDYALEELRGLTQSYLRELICDS",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Nuclear pore complex protein Nup96"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "7",
+                "asym_ids": [
+                  "CA",
+                  "G"
+                ],
+                "auth_asym_ids": [
+                  "G",
+                  "g"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "A0A8J1MFV7"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LK8_6",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MKQDSASNATYTVDCEDYVHVVEFNPFDSGEAGSLLAYGGISYVVIASCRFQEEDSTVEGIEFKTLKTFHHGERVVAIAWSPETRCDALLPLLRFATAAGDKKIRIFTSDFQDKNEYKVIEGHSGYINDLVFCSPEGTDIASVGDDHTCRIWDLDGKQIAMFILRSPGMSVAWHPEGAFKLMVAEKTGTIRFYDLTTHQAILSLESVQVPLMSADWCVRNTLRIGAVAGNDWIIWEMPRSSYPQDNKPAHADRARMFRWSKCNENVFATTGYPGKMKSQIAIHHLAHPQPILIGTAPVGSGLSWHRRLPLCVVGGYRKLFFWLTEM",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "MGC83926 protein"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "6",
+                "asym_ids": [
+                  "BA",
+                  "F"
+                ],
+                "auth_asym_ids": [
+                  "F",
+                  "f"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q66IZ6"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LK8_5",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAAAERHMTPFQAIDWAGSITLPMVQRVGGFTRAIMAASVNLERSYMELIGAERETSRRNFRDLSLRPDVNLVIGGPKYADCAGGYCYSESSSLLSATRNRFLHWTSYADTLELVEISLDINLVNNAVRLRILNCSILPGGVHICETPNNIVVLILTNQTVHRLILPHPSRMYRSEIISDSHIQSIFTDIGKTNFHDPSNTYVIPAIPGRAPNTTASTAWLSSDGEALFALPSISGGILVIKMPPHDMEGLVTIAELKQSSVMQRLLTGWMPSSIRGDQGPAHLPVSLAVHTLDHDSYLFALCQDHKLRMWSYKDQMCLMVADMLEYVPVSKDIRQTAGTGHKLRLAFSETLGILYLGVYLHTPKQGQFCVFQLMCAESNRYSLDHISSIFTNQETLIDFTFTLTSMDIWALWLDDDNQTVVKHINFEENQAGQWNPVFVNPLPEDDLAISDEQEPQEAYLECLFAPGRFTIAAVQKAIQILRKGSGRVLDLSWEELRKDVTLTVENEIQNAVIDYDVSQEEFRQINIENWCKFYTCCLQYQETLSRPLALLVHPDTNMVCLLRKGFLSFLAPCSLVEHLYLVPAEHLLTVDESVISDDIDAASDIVNLIQCLRMIADYISEDMAYLMESACCHLQSPERVAEQILEDLIANDIDNIMENIQNKLQDTRNPIRAIGFLLQNMDYETNADMEQPQPNTRLNLSTLYGSITASSVVCQAICKISATRFLICRDLLILQHLLLRLGDMALIGAGQLLHSQQELIPRAAQLLLSYYMIRWGSQCLACAVPVDILESNLQHLSVLELSDSQVEKRRYTSGIQTIVELFFEDVARKHFPHVFIQSGASQLQEPLNWSDLIKRITNYLLQLLWPSNPNFQFAECLMRNCQYTQLQEYVRLLLPWCQVNVGSCHFMLAQCYLVAGEGHKALDCFSQAASEVEREDFLEKLIRVEEGESVSPRLQYYNRVLRLLEDVGLPELVIQLATIAIGEASDDWRSQAALRTRIFKHHLDMGHNNQAYDALTQIPDPSRQLDCLRQLVVVLCERSQLQDLVEFPYVNLHNEVVGIIESRARAVDLMTHNYYELLYAFHIYRHNYRKAGSVMFEYGMRLGREVRTLRGLQKQVNSYLACLNCLRLIRPEYAWIVQPVSGAVYERPGASPKRNYDGESSAVPSSSQIEILELRDLEKEYVLAQTRLTLAKHNPSTAAIAGSSAAEEMVALLVQAGLFDTAISLCQTFKLALTSVFEGLACKCIRLQQGGEAAQAEAWEWLAANQLATVITTKESSATDEAWRLMISYLDKYEAKNTLYHHCIINKLLSHGVPLPNWLINRYKAMDAAELLRLYLKYDLLEEAAELVLEYVDALLGKGHQYFGIQAPLSATSQLVWFPYSAIDHLRQALGENESNQHNQAILSKLQRKMDEYFQKLKKATDDYKKLVQKPLRA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "outer Nup160"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "5",
+                "asym_ids": [
+                  "AA",
+                  "E"
+                ],
+                "auth_asym_ids": [
+                  "E",
+                  "e"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "A0A8J1JI67"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LK8_4",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MFVARSIAADHKDLIHDVSFDFHGRRMATCSSDQSVKVWDKSENGNWHCTASWKTHSGSVWRVTWAHPEFGQVLASCSFDRTAAVWEEIVGESNDKLRGQSHWVKRTTLVDSRTSVTDVKFAPKHMGLMLATCSADGVVRIYEAPDVMNLSQWSLQHEISCKLSCSCISWNPSSSRAHSPMIAVGSDDSSPNIMGKVQIYEYNENTRKYAKAETLMSVSDPVHDIAFAPNLGRSFHILAVATKDVRIFTMKPLRKELSSSGGVTKFEIHTVAQFDNHNSQVWRVSWNITGTVLASSGDDGTVRLWKANYMDNWKCIGVLKGD",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Nucleoporin SEH1-A"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "4",
+                "asym_ids": [
+                  "D",
+                  "Z"
+                ],
+                "auth_asym_ids": [
+                  "D",
+                  "d"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q4FZW5"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LK8_3",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MADKFAAKFVSHKISRTRWRPVSASSLQQPDVFATGSWDNEENKVCVWATSDFGATSLDEEYQGDPKQLCDIKHPGDVMDMQFLDKERIVTGSSTGTVTIFRHHENNQTLSVNQRWEQAHYHVGSNMRAPCTAIVCSSPEIVSVGEDGRINCFRAESRDVLRTIDDADSSTMHGVTFLRTTEILTVNSVGQLKLWDLRKQGNDPTQIFSVTGERVPLHCVDRHPNQQHVVATGGQDGMLCIWDVRHGKMPMSLLNAHEAEMWEVHFHPSNPDHLFTCSEDGSLWHWDASADSEKPTFLLGGRSTFNISRSSIAPPNANQSLACAWLSTDPTKGQLEITNLLPSSTLSVNSLDVLGQNLVCGTDAEAIYVTRRLFS",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "MGC154553 protein"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "3",
+                "asym_ids": [
+                  "C",
+                  "Y"
+                ],
+                "auth_asym_ids": [
+                  "C",
+                  "c"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q05AW3"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LK8_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MEELDVDPAETPIPGLGQQNRHIGFSWGPGDLLLYETLYQKQGNSETAARCPFMYLVRSDEDIYSPVLRKLFNESHSIFVGLQKSAEEASGKSRKAQLVQVSRNYRSVLRACMEEMHTLSESTRETAQKYISQISILSAMELSWNLCEILFIESAPAGPLLILLLEWVRLHVCEVDNIVQDVLRSEKPTEHEKFWDGVTGYVLQGRMNEARQLLAKEASTSASARSMCRVLDDLLKKMPMLHTGGTQTLTEFELKWQHWREECERHLQNGTFSSNVHMEAVCRVLLGDEEVLLEKRDLMTTWYHFLVSRLLFKHPTVKPTELHFYAQSSLDMFLAGDSCPEPLDNILLAAFEFDIHQVIKEFSIVSSNWWFVAHLTDLLDHCQLFQAHNLYFGANMREFLLLDYASGLFSHHSLWQLGVDYFDYCPNLGREYLKLHMERIPLSTEKKALKALRICEQRQMTEQVRSICKTMAMQSLCNRRLGSALSWSIRAKDAAFATLISDRFLKEYCERGNFTDLDLIDNLGSAMLLSDRLTFLGKYREFHRMYSQEQFSEAASLLLSLMTARIAPCSFWLTLLLDALPLLEQKQVIFSAEQTYELMRCLEDRMAAKLESTSPDEIQKQDSSIDNTKVEMLRLALARNLARAIVTEGALQE",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Nuclear pore complex protein Nup85"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "B",
+                  "X"
+                ],
+                "auth_asym_ids": [
+                  "B",
+                  "b"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q68FJ0"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LK8_18",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "bridge domain"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "18",
+                "asym_ids": [
+                  "U",
+                  "V"
+                ],
+                "auth_asym_ids": [
+                  "Q",
+                  "R"
+                ],
+                "reference_sequence_identifiers": null
+              }
+            },
+            {
+              "rcsb_id": "6LK8_17",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "XXXXXXXXXXXXXXXXXXXXXXXXXX",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Nup214 complex Coiled coil region 2, helix 3"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "17",
+                "asym_ids": [
+                  "T"
+                ],
+                "auth_asym_ids": [
+                  "P"
+                ],
+                "reference_sequence_identifiers": null
+              }
+            },
+            {
+              "rcsb_id": "6LK8_16",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Nup214 complex Coiled coil region 2, helix 2"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "16",
+                "asym_ids": [
+                  "S"
+                ],
+                "auth_asym_ids": [
+                  "O"
+                ],
+                "reference_sequence_identifiers": null
+              }
+            },
+            {
+              "rcsb_id": "6LK8_15",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Nup214 complex Coiled coil region 2, helix 1"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "15",
+                "asym_ids": [
+                  "R"
+                ],
+                "auth_asym_ids": [
+                  "N"
+                ],
+                "reference_sequence_identifiers": null
+              }
+            },
+            {
+              "rcsb_id": "6LK8_14",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Nup214 complex coiled coil region 1, helix 3"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "14",
+                "asym_ids": [
+                  "Q"
+                ],
+                "auth_asym_ids": [
+                  "M"
+                ],
+                "reference_sequence_identifiers": null
+              }
+            },
+            {
+              "rcsb_id": "6LK8_13",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Nup214 complex coiled coil region 1, helix 2"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "13",
+                "asym_ids": [
+                  "P"
+                ],
+                "auth_asym_ids": [
+                  "L"
+                ],
+                "reference_sequence_identifiers": null
+              }
+            },
+            {
+              "rcsb_id": "6LK8_12",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Nup214 complex Coiled-coil region 1, helix 1"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "12",
+                "asym_ids": [
+                  "O"
+                ],
+                "auth_asym_ids": [
+                  "K"
+                ],
+                "reference_sequence_identifiers": null
+              }
+            },
+            {
+              "rcsb_id": "6LK8_11",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MRRSKAEIQRYVENAQNSASSPREKSMKGFLFARLYYEAKEYELAKRSVSSYISVQERDPKAHRFLGQLFEIEGNVEKAVGCYKRSLELNPTQKDLTLRIAELICTLNIKDGRAEYWVERASKLFPGSPEIYRLKEQLLSSQGEAGWNQLFDLIQAELFARPNDVYVNLKLVDLFLSNQRLEEAVLHCLKPERRALRTDIEWCSCVVRVFKEYLASKQGQKNTNMRMITKELLLAQCDVVFLTLSKKDVQKSKEALERFDQALLSVKQSVSGTDASDLSVTFYEMRGHYYMHAGTLLLKMAQSCEVQWKALIEPAALCYLLAYQVPKPKSKPVKGDDNGQGFLEELAFDRQSKSGHLLLTLSHGKQNFISEIIETFANQCGQSILLKFLFEDNLSMQDSFMGSDDISYVENRVPDLSELSQHDNGSLRIHNGDLQHLTWLGLQWHFLSTLPPLRKWLKQIFPRVPQETSRLESNIPESICLLDLEVFLLAVVQTSYLQLQDNNTTADPNRPRCLPLPICKQLFTDRQRSWWDAVYSLITKKALPGTSAKLRSVIQHDLTTLRAQEKHGLQPAVLVNWARGLHKTGYSLNSFYDQKEYMGRCVHYWKKLLPLLDLVKQKKSIPEPVDPLFKHFHNKDIKVSEVKDLEDEACIAFATLDLVDGKTEDAIIAFESVKNVVAYWNLALIYQRKAEEIENDCLPAEEQEEFQECLLKCKGFLKMICDEYSAYPSIATSLPVPVETVFEMLDSVKQSLGEAMDDHSPAFMENHSVLTTSAIKHSTPSPTKLTISPSKSARFSPKTPPRWAEDQKSLLEVLCNKVEALKKEVQELKHNNSNANVSPHRWPNEGFESDTVADSYQGTQNFYTVPLTVSTSGPAAYYGQSPAYNSQHLLRPAANITPTKTSVYAMNRLPPQQHMYTYPQQMHTPPTQQSSAGCVFPQEIYGPPLRFESPAAAILSPHNEEFYNYNVPPASTNPPLPEPGYFTKPSTAMQHSKQEVPKVSDFGKGCLGQSTSEGQKPSPFTVPMQSTPASSTFKFNSNFKSNDGDFTFSSSHAGASSAYTGSESLLGLLTSDRPTQEQGKKSDFENIASDEKNMFRFGEKSFSPGFTVTGTQSQDKNPLVFGQSENIFTFKTPGKSTFKPPTFGTQTKDAHNHSVESDAGSEHVADDDGPHFEPIIPLPEKVEVKTGEEDEEEMFCNRAKLFRFDAETKEWKERGIGNVKILRHRLSGKIRLLMRREQVLKICANHYINADMKLKPNATSDKSYVWHAYDYADEMPKPEQLAIRFKTVDEAAHFKAKFEEAQRLLAMAEAPAISAQHKNAKDNLKLDASKVKEAPLPFGSQFILKRGEWQCDCCLATNAPTSTSCVCCQTPNKNKSSSISSVCISAPSFTFVKESATNKLAFGQQLLKDKDQWTCSKCSQKNDAGVSHCSSCQTQSQAKAGISQPNIASSGFTNNTSAQGDNLAAVFGKKAGQWDCDVCYVRNEPSANKCISCQNTKPLSKVSGTQAASFSFAAGADNSQKNFGAQFAKKEGQWDCDACYVRNEPLATKCISCQNTKLLSKTTGTQAASFSFAAAADNSQKNFGGQFAKKEGQWDCSSCLVRNEASAPNCVACHSANPQITNKDVVPPALTPSGFKFGHNAEVGKTQQSLSAMFSCKQGQWECSTCLVINDAAKDTCAACQAAKPGSSASQSKEVPSTFGIKANSSQNFGQPAAGFNCGFSAKGFKFGISDEKASASNFTFKAPATNEETKMVKDGFNFPVSAGSLSFKFGISEPDKTKEMSTGFMKGTSTNNKGSETAETTAQAEKIQQSPDKVLGQSVQSFSFADIAKSTEGIEFGKADPNFKGFSGAGQKLFTSSNQVNASNAQEAADDLYKTEERDDIHFEPIVQLPDKVDLITGEEDEKTLYSQRVKLYRFDATSGQWKERGVGNLKILKNEVNGKLRVLMRREQVLKVCANHWITTTMNLKPLTGSDRAWMWLANDFSEGDAKLEQLAVKFKTPEQAEEFKIKFDQCQCLLLDIPLQTPHKLVDTGRTAHLIQKAEEMKTGLKDLKTFLTDKAKPLDDSNAINTTDLEKQALADGTEPTYEWDTYDMRGDAHEETLDDSVYASPLASSPEKKNLFRFGDLSTSGFNFSFQPEPSPSKSPTKLNHSRVSVGTDEESDVTQEEERDGQYFEPVVPLPDLVEVTSGEENEQAIFCHRAKLYRFDKDSNQWKERGIGDLKILQRLDNKSARVVMRRDQVLKLCANHRITTDINLQPMKGAERAWVWTAHDFSEGEGKVECFAVRFKLQEAADLFKEVFEEAKEAQAKDCLLTPVSSRGTTPRAASCGKAAIAILEETTKERTDQQPEEDTSLTEASTPSPTDQPAKALVSPANFTFGSDVVKNIFGSEKQVPFAFGNTSSTGSLFGFSFNASQSQGQQVQKQPPKVTLDFNATFKDAETTNALQKPSQSSGQSPIVSSLSSSSSSSSSTLMQPMPARDKAADVPDADSSSDVLIVYVATPTPEQKALAETLLLPLTFFCYKNKPGYVSDESDIDDEDFETAVKNLNGILYTEDKKDKASSRLSGCSKEPTAESDQDCIIVWEKKPTPEEKAKADSLKLPPTFFCGLGSDTDEDKDNLEDFDTEVRKVKEAKGVPEADVTSSPEAAIVSAAETSVSLPPKQEPDSTTSISQEPVDLSSKQELPKTDSKGFSTPSFSFGLGEVSGVSFADLASTNSGDFAFGSKDTNFQWANTGAAVFGTLSQNKKGEDADGSDEEVVHSDDVHFEPIVSLPEVEVKSGEEDEEILFKERAKLYRWDRAVGQWKERGVGDIKILFHKEKGYYRVLMRRDQVLKVCANHVISTEIKISTLSTSNNSLVWTATDYSDGEGKVEQLAVRFKTKELTDSFQNKFEECQHNLQEESNPQH",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Nup358 complex, clamps"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "11",
+                "asym_ids": [
+                  "K",
+                  "L",
+                  "M",
+                  "N"
+                ],
+                "auth_asym_ids": [
+                  "S",
+                  "T",
+                  "U",
+                  "V"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "A0A1L8HGL2"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LK8_10",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MFPSPRAQGMGSARRPFNSRLTGGRKALGPGVTASSSPSALYSPVGRRVSASGARSTPSRVYLHPAASETVNYNVQLFGSSLPVKVMEALSNASADEPMAACIHEGGWAWLACNDRLIIWKISHSSSAKLMVCKELPLPLSDSEWSADLVDICAQTGDPAAAQSVALMAATPEGSSRYWPNILHEGTYIESYTEFGSSLCAFVTAVKGNSFILSSEKNQLVRLTPDASGKMNQRVLPQGQGMLSGIGRRVSTLFGILSPAVESTLCSVLWDKGDCFYTLTDSSINKWDLDDTSESQVLNWDMSRVLREYISDAIWGSESDYDDIKAGININYLSLNQNCDGLVILSAAWHPGDNPCQIYYTLVTVKDEGYNISDEITVEVTQFNPVFQARGMQLCQLVVPNFSSQACYLYTQEMIFACSTGTGRSTLPQEKIPFEAQGDNIVGAGSCEGWPVFFIRKSGMLTVVARETASVLPEHMEESLSSVSKSSRQAVVKDSRPDQIAHDDKTKHLKAAFLRYCRKDILGAQSMVDSLFSDSDMEPDDELDLAVNQISVDLIDDYPASDPRWAESVPEEAAGFSNTSLILLHQLEDKMKAHSFFVDFLHQVGLFSRLSTCQTKGMLVATRLLLSEHAEKLSAAIVLKNHHAKLPVLVNSAIQLALDKRMCTVPQNLTAADVYFREVSQMEIIFECLVDKEEADLESTSIDSVEWANIVVNVNTILKDMLHVACQYRQSKNSLYKNESGIQEPEHVPWTASSGTAGIRSVVTRQHGIILKVYPQADSGLRTILIEQLAALLNYLLDDYVTQLKSIDKLANEERYNILEMEYAQKRSELLSPLLILGQYAWASNLAEKYCDFDILVQICEMTDNQSRLQRYMTLFAEQNFSDFLFRWYLEKGKRGKLLSQPASQHGQLAAFLQAHDHLSWLHELNSQEFEKAHRTLQTLANMETRYFCKKKTLLGLSKLAALASDFQEDVLQEKVEEIAEQEHFLLHQETLPKKLLEEKQLDLNAMPVLAPFQLIQLYVCEENKRANENDFMKALDLLEYIGDDSEVDVEELKLEILCKAIKRDEWSATDGKDDPIEATKDSIFVKVLQNLLNKGIELKGYLPKAETLLQSEELNSLKTNSYFEFSLKANYECYMKMQS",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "outer Nup133"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "10",
+                "asym_ids": [
+                  "FA",
+                  "J"
+                ],
+                "auth_asym_ids": [
+                  "J",
+                  "j"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "A0A1L8H1I9"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LK8_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAAQLALNSEASLWGPYREIWQTVLSALIKRQPEAVHSLDIVLKKYKPDFISLFKNPPKSAQQHERVQKASTEGIPIKGTQRTRILEEQLIKEAFILSDLYNIGEIAAVELLLIGEQQQPTFHGLTRGLVAILLYWDGKSCMAESLLHLIQARKGKTFTLDHSPEVVSMVTRFTDDLMEQGLTNKILTLISQIDVNNEFDKLKKERGLGNKKHRKEVSDLIKECQQSLAHSLYSWSCQTPLNREDTLLLIGYLEKVTVEGDGSLDKVNLTLLMSLLYCLDVGFLEQGTDDREELMKQASMFMDRQYIAAIHNRLQNTQPWKSPGMQATVRLAWALALRGISQFSEVLEFSEADEPMAEIAIGGNVFLFLTEAVVGSESFCTDEFFIRRIHKLVTDFPTLMPMKVKQLRNRAEEDARLIQMSMQMGNEPPASLRRDLEHLLLLIGELYRKDPFHLELALEYWCPTEPLQSTSLMGSFLGVAHQRPPQRQVLLSKFVRQMSDLLPATLYLPYLKMLRGLASGPQCAHYCFSLLKANGGSSAENLQAAGGSPVSWDHFFHSLMLYHEHLRRDLPNTDNIHQRHPPLRGITQRELDGLIACLQLTCTIIDWSESARLALCEHAQWMPVVVILGLLQCSIPPLLKAELLKTLAAFGKSPEIAASLWQSLEYTQILQTVRATGLRQGVGIEVELNEIESRCEEYPLTRAFCQLISTLVESSFPTNLGAGLRAPGFEPYLQFLRDTVFLRYRTRAYRRAAEKWEVAEAVLDVFYKLLKDYEPQPEDFVDQYVELQGEERVAFKPPGFSLMHHLLNESPMLELCLSLMEEGVTQLDTYAPFPGKKHLEKAVAYCFMLLNLTLQKENRFMDLLRESHLSMIVTPLEQLLQGINPRSKKADNVVNIARYLCHGNSNAELAFESAKILCSISCNSKIQEKIVGDFTQDQNVSQKLMVGFVSCLDSEEAEELLDSEKEAEDQVKQTNIRYMTKIHILNLLITSLEMKAPNLAMFLLGYELKKPVSTTNLQDSGVLGCPRTCLHSILDILRKGTDVRAGPVAVWDTPHLAELCYQVIYQLCACADTSGPTMRYLRTSQDFLFSQLQHLPFSVEESEISAMNQMSWLMKTATIELRITSLNRQRSHTQRLLHLLLDDMPTRPYSADGEGGMEDESRSLSGFLHFDTTSKVRRKILRILDSIQFSNEIPEPLQLDFFDRSQIEQVIANCEHKNRRGQTVCNVKLLHRVLVAEVNALQGMAAIGQRPLLMEEINTILQYVVERNKLLQCLHAKRHALESWRQLVEIILTACPQDLIPTEHRQLIIRDLLQDLHVKILDDDAAQELMPIVAGAVFTLTAHLSQSVRTELKQPMTASGLGQSQYVQMLDGSFAAPPGTENISAGFASIGDSSLHMILRNLLEFILKTGGGFQRVRAHLYGSLLYYLQIAQRPDEPDTLESAHKSMWERLTAPEDVFSKLQRDNLSIFESYGTALMEVVCRDACDGHDIGRMLALALLDRIVSVDRQQQWLLYLSNSGYLKVLVDSLAEDDVVLRNLLTPQPPLLKALYIYESKMAFLTRVAKSSQGAIELLRSGVIVRLAQCQVYDMRPETDPHGVFGMRETPVFIPAPVERYRQILLPALQICQLILTSSTAQHLQAAGQVLQFLVAHSDTIQAILRSQEGSLGSLQELALLTGIISKAALPGVLNELDIGLNDGSMMELQGHIGRFQRQCLALLNRFGGSDRLRQLSLQDDSSRLDGVSKKDDMELAMQQICSNVMEYCQALMIQNSPSFQQTVCLFTPSLKESASRDGTRQDSQVSILPSWRLPSLGVVIHLLKQSANNFFTYYDIHRQSVGKLQNVEQLPPDEIKELCQSEMPVGADKISTTQKYGLARRRLVKLINSRAKLLSLCSYIIETCLYILWRHLEYYLLHCTTSDSQDPVFSNMTFGNRRFQDTFNTDPNMDPRNLRQNKVSQQDVDTLLREGANSFGESLQKRLLDIESLYCKVRSRHSFIQALVRRIRGLLRVSRV",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "MGC83295 protein"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "W"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "a"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q642R6"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6LK8-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                    "G",
+                    "H",
+                    "I",
+                    "J",
+                    "K",
+                    "L",
+                    "M",
+                    "N",
+                    "O",
+                    "P",
+                    "Q",
+                    "R",
+                    "S",
+                    "T",
+                    "U",
+                    "V",
+                    "W",
+                    "X",
+                    "Y",
+                    "Z",
+                    "AA",
+                    "BA",
+                    "CA",
+                    "DA",
+                    "EA",
+                    "FA"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6LNM",
+          "rcsb_accession_info": {
+            "initial_release_date": "2020-04-08T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.4
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6LNM_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GPGSEFISLAIKDIKEAIEEVKTRTIRSPYTPDEPKEPIWVMRQDISPTR",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Amyloid-beta A4 precursor protein-binding family A member 1"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "B",
+                  "D",
+                  "F"
+                ],
+                "auth_asym_ids": [
+                  "B",
+                  "D",
+                  "F"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "B2RUJ5"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LNM_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GPGSEFMADDDVLFEDVYELCEVIGKGPFSVVRRCINRETGQQFAVKIVDVAKFTSSPGLSTEDLKREASICHMLKHPHIVELLETYSSDGMLYMVFEFMDGADLCFEIVKRADAGFVYSEAVASHYMRQILEALRYCHDNNIIHRDVKPHCVLLASKENSAPVKLGGFGVAIQLGESGLVAGGRVGTPHFMAPEVVKREPYGKPVDVWGCGVILFILLSGCLPFYGTKERLFEGIIKGKYKMNPRQWSHISESAKDLVRRMLMLDPAERITVYEALNHPWLKERDRYAYKIHLPETVEQLRKFNARRKLKGAVLAAVSSHKFNSFYGDPPEELPDFSEDPTSSGLLAAER",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Peripheral plasma membrane protein CASK"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "C",
+                  "E"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "C",
+                  "E"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q62915"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6LNM-3",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "E",
+                    "F",
+                    "K",
+                    "L"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "6LNM-2",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "C",
+                    "D",
+                    "I",
+                    "J"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "6LNM-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "G",
+                    "H"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6LP2",
+          "rcsb_accession_info": {
+            "initial_release_date": "2021-01-13T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.479
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6LP2_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GSLESPGFMVHKKLKSMSQSYGVMMTGVPAEVLGQMQAERSIPSINKTGNLKQQIAKEVSKVCHMMTEPTQSAGQASNDVCELLLGKIEAEKFHFTKYEALSADGDNLKNVLENTAPSSTNLLIRFEIDREDPPIVLVKTKNENFNPETAVKNKIYLLENKLYFIDKMGNLFNLGPGKKKCTQLFNAIGDSAEYSLCDPFVLEEPEKPEDFAISEIVDIFNEQKERFDFWIGSHSFTIYIPQTLGESPRQFYPYQAYFGSHTLQDWFVSDKDEYLSRIGIDKYIEKLAVLGKTTNTKERSDIYAEFFSKRGREAFFCAHLNEKRQPLRVKFKITEINPELALKNLQETQEFIDTHPGENPSDKVENYRNRAKLAMTEHLESLLDIK",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Uncharacterized protein lpg2148"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "A"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q5ZTL3"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LP2_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGG",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Ubiquitin"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "C"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P0CG47"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LP2_3",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAGLPRRIIKETQRLLAEPVPGIKAEPDESNARYFHVVIAGPQDSPFEGGTFKLELFLPEEYPMAAPKVRFMTKIYHPNVDKLGRICLDILKDKWSPALQIRTVLLSIQALLSAPNPDDPLANDVAEQWKTNEAQAIETARAWTRLYAMNNI",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Ubiquitin-conjugating enzyme E2 N"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "3",
+                "asym_ids": [
+                  "C"
+                ],
+                "auth_asym_ids": [
+                  "D"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P61088"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6LP2-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6LQ9",
+          "rcsb_accession_info": {
+            "initial_release_date": "2021-06-23T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.5
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6LQ9_3",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GGSMEGILDFSNDLDIALLDQVVSTFYQGSGVQQKQAQEILTKFQDNPDAWQKADQILQFSTNPQSKFIALSILDKLITRKWKLLPNDHRIGIRNFVVGMIISMCQDDEVFKTQKNLINKSDLTLVQILKQEWPQNWPEFIPELIGSSSSSVNVCENNMIVLKLLSEEVFDFSAEQMTQAKALHLKNSMSKEFEQIFKLCFQVLEQGSSSSLIVATLESLLRYLHWIPYRYIYETNILELLSTKFMTSPDTRAITLKCLTEVSNLKIPQDNDLIKRQTVLFFQNTLQQIATSVMPVTADLKATYANANGNDQSFLQDLAMFLTTYLARNRALLESDESLRELLLNAHQYLIQLSKIEERELFKTTLDYWHNLVADLFYEPLKKHIYEEICSQLRLVIIENMVRPEEVLVVENDEGEIVREFVKESDTIQLYKSEREVLVYLTHLNVIDTEEIMISKLARQIDGSEWSWHNINTLSWAIGSISGTMSEDTEKRFVVTVIKDLLGLCEQKRGKDNKAVVASDIMYVVGQYPRFLKAHWNFLRTVILKLFEFMHETHEGVQDMACDTFIKIVQKCKYHFVIQQPRESEPFIQTIIRDIQKTTADLQPQQVHTFYKACGIIISEERSVAERNRLLSDLMQLPNMAWDTIVEQSTANPTLLLDSETVKIIANIIKTNVAVCTSMGADFYPQLGHIYYNMLQLYRAVSSMISAQVAAEGLIATKTPKVRGLRTIKKEILKLVETYISKARNLDDVVKVLVEPLLNAVLEDYMNNVPDARDAEVLNCMTTVVEKVGHMIPQGVILILQSVFECTLDMINKDFTEYPEHRVEFYKLLKVINEKSFAAFLELPPAAFKLFVDAICWAFKHNNRDVEVNGLQIALDLVKNIERMGNVPFANEFHKNYFFIFVSETFFVLTDSDHKSGFSKQALLLMKLISLVYDNKISVPLYQEAEVPQGTSNQVYLSQYLANMLSNAFPHLTSEQIASFLSALTKQCKDLVVFKGTLRDFLVQIKEVGGDPTDYLFAEDKENA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Exportin-1"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "3",
+                "asym_ids": [
+                  "C"
+                ],
+                "auth_asym_ids": [
+                  "C"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P30822"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQ9_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GGSDIHFEPVVHLEKVDVKTMEEDEEVLYKVRAKLFRFDADAKEWKERGTGDCKFLKNKKTNKVRILMRRDKTLKICANHIIAPEYTLKPNVGSDRSWVYACTADIAEGEAEAFTFAIRFGSKENADKFKEEFEKAQEINKKA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Ran-specific GTPase-activating protein 1"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "B"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P41920"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQ9_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GSSHHHHHHSSGLVPRGSHMAAQGEPQVQFKLVLVGDGGTGKTTFVKRHLTGEFEKKYVATLGVEVHPLVFHTNRGPIKFNVWDTAGQEKFGGLRDGYYIQAQCAIIMFDVTSRVTYKNVPNWHRDLVRVCENIPIVLCGNKVDIKDRKVKAKSIVFHRKKNLQYYDISAKSNYNFEKPFLWLARKLIGDPNLEFVAMPALAPPEVVMDPALAAQYEHDLEVAQTTALPDEDDDL",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "GTP-binding nuclear protein Ran"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "A"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62826"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6LQ9-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                    "G",
+                    "H",
+                    "I",
+                    "J",
+                    "K",
+                    "L",
+                    "M",
+                    "N",
+                    "O",
+                    "P"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6LQM",
+          "rcsb_accession_info": {
+            "initial_release_date": "2020-08-26T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "ELECTRON MICROSCOPY"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              3.09
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6LQM_9",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAKSKNHTTHNQSRKWHRNGIKKPRSQRYESLKGVDPKFLRNMRFAKKHNKKGLKKMQANNAKAMSARAEAIKALVKPKEVKPKIPKGVSRKLDRLAYIAHPKLGKRARARIAKGLRLCRPKAKAKAKAKDQTKAQAAAPASVPAQAPKRTQAPTKASE",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L29"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "9",
+                "asym_ids": [
+                  "I"
+                ],
+                "auth_asym_ids": [
+                  "C"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P47914"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_8",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MSHRKFSAPRHGSLGFLPRKRSSRHRGKVKSFPKDDPSKPVHLTAFLGYKAGMTHIVREVDRPGSKVNKKEVVEAVTIVETPPMVVVGIVGYVETPRGLRTFKTVFAEHISDECKRRFYKNWHKSKKKAFTKYCKKWQDEDGKKQLEKDFSSMKKYCQVIRVIAHTQMRLLPLRQKKAHLMEIQVNGGTVAEKLDWARERLEQQVPVNQVFGQDEMIDVIGVTKGKGYKGVTSRWHTKKLPRKTHRGLRKVACIGAWHPARVAFSVARAGQKGYHHRTEINKKIYKIGQGYLIKDGKLIKNNASTDYDLSDKSINPLGGFVHYGEVTNDFVMLKGCVVGTKKRVLTLRKSLLVQTKRRALEKIDLKFIDTTSKFGHGRFQTMEEKKAFMGPLKKDRIAKEEGA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L3"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "8",
+                "asym_ids": [
+                  "H"
+                ],
+                "auth_asym_ids": [
+                  "B"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P39023"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_7",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MSSKVSRDTLYEAVREVLHGNQRKRRKFLETVELQISLKNYDPQKDKRFSGTVRLKSTPRPKFSVCVLGDQQHCDEAKAVDIPHMDIEALKKLNKNKKLVKKLAKKYDAFLASESLIKQIPRILGPGLNKAGKFPSLLTHNENMVAKVDEVKSTIKFQMKKVLCLAVAVGHVKMTDDELVYNIHLAVNFLVSLLKKNWQNVRALYIKSTMGKPQRLY",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L10a"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "7",
+                "asym_ids": [
+                  "G"
+                ],
+                "auth_asym_ids": [
+                  "A"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62906"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_6",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "CGACUCUUAGCGGUGGAUCACUCGGCUCGUGCGUCGAUGAAGAACGCAGCUAGCUGCGAGAAUUAAUGUGAAUUGCAGGACACAUUGAUCAUCGACACUUCGAACGCACUUGCGGCCCCGGGUUCCUCCCGGGGCUACGCCUGUCUGAGCGUCGCU",
+                "type": "polyribonucleotide"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "5.8S rRNA"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "6",
+                "asym_ids": [
+                  "F"
+                ],
+                "auth_asym_ids": [
+                  "8"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "GenBank",
+                    "database_accession": "KY962518"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_5",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Eukaryotic translation initiation factor 6"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "5",
+                "asym_ids": [
+                  "E"
+                ],
+                "auth_asym_ids": [
+                  "6"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P56537"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_48",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MEGVEEKKKEVPAVPETLKKKRRNFAELKIKRLRKKFAQKMLRKARRKLIYEKAKHYHKEYRQMYRTEIRMARMARKAGNFYVPAEPKLAFVIRIRGINGVSPKVRKVLQLLRLRQIFNGTFVKLNKASINMLRIVEPYIAWGYPNLKSVNELIYKRGYGKINKKRIALTDNALIARSLGKYGIICMEDLIHEIYTVGKRFKEANNFLWPFKLSSPRGGMKKKTTHFVEGGDAGNREDQINRLIRRMN",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L7"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "48",
+                "asym_ids": [
+                  "VA"
+                ],
+                "auth_asym_ids": [
+                  "w"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P18124"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_47",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAGEKVEKPDTKEKKPEAKKVDAGGKVKKGNLKAKKPKKGKPHCSRNPVLVRGIGRYSRSAMYSRKAMYKRKYSAAKSKVEKKKKEKVLATVTKPVGGDKNGGTRVVKLRKMPRYYPTEDVPRKLLSHGKKPFSQHVRKLRASITPGTILIILTGRHRGKRVVFLKQLASGLLLVTGPLVLNRVPLRRTHQKFVIATSTKIDISNVKIPKHLTDAYFKKKKLRKPRHQEGEIFDTEKEKYEITEQRKIDQKAVDSQILPKIKAIPQLQGYLRSVFALTNGIYPHKLVF",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L6"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "47",
+                "asym_ids": [
+                  "UA"
+                ],
+                "auth_asym_ids": [
+                  "v"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q02878"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_46",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MSGRLWSKAIFAGYKRGLRNQREHTALLKIEGVYARDETEFYLGKRCAYVYKAKNNTVTPGGKPNKTRVIWGKVTRAHGNSGMVRAKFRSNLPAKAIGHRIRVMLYPSRI",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L35a"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "46",
+                "asym_ids": [
+                  "TA"
+                ],
+                "auth_asym_ids": [
+                  "u"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P18077"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_45",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAALRPLVKPKIVKKRTKKFIRHQSDRYVKIKRNWRKPRGIDNRVRRRFKGQILMPNIGYGSNKKTKHMLPSGFRKFLVHNVKELEVLLMCNKSYCAEIAHNVSSKNRKAIVERAAQLAIRVTNPNARLRSEENE",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L32"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "45",
+                "asym_ids": [
+                  "SA"
+                ],
+                "auth_asym_ids": [
+                  "t"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62910"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_44",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MGFVKVVKNKAYFKRYQVKFRRRREGKTDYYARKRLVIQDKNKYNTPKYRMIVRVTNRDIICQIAYARIEGDMIVCAAYAHELPKYGVKVGLTNYAAAYCTGLLLARRLLNRFGMDKIYEGQVEVTGDEYNVESIDGQPGAFTCYLDAGLARTTTGNKVFGALKGAVDGGLSIPHSTKRFPGYDSESKEFNAEVHRKHIMGQNVADYMRYLMEEDEDAYKKQFSQYIKNSVTPDMMEEMYKKAHAAIRENPVYEKKPKKEVKKKRWNRPKMSLAQKKDRVAQKKASFLRAQERAAES",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L5"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "44",
+                "asym_ids": [
+                  "RA"
+                ],
+                "auth_asym_ids": [
+                  "r"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P46777"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_43",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MGRVIRGQRKGAGSVFRAHVKHRKGAARLRAVDFAERHGYIKGIVKDIIHDPGRGAPLAKVVFRDPYRFKKRTELFIAAEGIHTGQFVYCGKKAQLNIGNVLPVGTMPEGTIVCCLEEKPGDRGKLARASGNYATVISHNPETKKTRVKLPSGSKKVISSANRAVVGVVAGGGRIDKPILKAGRAYHKYKAKRNCWPRVRGVAMNPVEHPFGGGNHQHIGKPSTIRRDAPAGRKVGLIAARRTGRLRGTKTVQEKEN",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L8"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "43",
+                "asym_ids": [
+                  "QA"
+                ],
+                "auth_asym_ids": [
+                  "m"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62917"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_42",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MSAHLQWMVVRNCSSFLIKRNKQTYSTEPNNLKARNSFRYNGLIHRKTVGVEPAADGKGVVVVIKRRSGQRKPATSYVRTTINKNARATLSSIRHMIRKNKYRPDLRMAAIRRASAILRSQKPVMVKRKRTRPTKSS",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L28"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "42",
+                "asym_ids": [
+                  "PA"
+                ],
+                "auth_asym_ids": [
+                  "l"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P46779"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_41",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MGKFMKPGKVVLVLAGRYSGRKAVIVKNIDDGTSDRPYSHALVAGIDRYPRKVTAAMGKKKIAKRSKIKSFVKVYNYNHLMPTRYSVDIPLDKTVVNKDVFRDPALKRKARREAKVKFEERYKTGKNKWFFQKLRF",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L27"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "41",
+                "asym_ids": [
+                  "OA"
+                ],
+                "auth_asym_ids": [
+                  "i"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P61353"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_40",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MKFNPFVTSDRSKNRKRHFNAPSHIRRKIMSSPLSKELRQKYNVRSMPIRKDDEVQVVRGHYKGQQIGKVVQVYRKKYVIYIERVQREKANGTTVHVGIHPSKVVITRLKLDKDRKKILERKAKSRQVGKEKGKYKEETIEKMQE",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L26"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "40",
+                "asym_ids": [
+                  "NA"
+                ],
+                "auth_asym_ids": [
+                  "h"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P61254"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_4",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GUCUACGGCCAUACCACCCUGAACGCGCCCGAUCUCGUCUGAUCUCGGAAGCUAAGCAGGGUCGGGCCUGGUUAGUACUUGGAUGGGAGACCGCCUGGGAAUACCGGGUGCUGUAGGCUU",
+                "type": "polyribonucleotide"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "5S rRNA"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "4",
+                "asym_ids": [
+                  "D"
+                ],
+                "auth_asym_ids": [
+                  "5"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "GenBank",
+                    "database_accession": "NR_023363"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_39",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAPKAKKEAPAPPKAEAKAKALKAKKAVLKGVHSHKKKKIRTSPTFRRPKTLRLRRQPKYPRKSAPRRNKLDHYAIIKFPLTTESAMKKIEDNNTLVFIVDVKANKHQIKQAVKKLYDIDVAKVNTLIRPDGEKKAYVRLAPDYDALDVANKIGII",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L23a"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "39",
+                "asym_ids": [
+                  "MA"
+                ],
+                "auth_asym_ids": [
+                  "g"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62750"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_38",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MKVELCSFSGYKIYPGHGRRYARTDGKVFQFLNAKCESAFLSKRNPRQINWTVLYRRKHKKGQSEEIQKKRTRRAVKFQRAITGASLADIMAKRNQKPEVRKAQREQAIRAAKEAKKAKQASKKTAMAAAKAPTKAAPKQKIVKPVKVSAPRVGGKR",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L24"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "38",
+                "asym_ids": [
+                  "LA"
+                ],
+                "auth_asym_ids": [
+                  "f"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P83731"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_37",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MSKRGRGGSSGAKFRISLGLPVGAVINCADNTGAKNLYIISVKGIKGRLNRLPAAGVGDMVMATVKKGKPELRKKVHPAVVIRQRKSYRRKDGVFLYFEDNAGVIVNNKGEMKGSAITGPVAKECADLWPRIASNAGSIA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L23"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "37",
+                "asym_ids": [
+                  "KA"
+                ],
+                "auth_asym_ids": [
+                  "e"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62829"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_36",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAPVKKLVVKGGKKKKQVLKFTLDCTHPVEDGIMDAANFEQFLQERIKVNGKAGNLGGGVVTIERSKSKITVTSEVPFSKRYLKYLTKKYLKKNNLRDWLRVVANSKESYELRYFQINQDEEEEEDED",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L22"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "36",
+                "asym_ids": [
+                  "JA"
+                ],
+                "auth_asym_ids": [
+                  "d"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P35268"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_35",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MTNTKGKRRGTRYMFSRPFRKHGVVPLATYMRIYKKGDIVDIKGMGTVQKGMPHKCYHGKTGRVYNVTQHAVGIVVNKQVKGKILAKRINVRIEHIKHSKSRDSFLKRVKENDQKKKEAKEKGTWVQLKRQPAPPREAHFVRTNGKEPELLEPIPYEFMA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L21"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "35",
+                "asym_ids": [
+                  "IA"
+                ],
+                "auth_asym_ids": [
+                  "c"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P46778"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_34",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MKASGTLREYKVVGRCLPTPKCHTPPLYRMRIFAPNHVVAKSRFWYFVSQLKKMKKSSGEIVYCGQVFEKSPLRVKNFGIWLRYDSRSGTHNMYREYRDLTTAGAVTQCYRDMGARHRARAHSIQIMKVEEIAASKCRRPAVKQFHDSKIKFPLPHRVLRRQHKPRFTTKRPNTFF",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L18a"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "34",
+                "asym_ids": [
+                  "HA"
+                ],
+                "auth_asym_ids": [
+                  "b"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q02543"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_33",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MSMLRLQKRLASSVLRCGKKKVWLDPNETNEIANANSRQQIRKLIKDGLIIRKPVTVHSRARCRKNTLARRKGRHMGIGKRKGTANARMPEKVTWMRRMRILRRLLRRYRESKKIDRHMYHSLYLKVKGNVFKNKRILMEHIHKLKADKARKKLLADQAEARRSKTKEARKRREERLQAKKEEIIKTLSKEEETKK",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L19"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "33",
+                "asym_ids": [
+                  "GA"
+                ],
+                "auth_asym_ids": [
+                  "a"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P84098"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_32",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MGVDIRHNKDRKVRRKEPKSQDIYLRLLVKLYRFLARRTNSTFNQVVLKRLFMSRTNRPPLSLSRMIRKMKLPGRENKTAVVVGTITDDVRVQEVPKLKVCALRVTSRARSRILRAGGKILTFDQLALDSPKGCGTVLLSGPRKGREVYRHFGKAPGTPHSHTKPYVRSKGRKFERARGRRASRGYKN",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L18"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "32",
+                "asym_ids": [
+                  "FA"
+                ],
+                "auth_asym_ids": [
+                  "Z"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q07020"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_31",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MVRYSLDPENPTKSCKSRGSNLRVHFKNTRETAQAIKGMHIRKATKYLKDVTLQKQCVPFRRYNGGVGRCAQAKQWGWTQGRWPKKSAEFLLHMLKNAESNAELKGLDVDSLVIEHIQVNKAPKMRRRTYRAHGRINPYMSSPCHIEMILTEKEQIVPKPEEEVAQKKKISQKKLKKQKLMARE",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L17"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "31",
+                "asym_ids": [
+                  "EA"
+                ],
+                "auth_asym_ids": [
+                  "Y"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P18621"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_30",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAKRTKKVGIVGKYGTRYGASLRKMVKKIEISQHAKYTCSFCGKTKMKRRAVGIWHCGSCMKTVAGGAWTYNTTSAVTVKSAIRRLKELKDQ",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L37a"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "30",
+                "asym_ids": [
+                  "DA"
+                ],
+                "auth_asym_ids": [
+                  "X"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P61513"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_3",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MEYMAESTDRSPGHILCCECGVPISPNPANICVACLRSKVDISQGIPKQVSISFCKQCQRYFQPPGTWIQCALESRELLALCLKKIKAPLSKVRLVDAGFVWTEPHSKRLKVKLTIQKEVMNGAILQQVFVVDYVVQSQMCGDCHRVEAKDFWKAVIQVRQKTLHKKTFYYLEQLILKYGMHQNTLRIKEIHDGLDFYYSSKQHAQKMVEFLQCTVPCRYKASQRLISQDIHSNTYNYKSTFSVEIVPICKDNVVCLSPKLAQSLGNMNQICVCIRVTSAIHLIDPNTLQVADIDGSTFWSHPFNSLCHPKQLEEFIVMECSIVQDIKRAAGAGMISKKHTLGEVWVQKTSEMNTDKQYFCRTHLGHLLNPGDLVLGFDLANCNLNDEHVNKMNSDRVPDVVLIKKSYDRTKRQRRRNWKLKELARERENMDTDDERQYQDFLEDLEEDEAIRKNVNIYRDSAIPVESDTDDEGAPRISLAEMLEDLHISQDATGEEGASMLTGSENLYFQGDYKDHDGDYKDHDIDYKDDDDK",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal export protein NMD3"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "3",
+                "asym_ids": [
+                  "C"
+                ],
+                "auth_asym_ids": [
+                  "3"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q96D46"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_29",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MVNVPKTRRTFCKKCGKHQPHKVTQYKKGKDSLYAQGKRRYDRKQSGYGGQTKPIFRKKAKTTKKIVLRLECVEPNCRSKRMLAIKRCKHFELGGDKKRKGQVIQF",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L36a"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "29",
+                "asym_ids": [
+                  "CA"
+                ],
+                "auth_asym_ids": [
+                  "W"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P83881"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_28",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAEVQVLVLDGRGHLLGRLAAIVAKQVLLGRKVVVVRCEGINISGNFYRNKLKYLAFLRKRMNTNPSRGPYHFRAPSRIFWRTVRGMLPHKTKRGQAALDRLKVFDGIPPPYDKKKRMVVPAALKVVRLKPTRKFAYLGRLAHEVGWKYQAVTATLEEKRKEKAKIHYRKKKQLMRLRKQAEKNVEKKIDKYTEVLKTHGLLV",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L13a"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "28",
+                "asym_ids": [
+                  "BA"
+                ],
+                "auth_asym_ids": [
+                  "V"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P40429"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_27",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MGAYKYIQELWRKKQSDVMRFLLRVRCWQYRQLSALHRAPRPTRPDKARRLGYKAKQGYVIYRIRVRRGGRKRPVPKGATYGKPVHHGVNQLKFARSLQSVAEERAGRHCGALRVLNSYWVGEDSTYKFFEVILIDPFHKAIRRNPDTQWITKPVHKHREMRGLTSAGRKSRGLGKGHKFHHTIGGSRRAAWRRRNTLQLHRYR",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L15"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "27",
+                "asym_ids": [
+                  "AA"
+                ],
+                "auth_asym_ids": [
+                  "U"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P61313"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_26",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAPAKKGGEKKKGRSAINEVVTREYTINIHKRIHGVGFKKRAPRALKEIRKFAMKEMGTPDVRIDTRLNKAVWAKGIRNVPYRIRVRLSRKRNEDEDSPNKLYTLVTYVPVTTFKNLQTVNVDEN",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L31"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "26",
+                "asym_ids": [
+                  "Z"
+                ],
+                "auth_asym_ids": [
+                  "T"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62899"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_25",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MVFRRFVEVGRVAYVSFGPHAGKLVAIVDVIDQNRALVDGPCTQVRRQAMPFKCMQLTDFILKFPHSAHQKYVRQAWQKADINTKWAATRWAKKIEARERKAKMTDFDRFKVMKAKKMRNRIIKNEVKKLQKAALLKASPKKAPGTKGTAAAAAAAAAAKVPAKKITAASKKAPAQKVPAQKATGQKAAPAPKAQKGQKAPAQKAPAPKASGKKA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L14"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "25",
+                "asym_ids": [
+                  "Y"
+                ],
+                "auth_asym_ids": [
+                  "S"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P50914"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_24",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGGIIEPSLRQLAQKYNCDKMICRKCYARLHPRAVNCRKKKCGHTNNLRPKKKVK",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Ubiquitin-60S ribosomal protein L40"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "24",
+                "asym_ids": [
+                  "X"
+                ],
+                "auth_asym_ids": [
+                  "R"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62987"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_23",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAPSRNGMVLKPHFHKDWQRRVATWFNQPARKIRRRKARQAKARRIAPRPASGPIRPIVRCPTVRYHTKVRAGRGFSLEELRVAGIHKKVARTIGISVDPRRRNKSTESLQANVQRLKEYRSKLILFPRKPSAPKKGDSSAEELKLATQLTGPVMPVRNVYKKEKARVITEEEKNFKAFASLRMARANARLFGIRAKRAKEAAEQDVEKKK",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L13"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "23",
+                "asym_ids": [
+                  "W"
+                ],
+                "auth_asym_ids": [
+                  "Q"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P26373"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_22",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MSSHKTFRIKRFLAKKQKQNRPIPQWIRMKTGNKIRYNSKRRHWRRTKLGL",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L39"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "22",
+                "asym_ids": [
+                  "V"
+                ],
+                "auth_asym_ids": [
+                  "P"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62891"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_21",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MPRKIEEIKDFLLTARRKDAKSVKIKKNKDNVKFKVRCSRYLYTLVITDKEKAEKLKQSLPPGLAVKELK",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L38"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "21",
+                "asym_ids": [
+                  "U"
+                ],
+                "auth_asym_ids": [
+                  "O"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P63173"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_20",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAQDQGEKENPMRELRIRKLCLNICVGESGDRLTRAAKVLEQLTGQTPVFSKARYTVRSFGIRRNEKIAVHCTVRGAKAEEILEKGLKVREYELRKNNFSDTGNFGFGIQEHIDLGIKYDPSIGIYGLDFYVVLGRPGFSIADKKRRTGCIGAKHRISKEEAMRWFQQKYDGIILPGK",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L11"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "20",
+                "asym_ids": [
+                  "T"
+                ],
+                "auth_asym_ids": [
+                  "N"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62913"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "CGCGACCUCAGAUCAGACGUGGCGACCCGCUGAAUUUAAGCAUAUUAGUCAGCGGAGGAGAAGAAACUAACCAGGAUUCCCUCAGUAACGGCGAGUGAACAGGGAAGAGCCCAGCGCCGAAUCCCCGCCCCGCGGCGGGGCGCGGGACAUGUGGCGUACGGAAGACCCGCUCCCCGGCGCCGCUCGUGGGGGGCCCAAGUCCUUCUGAUCGAGGCCCAGCCCGUGGACGGUGUGAGGCCGGUAGCGGCCCCCGGCGCGCCGGGCCCGGGUCUUCCCGGAGUCGGGUUGCUUGGGAAUGCAGCCCAAAGCGGGUGGUAAACUCCAUCUAAGGCUAAAUACCGGCACGAGACCGAUAGUCAACAAGUACCGUAAGGGAAAGUUGAAAAGAACUUUGAAGAGAGAGUUCAAGAGGGCGUGAAACCGUUAAGAGGUAAACGGGUGGGGUCCGCGCAGUCCGCCCGGAGGAUUCAACCCGGCGGCGGGUCCGGCCGUGUCGGCGGCCCGGCGGAUCUUUCCCGCCCCCCGUUCCUCCCGACCCCUCCACCCGCCCUCCCUUCCCCCGCCGCCCCUCCUCCUCCUCCCCGGAGGGGGCGGGCUCCGGCGGGUGCGGGGGUGGGCGGGCGGGGCCGGGGGUGGGGUCGGCGGGGGACCGUCCCCCGACCGGCGACCGGCCGCCGCCGGGCGCAUUUCCACCGCGGCGGUGCGCCGCGACCGGCUCCGGGACGGCUGGGAAGGCCCGGCGGGGAAGGUGGCUCGGGGGGCCCCGUCCGUCCGUCCGUCCGUCCUCCUCCUCCCCCGUCUCCGCCCCCCGGCCCCGCGUCCUCCCUCGGGAGGGCGCGCGGGUCGGGGCGGCGGCGGCGGCGGCGGUGGCGGCGGCGGCGGCGGCGGCGGGACCGAAACCCCCCCCGAGUGUUACAGCCCCCCCGGCAGCAGCACUCGCCGAAUCCCGGGGCCGAGGGAGCGAGACCCGUCGCCGCGCUCUCCCCCCUCCCGGCGCCCACCCCCGCGGGGAAUCCCCCGCGAGGGGGGUCUCCCCCGCGGGGGCGCGCCGGCGUCUCCUCGUGGGGGGGCCGGGCCACCCCUCCCACGGCGCGACCGCUCUCCCACCCCUCCUCCCCGCGCCCCCGCCCCGGCGACGGGGGGGGUGCCGCGCGCGGGUCGGGGGGCGGGGCGGACUGUCCCCAGUGCGCCCCGGGCGGGUCGCGCCGUCGGGCCCGGGGGAGGUUCUCUCGGGGCCACGCGCGCGUCCCCCGAAGAGGGGGACGGCGGAGCGAGCGCACGGGGUCGGCGGCGACGUCGGCUACCCACCCGACCCGUCUUGAAACACGGACCAAGGAGUCUAACACGUGCGCGAGUCGGGGGCUCGCACGAAAGCCGCCGUGGCGCAAUGAAGGUGAAGGCCGGCGCGCUCGCCGGCCGAGGUGGGAUCCCGAGGCCUCUCCAGUCCGCCGAGGGCGCACCACCGGCCCGUCUCGCCCGCCGCGCCGGGGAGGUGGAGCACGAGCGCACGUGUUAGGACCCGAAAGAUGGUGAACUAUGCCUGGGCAGGGCGAAGCCAGAGGAAACUCUGGUGGAGGUCCGUAGCGGUCCUGACGUGCAAAUCGGUCGUCCGACCUGGGUAUAGGGGCGAAAGACUAAUCGAACCAUCUAGUAGCUGGUUCCCUCCGAAGUUUCCCUCAGGAUAGCUGGCGCUCUCGCAGACCCGACGCACCCCCGCCACGCAGUUUUAUCCGGUAAAGCGAAUGAUUAGAGGUCUUGGGGCCGAAACGAUCUCAACCUAUUCUCAAACUUUAAAUGGGUAAGAAGCCCGGCUCGCUGGCGUGGAGCCGGGCGUGGAAUGCGAGUGCCUAGUGGGCCACUUUUGGUAAGCAGAACUGGCGCUGCGGGAUGAACCGAACGCCGGGUUAAGGCGCCCGAUGCCGACGCUCAUCAGACCCCAGAAAAGGUGUUGGUUGAUAUAGACAGCAGGACGGUGGCCAUGGAAGUCGGAAUCCGCUAAGGAGUGUGUAACAACUCACCUGCCGAAUCAACUAGCCCUGAAAAUGGAUGGCGCUGGAGCGUCGGGCCCAUACCCGGCCGUCGCCGGCAGUCGAGAGUGGACGGGAGCGGCGGCGGCGGCGCGCGCGCGCGCGCGUGUGGUGUGCGUCGGAGGGCGGCGGCGGCGGCGGCGGCGGGGGUGUGGGGUCCUUCCCCCGCCCCCCCCCCCACGCCUCCUCCCCUCCUCCCGCCCACGCCCCGCUCCCCGCCCCCGGAGCCCCGCGGACGCUACGCCGCGACGAGUAGGAGGGCCGCUGCGGUGAGCCUUGAAGCCUAGGGCGCGGGCCCGGGUGGAGCCGCCGCAGGUGCAGAUCUUGGUGGUAGUAGCAAAUAUUCAAACGAGAACUUUGAAGGCCGAAGUGGAGAAGGGUUCCAUGUGAACAGCAGUUGAACAUGGGUCAGUCGGUCCUGAGAGAUGGGCGAGCGCCGUUCCGAAGGGACGGGCGAUGGCCUCCGUUGCCCUCGGCCGAUCGAAAGGGAGUCGGGUUCAGAUCCCCGAAUCCGGAGUGGCGGAGAUGGGCGCCGCGAGGCGUCCAGUGCGGUAACGCGACCGAUCCCGGAGAAGCCGGCGGGAGCCCCGGGGAGAGUUCUCUUUUCUUUGUGAAGGGCAGGGCGCCCUGGAAUGGGUUCGCCCCGAGAGAGGGGCCCGUGCCUUGGAAAGCGUCGCGGUUCCGGCGGCGUCCGGUGAGCUCUCGCUGGCCCUUGAAAAUCCGGGGGAGAGGGUGUAAAUCUCGCGCCGGGCCGUACCCAUAUCCGCAGCAGGUCUCCAAGGUGAACAGCCUCUGGCAUGUUGGAACAAUGUAGGUAAGGGAAGUCGGCAAGCCGGAUCCGUAACUUCGGGAUAAGGAUUGGCUCUAAGGGCUGGGUCGGUCGGGCUGGGGCGCGAAGCGGGGCUGGGCGCGCGCCGCGGCUGGACGAGGCGCCGCCGCCCCCCCCACGCCCGGGGCACCCCCCUCGCGGCCCUCCCCCGCCCCACCCCGCGCGCGCCGCUCGCUCCCUCCCCGCCCCGCGCCCUCUCUCUCUCUCUCUCCCCCGCUCCCCGUCCUCCCCCCUCCCCGGGGGAGCGCCGCGUGGGGGCGGCGGCGGGGGGAGAAGGGUCGGGGCGGCAGGGGCCGGCGGCGGCCCGCCGCGGGGCCCCGGCGGCGGGGGCACGGUCCCCCGCGAGGGGGGCCCGGGCACCCGGGGGGCCGGCGGCGGCGGCGACUCUGGACGCGAGCCGGGCCCUUCCCGUGGAUCGCCCCAGCUGCGGCGGGCGUCGCGGCCGCCCCCGGGGAGCCCGGCGGGCGCCGGCGCGCCCCCCCCCCCACCCCACGUCUCGUCGCGCGCGCGUCCGCUGGGGGCGGGGAGCGGUCGGGCGGCGGCGGUCGGCGGGCGGCGGGGCGGGGCGGUUCGUCCCCCCGCCCUACCCCCCCGGCCCCGUCCGCCCCCCGUUCCCCCCUCCUCCUCGGCGCGCGGCGGCGGCGGCGGCAGGCGGCGGAGGGGCCGCGGGCCGGUCCCCCCCGCCGGGUCCGCCCCCGGGGCCGCGGUUCCGCGCGGCGCCUCGCCUCGGCCGGCGCCUAGCAGCCGACUUAGAACUGGUGCGGACCAGGGGAAUCCGACUGUUUAAUUAAAACAAAGCAUCGCGAAGGCCCGCGGCGGGUGUUGACGCGAUGUGAUUUCUGCCCAGUGCUCUGAAUGUCAAAGUGAAGAAAUUCAAUGAAGCGCGGGUAAACGGCGGGAGUAACUAUGACUCUCUUAAGGUAGCCAAAUGCCUCGUCAUCUAAUUAGUGACGCGCAUGAAUGGAUGAACGAGAUUCCCACUGUCCCUACCUACUAUCCAGCGAAACCACAGCCAAGGGAACGGGCUUGGCGGAAUCAGCGGGGAAAGAAGACCCUGUUGAGCUUGACUCUAGUCUGGCACGGUGAAGAGACAUGAGAGGUGUAGAAUAAGUGGGAGGCCCCCGGCGCCCCCCCGGUGUCCCCGCGAGGGGCCCGGGGCGGGGUCCGCCGGCCCUGCGGGCCGCCGGUGAAAUACCACUACUCUGAUCGUUUUUUCACUGACCCGGUGAGGCGGGGGGGCGAGCCCCGAGGGGCUCUCGCUUCUGGCGCCAAGCGCCCGGCCGCGCGCCGGCCGGGCGCGACCCGCUCCGGGGACAGUGCCAGGUGGGGAGUUUGACUGGGGCGGUACACCUGUCAAACGGUAACGCAGGUGUCCUAAGGCGAGCUCAGGGAGGACAGAAACCUCCCGUGGAGCAGAAGGGCAAAAGCUCGCUUGAUCUUGAUUUUCAGUACGAAUACAGACCGUGAAAGCGGGGCCUCACGAUCCUUCUGACCUUUUGGGUUUUAAGCAGGAGGUGUCAGAAAAGUUACCACAGGGAUAACUGGCUUGUGGCGGCCAAGCGUUCAUAGCGACGUCGCUUUUUGAUCCUUCGAUGUCGGCUCUUCCUAUCAUUGUGAAGCAGAAUUCACCAAGCGUUGGAUUGUUCACCCACUAAUAGGGAACGUGAGCUGGGUUUAGACCGUCGUGAGACAGGUUAGUUUUACCCUACUGAUGAUGUGUUGUUGCCAUGGUAAUCCUGCUCAGUACGAGAGGAACCGCAGGUUCAGACAUUUGGUGUAUGUGCUUGGCUGAGGAGCCAAUGGGGCGAAGCUACCAUCUGUGGGAUUAUGACUGAACGCCUCUAAGUCAGAAUCCCGCCCAGGCGGAACGAUACGGCAGCGCCGCGGAGCCUCGGUUGGCCUCGGAUAGCCGGUCCCCCGCCUGUCCCCGCCGGCGGGCCGCCCCCCCCCUCCACGCGCCCCGCGCGCGCGGGAGGGCGCGUGCCCCGCCGCGCGCCGGGACCGGGGUCCGGUGCGGAGUGCCCUUCGUCCUGGGAAACGGGGCGCGGCCGGAGAGGCGGCCGCCCCCUCGCCCGUCACGCACCGCACGUUCGUGGGGAACCUGGCGCUAAACCAUUCGUAGACGACCUGCUUCUGGGUCGGGGUUUCGUACGUAGCAGAGCAGCUCCCUCGCUGCGAUCUAUUGAAAGUCAGCCCUCGACACAAGGGUUUGUC",
+                "type": "polyribonucleotide"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "28S rRNA"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "2"
+                ],
+                "reference_sequence_identifiers": null
+              }
+            },
+            {
+              "rcsb_id": "6LQM_19",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MTKGTSSFGKRRNKTHTLCRRCGSKAYHLQKSTCGKCGYPAKRKRKYNWSAKAKRRNTTGTGRMRHLKIVYRRFRHGFREGTTPKPKRAAVAASSSS",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L37"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "19",
+                "asym_ids": [
+                  "S"
+                ],
+                "auth_asym_ids": [
+                  "M"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P61927"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_18",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MPSRLRKTRKLRGHVSHGHGRIGKHRKHPGGRGNAGGLHHHRINFDKYHPGYFGKVGMKHYHLKRNQSFCPTVNLDKLWTLVSEQTRVNAAKNKTGAAPIIDVVRSGYYKVLGKGKLPKQPVIVKAKFFSRRAEEKIKSVGGACVLVA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L27a"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "18",
+                "asym_ids": [
+                  "R"
+                ],
+                "auth_asym_ids": [
+                  "L"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P46776"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_17",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MALRYPMAVGLNKGHKVTKNVSKPRHSRRRGRLTKHTKFVRDMIREVCGFAPYERRAMELLKVSKDKRALKFIKKRVGTHIRAKRKREELSNVLAAMRKAAAKKD",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L36"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "17",
+                "asym_ids": [
+                  "Q"
+                ],
+                "auth_asym_ids": [
+                  "K"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q9Y3U8"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_16",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MGRRPARCYRYCKNKPYPKSRFCRGVPDAKIRIFDLGRKKAKVDEFPLGGHMVSDEYEQLSSEALEAARICANKYMVKSCGRDGFHMRVRLHPFHVIRINKMLSCAGADRLQTGMRGAFGKPQGTVARVHIGQVIMSIRTKLQNEEHVIEALRRAKFKFPGRQKIHISKKWGFTKFNADEFEDMVAKKCLIPDGCGVKYVPSHGPLDKWRVLHS",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L10-like"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "16",
+                "asym_ids": [
+                  "P"
+                ],
+                "auth_asym_ids": [
+                  "J"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q96L21"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_15",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MKTILSNQTVDIPENVDITLKGRTVIVKGPRGTLRRDFNHINVELSLLGKKKKRLRVDKWWGNRKELATVRTICSHVQNMIKGVTLGFRYKMRSVYAHFPINVVIQENGSLVEIRNFLGEKYIRRVRMRPGVACSVSQAQKDELILEGNDIELVSNSAALIQQATTVKNKDIRKFLDGIYVSEKGTVQQADE",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L9"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "15",
+                "asym_ids": [
+                  "O"
+                ],
+                "auth_asym_ids": [
+                  "I"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P32969"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_14",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAKIKARDLRGKKKEELLKQLDDLKVELSQLRVAKVTGGAASKLSKIRVVRKSIARVLTVINQTQKENLRKFYKGKKYKPLDLRPKKTRAMRRRLNKHEENLKTKKQQRKERLYPLRKYAVKA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L35"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "14",
+                "asym_ids": [
+                  "N"
+                ],
+                "auth_asym_ids": [
+                  "H"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P42766"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_13",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MPKGKKAKGKKVAPAPAVVKKQEAKKVVNPLFEKRPKNFGIGQDIQPKRDLTRFVKWPRYIRLQRQRAILYKRLKVPPAINQFTQALDRQTATQLLKLAHKYRPETKQEKKQRLLARAEKKAAGKGDVPTKRPPVLRAGVNTVTTLVENKKAQLVVIAHDVDPIELVVFLPALCRKMGVPYCIIKGKARLGRLVHRKTCTTVAFTQVNSEDKGALAKLVEAIRTNYNDRYDEIRRHWGGNVLGPKSVARIAKLEKAKAKELATKLG",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L7a"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "13",
+                "asym_ids": [
+                  "M"
+                ],
+                "auth_asym_ids": [
+                  "G"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62424"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_12",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MVQRLTYRRRLSYNTASNKTRLSRTPGNRIVYLYTKKVGKAPKSACGVCPGRLRGVRAVRPKVLMRLSKTKKHVSRAYGGSMCAKCVRDRIKRAFLIEEQKIVVKVLKAQAQSQKAK",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L34"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "12",
+                "asym_ids": [
+                  "L"
+                ],
+                "auth_asym_ids": [
+                  "F"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P49207"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_11",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MVAAKKTKKSLESINSRLQLVMKSGKYVLGYKQTLKMIRQGKAKLVILANNCPALRKSEIEYYAMLAKTGVHHYSGNNIELGTACGKYYRVCTLAIIDPGDSDIIRSMPEQTGEK",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L30"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "11",
+                "asym_ids": [
+                  "K"
+                ],
+                "auth_asym_ids": [
+                  "E"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62888"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_10",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MACARPLISVYSEKGESSGKNVTLPAVFKAPIRPDIVNFVHTNLRKNNRQPYAVSELAGHQTSAESWGTGRAVARIPRVRGGGTHRSGQGAFGNMCRGGRMFAPTKTWRRWHRRVNTTQKRYAICSALAASALPALVMSKGHRIEEVPELPLVVEDKVEGYKKTKEAVLLLKKLKAWNDIKKVYASQRMRAGKGKMRNRRRIQRRGPCIIYNEDNGIIKAFRNIPGITLLNVSKLNILKLAPGGHVGRFCIWTESAFRKLDELYGTWRKAASLKSNYNLPMHKMINTDLSRILKSPEIQRALRAPRKKIHRRVLKKNPLKNLRIMLKLNPYAKTMRRNTILRQARNHKLRVDKAAAAAAALQAKSDEKAAVAGKKPVVGKKGKKAAVGVKKQKKPLVGKKAAATKKPAPEKKPAEKKPTTEEKKPAA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "60S ribosomal protein L4"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "10",
+                "asym_ids": [
+                  "J"
+                ],
+                "auth_asym_ids": [
+                  "D"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P36578"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6LQM_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MATYTCITCRVAFRDADMQRAHYKTDWHRYNLRRKVASMAPVTAEGFQERVRAQRAVAEEESKGSATYCTVCSKKFASFNAYENHLKSRRHVELEKKAVQAVNRKVEMMNEKNLEKGLGVDSVDKDAMNAAIQQAIKAQPSMSPKKAPPAPAKEARNVVAVGTGGRGTHDRDPSEKPPRLQWFEQQAKKLAKQQEEDSEEEEEDLDGDDWEDIDSDEELECEDTEAMDDVVEQDAEEEEAEEGPPLGAIPITDCLFCSHHSSSLMKNVAHMTKDHSFFIPDIEYLSDIKGLIKYLGEKVGVGKICLWCNEKGKSFYSTEAVQAHMNDKSHCKLFTDGDAALEFADFYDFRSSYPDHKEGEDPNKAEELPSEKNLEYDDETMELILPSGARVGHRSLMRYYKQRFGLSRAVAVAKNRKAVGRVLQQYRALGWTGSTGAALMRERDMQYVQRMKSKWMLKTGMKNNATKQMHFRVQVRF",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Zinc finger protein 622"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "0"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q969S3"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6LQM-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                    "G",
+                    "H",
+                    "I",
+                    "J",
+                    "K",
+                    "L",
+                    "M",
+                    "N",
+                    "O",
+                    "P",
+                    "Q",
+                    "R",
+                    "S",
+                    "T",
+                    "U",
+                    "V",
+                    "W",
+                    "X",
+                    "Y",
+                    "Z",
+                    "AA",
+                    "BA",
+                    "CA",
+                    "DA",
+                    "EA",
+                    "FA",
+                    "GA",
+                    "HA",
+                    "IA",
+                    "JA",
+                    "KA",
+                    "LA",
+                    "MA",
+                    "NA",
+                    "OA",
+                    "PA",
+                    "QA",
+                    "RA",
+                    "SA",
+                    "TA",
+                    "UA",
+                    "VA",
+                    "WA",
+                    "XA",
+                    "YA",
+                    "ZA",
+                    "AB",
+                    "BB",
+                    "CB",
+                    "DB",
+                    "EB",
+                    "FB",
+                    "GB",
+                    "HB",
+                    "IB",
+                    "JB",
+                    "KB",
+                    "LB",
+                    "MB",
+                    "NB",
+                    "OB",
+                    "PB",
+                    "QB",
+                    "RB",
+                    "SB",
+                    "TB",
+                    "UB",
+                    "VB",
+                    "WB",
+                    "XB",
+                    "YB",
+                    "ZB",
+                    "AC",
+                    "BC",
+                    "CC",
+                    "DC",
+                    "EC",
+                    "FC",
+                    "GC",
+                    "HC",
+                    "IC",
+                    "JC",
+                    "KC",
+                    "LC",
+                    "MC",
+                    "NC",
+                    "OC",
+                    "PC",
+                    "QC",
+                    "RC",
+                    "SC",
+                    "TC",
+                    "UC",
+                    "VC",
+                    "WC",
+                    "XC",
+                    "YC",
+                    "ZC",
+                    "AD",
+                    "BD",
+                    "CD",
+                    "DD",
+                    "ED",
+                    "FD",
+                    "GD",
+                    "HD",
+                    "ID",
+                    "JD",
+                    "KD",
+                    "LD",
+                    "MD",
+                    "ND",
+                    "OD",
+                    "PD",
+                    "QD",
+                    "RD",
+                    "SD",
+                    "TD",
+                    "UD",
+                    "VD",
+                    "WD",
+                    "XD",
+                    "YD",
+                    "ZD",
+                    "AE",
+                    "BE",
+                    "CE",
+                    "DE",
+                    "EE",
+                    "FE",
+                    "GE",
+                    "HE",
+                    "IE",
+                    "JE",
+                    "KE",
+                    "LE",
+                    "ME",
+                    "NE",
+                    "OE",
+                    "PE",
+                    "QE",
+                    "RE",
+                    "SE",
+                    "TE",
+                    "UE",
+                    "VE",
+                    "WE",
+                    "XE",
+                    "YE",
+                    "ZE",
+                    "AF",
+                    "BF",
+                    "CF",
+                    "DF",
+                    "EF",
+                    "FF",
+                    "GF",
+                    "HF",
+                    "IF",
+                    "JF",
+                    "KF",
+                    "LF",
+                    "MF",
+                    "NF",
+                    "OF",
+                    "PF",
+                    "QF",
+                    "RF",
+                    "SF",
+                    "TF",
+                    "UF",
+                    "VF",
+                    "WF",
+                    "XF",
+                    "YF",
+                    "ZF",
+                    "AG",
+                    "BG",
+                    "CG",
+                    "DG",
+                    "EG",
+                    "FG",
+                    "GG",
+                    "HG",
+                    "IG",
+                    "JG",
+                    "KG",
+                    "LG",
+                    "MG",
+                    "NG",
+                    "OG",
+                    "PG",
+                    "QG",
+                    "RG",
+                    "SG",
+                    "TG",
+                    "UG",
+                    "VG",
+                    "WG",
+                    "XG",
+                    "YG",
+                    "ZG",
+                    "AH",
+                    "BH",
+                    "CH",
+                    "DH",
+                    "EH",
+                    "FH",
+                    "GH",
+                    "HH",
+                    "IH",
+                    "JH",
+                    "KH",
+                    "LH",
+                    "MH",
+                    "NH",
+                    "OH",
+                    "PH",
+                    "QH",
+                    "RH",
+                    "SH",
+                    "TH",
+                    "UH",
+                    "VH",
+                    "WH",
+                    "XH",
+                    "YH",
+                    "ZH",
+                    "AI",
+                    "BI",
+                    "CI",
+                    "DI",
+                    "EI",
+                    "FI",
+                    "GI",
+                    "HI",
+                    "II",
+                    "JI",
+                    "KI",
+                    "LI",
+                    "MI",
+                    "NI",
+                    "OI",
+                    "PI",
+                    "QI",
+                    "RI",
+                    "SI",
+                    "TI",
+                    "UI",
+                    "VI",
+                    "WI",
+                    "XI",
+                    "YI",
+                    "ZI",
+                    "AJ",
+                    "BJ",
+                    "CJ",
+                    "DJ",
+                    "EJ",
+                    "FJ",
+                    "GJ",
+                    "HJ",
+                    "IJ",
+                    "JJ",
+                    "KJ",
+                    "LJ",
+                    "MJ",
+                    "NJ",
+                    "OJ",
+                    "PJ",
+                    "QJ",
+                    "RJ",
+                    "SJ",
+                    "TJ",
+                    "UJ",
+                    "VJ",
+                    "WJ",
+                    "XJ",
+                    "YJ",
+                    "ZJ",
+                    "AK",
+                    "BK",
+                    "CK",
+                    "DK",
+                    "EK",
+                    "FK",
+                    "GK",
+                    "HK",
+                    "IK",
+                    "JK",
+                    "KK",
+                    "LK",
+                    "MK"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6M60",
+          "rcsb_accession_info": {
+            "initial_release_date": "2021-06-09T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.17
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6M60_3",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GGSMEGILDFSNDLDIALLDQVVSTFYQGEGVQQKQAQEILTKFQDNPDAWEKADQILQFSTNPQSKFIALSILDKLITRKWKLLPNDHRIGIRNFVVGMIISMCQDDEVFKTQKNLINKSDLTLVQILKQEWPQNWPEFIPELIGSSSSSVNVCENNMIVLKLLSEEVFDFSAEQMTQAKALHLKNSMSKEFEQIFKLCFQVLEQGSSSSLIVATLESLLRYLHWIPYRYIYETNILELLSTKFMTSPDTRAITLKCLTEVSNLKIPQDNDLIKRQTVLFFQNTLQQIATSVMPVTADLKATYANANGNDQSFLQDLAMFLTTYLARNRALLESDESLRELLLNAHQYLIQLSKIEERELFKTTLDYWHNLVADLFYEPLKKHIYEEICSQLRLVIIENMVRPEEIQLYKSEREVLVYLTHLNVIDTEEIMISKLARQIDGSEWSWHNINTLSWAIGSISGTMSEKTEKRFVVTVIKDLLGLCEQKRGKDNKAVVARDIMYVVGEYPRFLKAHWNFLRTVILKLFEFMHETHEGVQDMACDTFIKIVQKCKYHFVIQQPRESEPFIQTIIRDIQKTTADLQPQQVHTFYKACGIIISEERSVAERNRLLSDLMQLPNMAWDTIVEQSTANPTLLLDSETVKIIANIIKTNVAVCTSMGADFYPQLGHIYYNMLQLYRAVSSMISTQVAAEGLIATKTPKVRGLRTIKKEILKLVETYISKARNLDDVVKVLVEPLLNAVLEDYMNNVPDARDAEVLNCMTTVVEKVGHMIPQGVILILQSVFECTLDMINKDFTEYPEHRVEFYKLLKVINEKSFAAFLELPPAAFKLFVDAICWAFKHNNRDVEVNGLQIALDLVKNIERMGNVPFANEFHKNYFFIFVSETFFVLTDSDHKSGFSKQALLLMKLISLVYDNKISVPLYQEAEVPQGTSNQVYLSQYLANMLSNAFPHLTSEQIASFLSALTKQCKDLVVFKGTLRDFLVQIKEVGGDPTDYLFAEDKENA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Exportin-1"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "3",
+                "asym_ids": [
+                  "C"
+                ],
+                "auth_asym_ids": [
+                  "C"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P30822"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6M60_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "DIHFEPVVHLEKVDVKTMEEDEEVLYKVRAKLFRFDADAKEWKERGTGDCKFLKNKKTNKVRILMRRDKTLKICANHIIAPEYTLKPNVGSDRSWVYACTADIAEGEAEAFTFAIRFGSKENADKFKEEFEKAQEINKKA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Ran-specific GTPase-activating protein 1"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "B"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P41920"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6M60_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAAQGEPQVQFKLVLVGDGGTGKTTFVKRHLTGEFEKKYVATLGVEVHPLVFHTNRGPIKFNVWDTAGLEKFGGLRDGYYIQAQCAIIMFDVTSRVTYKNVPNWHRDLVRVCENIPIVLCGNKVDIKDRKVKAKSIVFHRKKNLQYYDISAKSNYNFEKPFLWLARKLIGDPNLEFVAMPAAAPPEVVMDPALAAQYEHDLEVAQTTALPDEDDDL",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "GTP-binding nuclear protein Ran"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "A"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62826"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6M60-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                    "G",
+                    "H",
+                    "I",
+                    "J",
+                    "K",
+                    "L",
+                    "M",
+                    "N",
+                    "O",
+                    "P",
+                    "Q",
+                    "R",
+                    "S",
+                    "T",
+                    "U",
+                    "V",
+                    "W",
+                    "X",
+                    "Y",
+                    "Z",
+                    "AA",
+                    "BA",
+                    "CA"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6MD9",
+          "rcsb_accession_info": {
+            "initial_release_date": "2019-02-13T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.12
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6MD9_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SMTSRRWFHPNITGVEAENLLLTRGVDGSFLARPSKSNPGDFTLSVRRNGAVTHIKIQNTGDYYDLYGGEKFATLAELVQYYMEHHGQLKEKNGDVIELKYPLNCADPTSERWFHGHLSGKEAEKLLTEKGKHGSFLVRESQSHPGDFVLSVRTGDDKGESNDGKSKVTHVMIRCQELKYDVGGGERFDSLTDLVEHYKKNPMVETLGTVLQLKQPLNTTRINAAEIESRVRELSKLAETTDKVKQGFWEEFETLQQQECKLLYSRKEGQRQENKNKNRYKNILPFDHTRVVLHDGDPNEPVSDYINANIIMPEFETKCNNSKPKKSYIATQGCLQNTVNDFWRMVFQENSRVIVMTTKEVERGKSKCVKYWPDEYALKEYGVMRVRNVKESAAHDYTLRELKLSKVGQGNTERTVWQYHFRTWPDHGVPSDPGGVLDFLEEVHHKQESIMDAGPVVVHCSAGIGRTGTFIVIDILIDIIREKGVDCDIDVPKTIQMVRSQRSGMVQTEAQYRFIYMAVQHYIETL",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Tyrosine-protein phosphatase non-receptor type 11"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q06124"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6MD9-2",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "B",
+                    "E",
+                    "F",
+                    "G",
+                    "I"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "6MD9-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "C",
+                    "D",
+                    "H"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6MDA",
+          "rcsb_accession_info": {
+            "initial_release_date": "2019-02-13T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.21
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6MDA_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SMTSRRWFHPNITGVEAENLLLTRGVDGSFLARPSKSNPGDFTLSVRRNGAVTHIKIQNTGDYYDLYGGEKFATLAELVQYYMEHHGQLKEKNGDVIELKYPLNCADPTSERWFHGHLSGKEAEKLLTEKGKHGSFLVRESQSHPGDFVLSVRTGDDKGESNDGKSKVTHVMIRCQELKYDVGGGERFDSLTDLVEHYKKNPMVETLGTVLQLKQPLNTTRINAAEIESRVRELSKLAETTDKVKQGFWEEFETLQQQECKLLYSRKEGQRQENKNKNRYKNILPFDHTRVVLHDGDPNEPVSDYINANIIMPEFETKCNNSKPKKSYIATQGCLQNTVNDFWRMVFQENSRVIVMTTKEVERGKSKCVKYWPDEYALKEYGVMRVRNVKESAAHDYTLRELKLSKVGQGNTERTVWQYHFRTWPDHGVPSDPGGVLDFLEEVHHKQESIMDAGPVVVHCSAGIGRTGTFIVIDILIDIIREKGVDCDIDVPKTIQMVRSQRSGMVQTEAQYRFIYMAVQHYIETL",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Tyrosine-protein phosphatase non-receptor type 11"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q06124"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6MDA-2",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "B",
+                    "E",
+                    "F",
+                    "H"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "6MDA-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "C",
+                    "D",
+                    "G"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6MDB",
+          "rcsb_accession_info": {
+            "initial_release_date": "2019-02-13T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.34
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6MDB_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SMTSRRWFHPNITGVEAENLLLTRGVDGSFLARPSKSNPGDFTLSVRRNGAVTHIKIQNTGDYYDLYGGEKFATLAELVQYYMEHHGQLKEKNGDVIELKYPLNCADPTSERWFHGHLSGKEAEKLLTEKGKHGSFLVRESQSHPGDFVLSVRTGDDKGESNDGKSKVTHVMIRCQELKYDVGGGERFDSLTDLVEHYKKNPMVETLGTVLQLKQPLNTTRINAAEIESRVRELSKLAETTDKVKQGFWEEFETLQQQECKLLYSRKEGQRQENKNKNRYKNILPFDHTRVVLHDGDPNEPVSDYINANIIMPEFETKCNNSKPKKSYIATQGCLQNTVNDFWRMVFQENSRVIVMTTKEVERGKSKCVKYWPDEYALKEYGVMRVRNVKESAAHDYTLRELKLSKVGQGNTERTVWQYHFRTWPDHGVPSDPGGVLDFLEEVHHKQESIMDAGPVVVHCSAGIGRTGTFIVIDILIDIIREKGVDCDIDVPKTIQMVRSQRSGMVQTEAQYRFIYMAVQHYIETL",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Tyrosine-protein phosphatase non-receptor type 11"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q06124"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6MDB-2",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "B",
+                    "F",
+                    "G",
+                    "I"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "6MDB-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "C",
+                    "D",
+                    "E",
+                    "H"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6MDC",
+          "rcsb_accession_info": {
+            "initial_release_date": "2019-02-13T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.14
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6MDC_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SMTSRRWFHPNITGVEAENLLLTRGVDGSFLARPSKSNPGDFTLSVRRNGAVTHIKIQNTGDYYDLYGGEKFATLAELVQYYMEHHGQLKEKNGDVIELKYPLNCADPTSERWFHGHLSGKEAEKLLTEKGKHGSFLVRESQSHPGDFVLSVRTGDDKGESNDGKSKVTHVMIRCQELKYDVGGGERFDSLTDLVEHYKKNPMVETLGTVLQLKQPLNTTRINAAEIESRVRELSKLAETTDKVKQGFWEEFETLQQQECKLLYSRKEGQRQENKNKNRYKNILPFDHTRVVLHDGDPNEPVSDYINANIIMPEFETKCNNSKPKKSYIATQGCLQNTVNDFWRMVFQENSRVIVMTTKEVERGKSKCVKYWPDEYALKEYGVMRVRNVKESAAHDYTLRELKLSKVGQGNTERTVWQYHFRTWPDHGVPSDPGGVLDFLEEVHHKQESIMDAGPVVVHCSAGIGRTGTFIVIDILIDIIREKGVDCDIDVPKTIQMVRSQRSGMVQTEAQYRFIYMAVQHYIETL",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Tyrosine-protein phosphatase non-receptor type 11"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q06124"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6MDC-2",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "B",
+                    "G",
+                    "H",
+                    "I",
+                    "K"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "6MDC-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                    "J"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6MM5",
+          "rcsb_accession_info": {
+            "initial_release_date": "2019-05-08T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              1.95
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6MM5_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "LYNRTRRISQTS",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Ryanodine receptor 2"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "C"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "E9Q401"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MM5_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SNAVKEFLAKAKEDFLKKWETPSQNTAQLDQFDRIKTLGTGSFGRVMLVKHKESGNHYAMKILDKQKVVKLKQIEHTLNEKRILQAVNFPFLVKLEFSFKDNSNLYMVMEYVAGGEMFSHLRRIGRFSEPHARFYAAQIVLTFEYLHSLDLIYRDLKPENLLIDQQGYIQVTDFGFAKRVKGRTWTLCGTPEYLAPEIILSKGYNKAVDWWALGVLIYEMAAGYPPFFADQPIQIYEKIVSGKVRFPSHFSSDLKDLLRNLLQVDLTKRFGNLKNGVNDIKNHKWFATTDWIAIYQRKVEAPFIPKFKGPGDTSNFDDYEEEEIRVSINEKCGKEFTEF",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "cAMP-dependent protein kinase catalytic subunit alpha"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "E"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P05132"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6MM5-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                    "G"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6MM6",
+          "rcsb_accession_info": {
+            "initial_release_date": "2019-05-08T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.39
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6MM6_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SNANFNPQPVDTSNITIPEKLEYFINKYAEHSHDKWSMDKLANGWIYGEIYSDSSKIQPLMKPYKLLSEKEKEIYRWPIKESLKTMLAWGWRIERTREGDSMALYNRTRRISQTSQVSIDAAHGYSPRAIDMSNVTLSRDLHAMAEMMAENYHNIWAKKKKLELESKGGGNHPLLVPYDTLTAAEKAKDREKAQDIFKFLQISGYVVSR",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Ryanodine receptor 2"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "C",
+                  "D"
+                ],
+                "auth_asym_ids": [
+                  "D",
+                  "F"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "E9Q401"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MM6_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SNAVKEFLAKAKEDFLKKWETPSQNTAQLDQFDRIKTLGTGSFGRVMLVKHKESGNHYAMKILDKQKVVKLKQIEHTLNEKRILQAVNFPFLVKLEFSFKDNSNLYMVMEYVAGGEMFSHLRRIGRFSEPHARFYAAQIVLTFEYLHSLDLIYRDLKPENLLIDQQGYIQVTDFGFAKRVKGRTWTLCGTPEYLAPEIILSKGYNKAVDWWALGVLIYEMAAGYPPFFADQPIQIYEKIVSGKVRFPSHFSSDLKDLLRNLLQVDLTKRFGNLKNGVNDIKNHKWFATTDWIAIYQRKVEAPFIPKFKGPGDTSNFDDYEEEEIRVSINEKCGKEFTEF",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "cAMP-dependent protein kinase catalytic subunit alpha"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "C",
+                  "E"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P05132"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6MM6-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "E",
+                    "F",
+                    "G",
+                    "H",
+                    "M"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "6MM6-2",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "B",
+                    "I",
+                    "J",
+                    "K",
+                    "N"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "6MM6-3",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "C",
+                    "L",
+                    "O"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "6MM6-4",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "D",
+                    "P"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6MM7",
+          "rcsb_accession_info": {
+            "initial_release_date": "2019-05-08T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              1.85
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6MM7_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SNANFNPQPVDTSNITIPEKLEYFINKYAEHSHDKWSMDKLANGWIYGEIYSDSSKIQPLMKPYKLLSEKEKEIYRWPIKESLKTMLAWGWRIERTREGDSMALYNRTRRISQTSQVDIDAAHGYSPRAIDMSNVTLSRDLHAMAEMMAENYHNIWAKKKKLELESKGGGNHPLLVPYDTLTAAEKAKDREKAQDIFKFLQISGYVVSR",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Ryanodine receptor 2"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "B",
+                  "D"
+                ],
+                "auth_asym_ids": [
+                  "C",
+                  "E"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "E9Q401"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MM7_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SNAVKEFLAKAKEDFLKKWETPSQNTAQLDQFDRIKTLGTGSFGRVMLVKHKESGNHYAMKILDKQKVVKLKQIEHTLNEKRILQAVNFPFLVKLEFSFKDNSNLYMVMEYVAGGEMFSHLRRIGRFSEPHARFYAAQIVLTFEYLHSLDLIYRDLKPENLLIDQQGYIQVTDFGFAKRVKGRTWTLCGTPEYLAPEIILSKGYNKAVDWWALGVLIYEMAAGYPPFFADQPIQIYEKIVSGKVRFPSHFSSDLKDLLRNLLQVDLTKRFGNLKNGVNDIKNHKWFATTDWIAIYQRKVEAPFIPKFKGPGDTSNFDDYEEEEIRVSINEKCGKEFTEF",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "cAMP-dependent protein kinase catalytic subunit alpha"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "C"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "D"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P05132"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6MM7-4",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "D",
+                    "W",
+                    "X",
+                    "BA"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "6MM7-3",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "C",
+                    "M",
+                    "N",
+                    "O",
+                    "P",
+                    "Q",
+                    "R",
+                    "S",
+                    "T",
+                    "U",
+                    "V",
+                    "AA"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "6MM7-2",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "B",
+                    "L",
+                    "Z"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "6MM7-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "E",
+                    "F",
+                    "G",
+                    "H",
+                    "I",
+                    "J",
+                    "K",
+                    "Y"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6MM8",
+          "rcsb_accession_info": {
+            "initial_release_date": "2019-05-08T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              1.85
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6MM8_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SNAVKEFLAKAKEDFLKKWETPSQNTAQLDQFDRIKTLGTGSFGRVMLVKHKESGNHYAMKILDKQKVVKLKQIEHTLNEKRILQAVNFPFLVKLEFSFKDNSNLYMVMEYVAGGEMFSHLRRIGRFSEPHARFYAAQIVLTFEYLHSLDLIYRDLKPENLLIDQQGYIQVTDFGFAKRVKGRTWTLCGTPEYLAPEIILSKGYNKAVDWWALGVLIYEMAAGYPPFFADQPIQIYEKIVSGKVRFPSHFSSDLKDLLRNLLQVDLTKRFGNLKNGVNDIKNHKWFATTDWIAIYQRKVEAPFIPKFKGPGDTSNFDDYEEEEIRVSINEKCGKEFTEF",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "cAMP-dependent protein kinase catalytic subunit alpha"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "C"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P05132"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MM8_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SNANFNPQPVDTSNITIPEKLEYFINKYAEHSHDKWSMDKLANGWIYGEIYSDSSKIQPLMKPYKLLSEKEKEIYRWPIKESLKTMLAWGWRIERTREGDSMALYNRTRRISQTSQVDIDAAHGYSPRAIDMSNVTLSRDLHAMAEMMAENYHNIWAKKKKLELESKGGGNHPLLVPYDTLTAAEKAKDREKAQDIFKFLQISGYVVSR",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Ryanodine receptor 2"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "D"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "E9Q401"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6MM8-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                    "G",
+                    "H",
+                    "I",
+                    "J",
+                    "K",
+                    "L",
+                    "M",
+                    "N"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6MNH",
+          "rcsb_accession_info": {
+            "initial_release_date": "2019-03-27T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              1.73
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6MNH_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SLGGTETVGKFEFSRKDLIGHGAFAVVFKGRHREKHDLEVAVKCINKKNLAKSQTLLGKEIKILKELKHENIVALYDFQEMANSVYLVMEYCNGGDLADYLHAMRTLSEDTIRLFLQQIAGAMRLLHSKGIIHRDLKPQNILLSNPAGRRANPNSIRVKIADFGFARYLQSNMMAATLCGSPMYMAPEVIMAQHYDGKADLWSIGTIVYQCLTGKAPFQAASPQDLRLFYEKNKTLVPTIPRETSAPLRQLLLALLQRNHKDRMDFDEFFHHPFLDASPSVRKSPPV",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Serine/threonine-protein kinase ULK1"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "A"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "O75385"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6MNH-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6MS1",
+          "rcsb_accession_info": {
+            "initial_release_date": "2019-02-06T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              1.35
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6MS1_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GSYLVTSV",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "APC C-terminus peptide"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "C",
+                  "D"
+                ],
+                "auth_asym_ids": [
+                  "C",
+                  "D"
+                ],
+                "reference_sequence_identifiers": null
+              }
+            },
+            {
+              "rcsb_id": "6MS1_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "IEEEELTLTILRQTGGLGISIAGGKGSTPYKGDDEGIFISRVSEEGPAARAGVRVGDKLLEVNGVALQGAEHHEAVEALRGAGTAVQMRVWRER",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Protein scribble homolog"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q14160"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6MS1-2",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "B",
+                    "C",
+                    "I",
+                    "K",
+                    "L"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "6MS1-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "D",
+                    "E",
+                    "F",
+                    "G",
+                    "H",
+                    "J",
+                    "M"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6MSB",
+          "rcsb_accession_info": {
+            "initial_release_date": "2018-12-05T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "ELECTRON MICROSCOPY"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              3.0
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6MSB_9",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "DRLLRLGGGMPGLGQGPPTDAPAVDTAEQVYISSLALLKMLKHGRAGVPMEVMGLMLGEFVDDYTVRVIDVFAMPQSGTGVSVEAVDPVFQAKMLDMLKQTGRPEMVVGWYHSHPGFGCWLSGVDINTQQSFEALSERAVAVVVDPIQSVKGKVVIDAFRLINANMMVLGHEPRQTTSNLGHLNKPSIQALIHGLNRHYYSITINYRKNELEQKMLLNLHKKSWMEGLTLQDYSEHCKHNESVVKEMLELAKNYNKAVEEEDKMTPEQLAIKNVGKQDPKRHLEEHVDVLMTSNIVQCLAAMLDTVVFK",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "26S proteasome non-ATPase regulatory subunit 14"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "9",
+                "asym_ids": [
+                  "I"
+                ],
+                "auth_asym_ids": [
+                  "c"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "O00487"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_8",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MVLESTMVCVDNSEYMRNGDFLPTRLQAQQDAVNIVCHSKTRSNPENNVGLITLANDCEVLTTLTPDTGRILSKLHTVQPKGKITFCTGIRVAHLALKHRQGKNHKMRIIAFVGSPVEDNEKDLVKLAKRLKKEKVNVDIINFGEEEVNTEKLTAFVNTLNGKDGTGSHLVTVPPGPSLADALISSPILAGEGGAMLGLGASDFEFGVDPSADPELALALRVSMEEQRQRQEEEARRAAAASAAEAGIATTGTEDSDDALLKMTISQQEFGRTGLPDLSSMTEEEQIAYAMQMSLQGAEFGQAESADIDASSAMDTSEPAKEEDDYDVMQDPEFLQSVLENLPGVDPNNEAIRNAMGSLASQATKDGKKDKKEEDKK",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "26S proteasome non-ATPase regulatory subunit 4"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "8",
+                "asym_ids": [
+                  "H"
+                ],
+                "auth_asym_ids": [
+                  "b"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P55036"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_7",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MKDVPGFLQQSQNSGPGQPAVWHRLEELYTKKLWHQLTLQVLDFVQDPCFAQGDGLIKLYENFISEFEHRVNPLSLVEIILHVVRQMTDPNVALTFLEKTREKVKSSDEAVILCKTAIGALKLNIGDLQVTKETIEDVEEMLNNLPGVTSVHSRFYDLSSKYYQTIGNHASYYKDALRFLGCVDIKDLPVSEQQERAFTLGLAGLLGEGVFNFGELLMHPVLESLRNTDRQWLIDTLYAFNSGNVERFQTLKTAWGQQPDLAANEAQLLRKIQLLCLMEMTFTRPANHRQLTFEEIAKSAKITVNEVELLVMKALSVGLVKGSIDEVDKRVHMTWVQPRVLDLQQIKGMKDRLEFWCTDVKSMEMLVEHQAHDILT",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "26S proteasome non-ATPase regulatory subunit 13"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "7",
+                "asym_ids": [
+                  "G"
+                ],
+                "auth_asym_ids": [
+                  "a"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q9UNM6"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_6",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MPELAVQKVVVHPLVLLSVVDHFNRIGKVGNQKRVVGVLLGSWQKKVLDVSNSFAVPFDEDDKDDSVWFLDHDYLENMYGMFKKVNARERIVGWYHTGPKLHKNDIAINELMKRYCPNSVLVIIDVKPKDLGLPTEAYISVEEVHDDGTPTSKTFEHVTSEIGAEEAEEVGVEHLLRDIKDTTVGTLSQRITNQVHGLKGLNSKLLDIRSYLEKVATGKLPINHQIIYQLQDVFNLLPDVSLQEFVKAFYLKTNDQMVVVYLASLIRSVVALHNLINNKIANRDAEKKEGQEKEESKKDRKEDKEKDKDKEKSDVKKEEKKEKK",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "26S proteasome non-ATPase regulatory subunit 7"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "6",
+                "asym_ids": [
+                  "F"
+                ],
+                "auth_asym_ids": [
+                  "Z"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P51665"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_5",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MPLENLEEEGLPKNPDLRIAQLRFLLSLPEHRGDAAVRDELMAAVRDNNMAPYYEALCKSLDWQIDVDLLNKMKKANEDELKRLDEELEDAEKNLGESEIRDAMMAKAEYLCRIGDKEGALTAFRKTYDKTVALGHRLDIVFYLLRIGLFYMDNDLITRNTEKAKSLIEEGGDWDRRNRLKVYQGLYCVAIRDFKQAAELFLDTVSTFTSYELMDYKTFVTYTVYVSMIALERPDLREKVIKGAEILEVLHSLPAVRQYLFSLYECRYSVFFQSLAVVEQEMKKDWLFAPHYRYYVREMRIHAYSQLLESYRSLTLGYMAEAFGVGVEFIDQELSRFIAAGRLHCKIDKVNEIVETNRPDSKNWQYQETIKKGDLLLNRVQKLSRVINM",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "26S proteasome non-ATPase regulatory subunit 6"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "5",
+                "asym_ids": [
+                  "E"
+                ],
+                "auth_asym_ids": [
+                  "Y"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q15008"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_4",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAAAAVVEFQRAQSLLSTDREASIDILHSIVKRDIQENDEEAVQVKEQSILELGSLLAKTGQAAELGGLLKYVRPFLNSISKAKAARLVRSLLDLFLDMEAATGQEVELCLECIEWAKSEKRTFLRQALEARLVSLYFDTKRYQEALHLGSQLLRELKKMDDKALLVEVQLLESKTYHALSNLPKARAALTSARTTANAIYCPPKLQATLDMQSGIIHAAEEKDWKTAYSYFYEAFEGYDSIDSPKAITSLKYMLLCKIMLNTPEDVQALVSGKLALRYAGRQTEALKCVAQASKNRSLADFEKALTDYRAELRDDPIISTHLAKLYDNLLEQNLIRVIEPFSRVQIEHISSLIKLSKADVERKLSQMILDKKFHGILDQGEGVLIIFDEPPVDKTYEAALETIQNMSKVVDSLYNKAKKLT",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "26S proteasome non-ATPase regulatory subunit 11"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "4",
+                "asym_ids": [
+                  "D"
+                ],
+                "auth_asym_ids": [
+                  "X"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "O00231"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_33",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "EAFLGSRSGLWAGGPAPGQFYRIPSTPDSFMDPASALYRGPITRTQNPMVTGTSVLGVKFEGGVVIAADMLGSYGSLARFRNISRIMRVNNSTMLGASGDYADFQYLKQVLGQMVIDEELLGDGHSYSPRAIHSWLTRAMYSRRSKMNPLWNTMVIGGYADGESFLGYVDMLGVAYEAPSLATGYGAYLAQPLLREVLEKQPVLSQTEARDLVERCMRVLYYRDARSYNRFQIATVTEKGVEIEGPLSTETNWDIAHMISGFE",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Proteasome subunit beta type-4"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "33",
+                "asym_ids": [
+                  "HA",
+                  "VA"
+                ],
+                "auth_asym_ids": [
+                  "T",
+                  "t"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P28070"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_32",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "LSSTAMYSAPGRDLGMEPHRAAGPLQLRFSPYVFNGGTILAIAGEDFAIVASDTRLSEGFSIHTRDSPKCYKLTDKTVIGCSGFHGDCLTLTKIIEARLKMYKHSNNKAMTTGAIAAMLSTILYSRRFFPYYVYNIIGGLDEEGKGAVYSFDPVGSYQRDSFKAGGSASAMLQPLLDNQVGFKNMQNVEHVPLSLDRAMRLVKDVFISAAERDVYTGDALRICIVTKEGIREETVSLRKD",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Proteasome subunit beta type-1"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "32",
+                "asym_ids": [
+                  "GA",
+                  "UA"
+                ],
+                "auth_asym_ids": [
+                  "S",
+                  "s"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P20618"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_31",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "ALASVLERPLPVNQRGFFGLGGRADLLDLGPGSLSDGLSLAAPGWGVPEEPGIEMLHGTTTLAFKFRHGVIVAADSRATAGAYIASQTVKKVIEINPYLLGTMAGGAADCSFWERLLARQCRIYELRNKERISVAAASKLLANMVYQYKGMGLSMGTMICGWDKRGPGLYYVDSEGNRISGATFSVGSGSVYAYGVMDRGYSYDLEVEQAYDLARRAIYQATYRDAYSGGAVNLYHVREDGWIRVSSDNVADLHEKYSGSTP",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Proteasome subunit beta type-5"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "31",
+                "asym_ids": [
+                  "FA",
+                  "TA"
+                ],
+                "auth_asym_ids": [
+                  "R",
+                  "r"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P28074"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_30",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MEYLIGIQGPDYVLVASDRVAASNIVQMKDDHDKMFKMSEKILLLCVGEAGDTVQFAEYIQKNVQLYKMRNGYELSPTAAANFTRRNLADCLRSRTPYHVNLLLAGYDEHEGPALYYMDYLAALAKAPFAAHGYGAFLTLSILDRYYTPTISRERAVELLRKCLEELQKRFILNLPTFSVRIIDKNGIHDLDNISFPKQGS",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Proteasome subunit beta type-2"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "30",
+                "asym_ids": [
+                  "EA",
+                  "SA"
+                ],
+                "auth_asym_ids": [
+                  "Q",
+                  "q"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P49721"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_3",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MADGGSERADGRIVKMEVDYSATVDQRLPECAKLAKEGRLQEVIETLLSLEKQTRTASDMVSTSRILVAVVKMCYEAKEWDLLNENIMLLSKRRSQLKQAVAKMVQQCCTYVEEITDLPIKLRLIDTLRMVTEGKIYVEIERARLTKTLATIKEQNGDVKEAASILQELQVETYGSMEKKERVEFILEQMRLCLAVKDYIRTQIISKKINTKFFQEENTEKLKLKYYNLMIQLDQHEGSYLSICKHYRAIYDTPCIQAESEKWQQALKSVVLYVILAPFDNEQSDLVHRISGDKKLEEIPKYKDLLKLFTTMELMRWSTLVEDYGMELRKGSLESPATDVFGSTEEGEKRWKDLKNRVVEHNIRIMAKYYTRITMKRMAQLLDLSVDESEAFLSNLVVNKTIFAKVDRLAGIINFQRPKDPNNLLNDWSQKLNSLMSLVNKTTHLIAKEEMIHNLQ",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "26S proteasome non-ATPase regulatory subunit 12"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "3",
+                "asym_ids": [
+                  "C"
+                ],
+                "auth_asym_ids": [
+                  "W"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "O00232"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_29",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SIMSYNGGAVMAMKGKNCVAIAADRRFGIQAQMVTTDFQKIFPMGDRLYIGLAGLATDVQTVAQRLKFRLNLYELKEGRQIKPYTLMSMVANLLYEKRFGPYYTEPVIAGLDPKTFKPFICSLDLIGCPMVTDDFVVSGTCAEQMYGMCESLWEPNMDPDHLFETISQAMLNAVDRDAVSGMGVIVHIIEKDKITTRTLKARMD",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Proteasome subunit beta type-3"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "29",
+                "asym_ids": [
+                  "DA",
+                  "RA"
+                ],
+                "auth_asym_ids": [
+                  "P",
+                  "p"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P49720"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_28",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "AAVSVYAPPVGGFSFDNCRRNAVLEADFAKRGYKLPKVRKTGTTIAGVVYKDGIVLGADTRATEGMVVADKNCSKIHFISPNIYCCGAGTAADTDMTTQLISSNLELHSLSTGRLPRVVTANRMLKQMLFRYQGYIGAALVLGGVDVTGPHLYSIYPHGSTDKLPYVTMGSGSLAAMAVFEDKFRPDMEEEEAKNLVSEAIAAGIFNDLGSGSNIDLCVISKNKLDFLRPYTVPNKKGTRLGRYRCEKGTTAVLTEKITPLEIEVLEETVQTMDTS",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Proteasome subunit beta type-7"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "28",
+                "asym_ids": [
+                  "CA",
+                  "QA"
+                ],
+                "auth_asym_ids": [
+                  "O",
+                  "o"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q99436"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_27",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "AATLLAARGAGPAPAWGPEAFTPDWESREVSTGTTIMAVQFDGGVVLGADSRTTTGSYIANRVTDKLTPIHDRIFCCRSGSAADTQAVADAVTYQLGFHSIELNEPPLVHTAASLFKEMCYRYREDLMAGIIIAGWDPQEGGQVYSVPMGGMMVRQSFAIGGSGSSYIYGYVDATYREGMTKEECLQFTANALALAMERDGSSGGVIRLAAIAESGVERQVLLGDQIPKFAVATLPPA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Proteasome subunit beta type-6"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "27",
+                "asym_ids": [
+                  "BA",
+                  "PA"
+                ],
+                "auth_asym_ids": [
+                  "N",
+                  "n"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P28072"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_26",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SSIGTGYDLSASTFSPDGRVFQVEYAMKAVENSSTAIGIRCKDGVVFGVEKLVLSKLYEEGSNKRLFNVDRHVGMAVAGLLADARSLADIAREEASNFRSNFGYNIPLKHLADRVAMYVHAYTLYSAVRPFGCSFMLGSYSVNDGAQLYMIDPSGVSYGYWGCAIGKARQAAKTEIEKLQMKEMTCRDIVKEVAKIIYIVHDEVKDKAFELELSWVGELTNGRHEIVPKDIREEAEKYAKESLKEEDESDDDNM",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Proteasome subunit alpha type-3"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "26",
+                "asym_ids": [
+                  "AA",
+                  "OA"
+                ],
+                "auth_asym_ids": [
+                  "M",
+                  "m"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P25788"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_25",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "QLSKVKFRNQYDNDVTVWSPQGRIHQIEYAMEAVKQGSATVGLKSKTHAVLVALKRAQSELAAHQKKILHVDNHIGISIAGLTADARLLCNFMRQECLDSRFVFDRPLPVSRLVSLIGSKTQIPTQRYGRRPYGVGLLIAGYDDMGPHIFQTCPSANYFDCRAMSIGARSQSARTYLERHMSEFMECNLNELVKHGLRALRETLPAEQDLTTKNVSIGIVGKDLEFTIYDDDDVSPFLEGLEERPQRKAQPAQPADEPAEKADEPMEH",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Proteasome subunit alpha type-1"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "25",
+                "asym_ids": [
+                  "NA",
+                  "Z"
+                ],
+                "auth_asym_ids": [
+                  "L",
+                  "l"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P25786"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_24",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "FLTRSEYDRGVNTFSPEGRLFQVEYAIEAIKLGSTAIGIQTSEGVCLAVEKRITSPLMEPSSIEKIVEIDAHIGCAMSGLIADAKTLIDKARVETQNHWFTYNETMTVESVTQAVSNLALQFGEEDADPGAMSRPFGVALLFGGVDEKGPQLFHMDPSGTFVQCDARAIGSASEGAQSSLQEVYHKSMTLKEAIKSSLIILKQVMEEKLNATNIELATVQPGQNFHMFTKEELEEVIKDI",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Proteasome subunit alpha type-5"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "24",
+                "asym_ids": [
+                  "MA",
+                  "Y"
+                ],
+                "auth_asym_ids": [
+                  "K",
+                  "k"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P28066"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_23",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SYDRAITVFSPDGHLFQVEYAQEAVKKGSTAVGVRGRDIVVLGVEKKSVAKLQDERTVRKICALDDNVCMAFAGLTADARIVINRARVECQSHRLTVEDPVTVEYITRYIASLKQRYTQSNGRRPFGISALIVGFDFDGTPRLYQTDPSGTYHAWKANAIGRGAKSVREFLEKNYTDEAIETDDLTIKLVIKALLEVVQSGGKNIELAVMRRDQSLKILNPEEIEKYVAEIEKEKEENEKKKQKKAS",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Proteasome subunit alpha type-7"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "23",
+                "asym_ids": [
+                  "LA",
+                  "X"
+                ],
+                "auth_asym_ids": [
+                  "J",
+                  "j"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "O14818"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_22",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SRRYDSRTTIFSPEGRLYQVEYAMEAIGHAGTCLGILANDGVLLAAERRNIHKLLDEVFFSEKIYKLNEDMACSVAGITSDANVLTNELRLIAQRYLLQYQEPIPCEQLVTALCDIKQAYTQFGGKRPFGVSLLYIGWDKHYGFQLYQSDPSGNYGGWKATCIGNNSAAAVSMLKQDYKEGEMTLKSALALAIKVLNKTMDVSKLSAEKVEIATLTRENGKTVIRVLKQKEVEQLIKKHEEEEAKAEREKKEKEQKEKDK",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Proteasome subunit alpha type-4"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "22",
+                "asym_ids": [
+                  "KA",
+                  "W"
+                ],
+                "auth_asym_ids": [
+                  "I",
+                  "i"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P25789"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_21",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "AERGYSFSLTTFSPSGKLVQIEYALAAVAGGAPSVGIKAANGVVLATEKKQKSILYDERSVHKVEPITKHIGLVYSGMGPDYRVLVHRARKLAQQYYLVYQEPIPTAQLVQRVASVMQEYTQSGGVRPFGVSLLICGWNEGRPYLFQSDPSGAYFAWKATAMGKNYVNGKTFLEKRYNEDLELEDAIHTAILTLKESFEGQMTEDNIEVGICNEAGFRRLTPTEVKDYLAAIA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Proteasome subunit alpha type-2"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "21",
+                "asym_ids": [
+                  "JA",
+                  "V"
+                ],
+                "auth_asym_ids": [
+                  "H",
+                  "h"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P25787"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_20",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SRGSSAGFDRHITIFSPEGRLYQVEYAFKAINQGGLTSVAVRGKDCAVIVTQKKVPDKLLDSSTVTHLFKITENIGCVMTGMTADSRSQVQRARYEAANWKYKYGYEIPVDMLCKRIADISQVYTQNAEMRPLGCCMILIGIDEEQGPQVYKCDPAGYYCGFKATAAGVKQTESTSFLEKKVKKKFDWTFEQTVETAITCLSTVLSIDFKPSEIEVGVVTVENPKFRILTEAEIDAHLVALAERD",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Proteasome subunit alpha type-6"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "20",
+                "asym_ids": [
+                  "IA",
+                  "U"
+                ],
+                "auth_asym_ids": [
+                  "G",
+                  "g"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P60900"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MKQEGSARRRGADKAKPPPGGGEQEPPPPPAPQDVEMKEEAATGGGSTGEADGKTAAAAAEHSQRELDTVTLEDIKEHVKQLEKAVSGKEPRFVLRALRMLPSTSRRLNHYVLYKAVQGFFTSNNATRDFLLPFLEEPMDTEADLQFRPRTGKAASTPLLPEVEAYLQLLVVIFMMNSKRYKEAQKISDDLMQKISTQNRRALDLVAAKCYYYHARVYEFLDKLDVVRSFLHARLRTATLRHDADGQATLLNLLLRNYLHYSLYDQAEKLVSKSVFPEQANNNEWARYLYYTGRIKAIQLEYSEARRTMTNALRKAPQHTAVGFKQTVHKLLIVVELLLGEIPDRLQFRQPSLKRSLMPYFLLTQAVRTGNLAKFNQVLDQFGEKFQADGTYTLIIRLRHNVIKTGVRMISLSYSRISLADIAQKLQLDSPEDAEFIVAKAIRDGVIEASINHEKGYVQSKEMIDIYSTREPQLAFHQRISFCLDIHNMSVKAMRFPPKSYNKDLESAEERREREQQDLEFAKEMAEDDDDSFP",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "26S proteasome non-ATPase regulatory subunit 3"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "V"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "O43242"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_19",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQRESTLHLVLRLRGG",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Ubiquitin"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "19",
+                "asym_ids": [
+                  "S",
+                  "T"
+                ],
+                "auth_asym_ids": [
+                  "u",
+                  "w"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P0CG47"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_18",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MNLLPNIESPVTRQEKMATVWDEAEQDGIGEEVLKMSTEEIIQRTRLLDSEIKIMKSEVLRVTHELQAMKDKIKENSEKIKVNKTLPYLVSNVIELLDVDPNDQEEDGANIDLDSQRKGKCAVIKTSTRQTYFLPVIGLVDAEKLKPGDLVGVNKDSYLILETLPTEYDSRVKAMEVDERPTEQYSDIGGLDKQIQELVEAIVLPMNHKEKFENLGIQPPKGVLMYGPPGTGKTLLARACAAQTKATFLKLAGPQLVQMFIGDGAKLVRDAFALAKEKAPSIIFIDELDAIGTKRFDSEKAGDREVQRTMLELLNQLDGFQPNTQVKVIAATNRVDILDPALLRSGRLDRKIEFPMPNEEARARIMQIHSRKMNVSPDVNYEELARCTDDFNGAQCKAVCVEAGMIALRRGATELTHEDYMEGILEVQAKKKANLQYYA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "26S proteasome regulatory subunit 6A"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "18",
+                "asym_ids": [
+                  "R"
+                ],
+                "auth_asym_ids": [
+                  "F"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P17980"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_17",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAIPGIPYERRLLIMADPRDKALQDYRKKLLEHKEIDGRLKELREQLKELTKQYEKSENDLKALQSVGQIVGEVLKQLTEEKFIVKATNGPRYVVGCRRQLDKSKLKPGTRVALDMTTLTIMRYLPREVDPLVYNMSHEDPGNVSYSEIGGLSEQIRELREVIELPLTNPELFQRVGIIPPKGCLLYGPPGTGKTLLARAVASQLDCNFLKVVSSSIVDKYIGESARLIREMFNYARDHQPCIIFMDEIDAIGGRRFSEGTSADREIQRTLMELLNQMDGFDTLHRVKMIMATNRPDTLDPALLRPGRLDRKIHIDLPNEQARLDILKIHAGPITKHGEIDYEAIVKLSDGFNGADLRNVCTEAGMFAIRADHDFVVQEDFMKAVRKVADSKKLESKLDYKPV",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "26S proteasome regulatory subunit 10B"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "17",
+                "asym_ids": [
+                  "Q"
+                ],
+                "auth_asym_ids": [
+                  "E"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62333"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_16",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MEEIGILVEKAQDEIPALSVSRPQTGLSFLGPEPEDLEDLYSRYKKLQQELEFLEVQEEYIKDEQKNLKKEFLHAQEEVKRIQSIPLVIGQFLEAVDQNTAIVGSTTGSNYYVRILSTIDRELLKPNASVALHKHSNALVDVLPPEADSSIMMLTSDQKPDVMYADIGGMDIQKQEVREAVELPLTHFELYKQIGIDPPRGVLMYGPPGCGKTMLAKAVAHHTTAAFIRVVGSEFVQKYLGEGPRMVRDVFRLAKENAPAIIFIDEIDAIATKRFDAQTGADREVQRILLELLNQMDGFDQNVNVKVIMATNRADTLDPALLRPGRLDRKIEFPLPDRRQKRLIFSTITSKMNLSEEVDLEDYVARPDKISGADINSICQESGMLAVRENRYIVLAKDFEKAYKTVIKKDEQEHEFYK",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "26S proteasome regulatory subunit 6B"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "16",
+                "asym_ids": [
+                  "P"
+                ],
+                "auth_asym_ids": [
+                  "D"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P43686"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_15",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MELEEGKAGSGLRQYYLSKIEELQLIVNDKSQNLRRLQAQRNELNAKVRLLREELQLLQEQGSYVGEVVRAMDKKKVLVKVHPEGKFVVDVDKNIDINDVTPNCRVALRNDSYTLHKILPNKVDPLVSLMMVEKVPDSTYEMIGGLDKQIKEIKEVIELPVKHPELFEALGIAQPKGVLLYGPPGTGKTLLARAVAHHTDCTFIRVSGSELVQKFIGEGARMVRELFVMAREHAPSIIFMDEIDSIGSSRLEGGSGGDSEVQRTMLELLNQLDGFEATKNIKVIMATNRIDILDSALLRPGRIDRKIEFPPPNEEARLDILKIHSRKMNLTRGINLRKIAELMPGASGAEVKGVCTEAGMYALRERRVHVTQEDFEMAVAKVMQKDSEKNMSIKKLWK",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "26S proteasome regulatory subunit 8"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "15",
+                "asym_ids": [
+                  "O"
+                ],
+                "auth_asym_ids": [
+                  "C"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62195"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_14",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MGQSQSGGHGPGGGKKDDKDKKKKYEPPVPTRVGKKKKKTKGPDAASKLPLVTPHTQCRLKLLKLERIKDYLLMEEEFIRNQEQMKPLEEKQEEERSKVDDLRGTPMSVGTLEEIIDDNHAIVSTSVGSEHYVSILSFVDKDLLEPGCSVLLNHKVHAVIGVLMDDTDPLVTVMKVEKAPQETYADIGGLDNQIQEIKESVELPLTHPEYYEEMGIKPPKGVILYGPPGTGKTLLAKAVANQTSATFLRVVGSELIQKYLGDGPKLVRELFRVAEEHAPSIVFIDEIDAIGTKRYDSNSGGEREIQRTMLELLNQLDGFDSRGDVKVIMATNRIETLDPALIRPGRIDRKIEFPLPDEKTKKRIFQIHTSRMTLADDVTLDDLIMAKDDLSGADIKAICTEAGLMALRERRMKVTNEDFKKSKENVLYKKQEGTPEGLYL",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "26S proteasome regulatory subunit 4"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "14",
+                "asym_ids": [
+                  "N"
+                ],
+                "auth_asym_ids": [
+                  "B"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62191"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_13",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MPDYLGADQRKTKEDEKDDKPIRALDEGDIALLKTYGQSTYSRQIKQVEDDIQQLLKKINELTGIKESDTGLAPPALWDLAADKQTLQSEQPLQVARCTKIINADSEDPKYIINVKQFAKFVVDLSDQVAPTDIEEGMRVGVDRNKYQIHIPLPPKIDPTVTMMQVEEKPDVTYSDVGGCKEQIEKLREVVETPLLHPERFVNLGIEPPKGVLLFGPPGTGKTLCARAVANRTDACFIRVIGSELVQKYVGEGARMVRELFEMARTKKACLIFFDEIDAIGGARFDDGAGGDNEVQRTMLELINQLDGFDPRGNIKVLMATNRPDTLDPALMRPGRLDRKIEFSLPDLEGRTHIFKIHARSMSVERDIRFELLARLCPNSTGAEIRSVCTEAGMFAIRARRKIATEKDFLEAVNKVIKSYAKFSATPRYMTYN",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "26S proteasome regulatory subunit 7"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "13",
+                "asym_ids": [
+                  "M"
+                ],
+                "auth_asym_ids": [
+                  "A"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P35998"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_12",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MEEGGRDKAPVQPQQSPAAAPGGTDEKPSGKERRDAGDKDKEQELSEEDKQLQDELEMLVERLGEKDTSLYRPALEELRRQIRSSTTSMTSVPKPLKFLRPHYGKLKEIYENMAPGENKRFAADIISVLAMTMSGERECLKYRLVGSQEELASWGHEYVRHLAGEVAKEWQELDDAEKVQREPLLTLVKEIVPYNMAHNAEHEACDLLMEIEQVDMLEKDIDENAYAKVCLYLTSCVNYVPEPENSALLRCALGVFRKFSRFPEALRLALMLNDMELVEDIFTSCKDVVVQKQMAFMLGRHGVFLELSEDVEEYEDLTEIMSNVQLNSNFLALARELDIMEPKVPDDIYKTHLENNRFGGSGSQVDSARMNLASSFVNGFVNAAFGQDKLLTDDGNKWLYKNKDHGMLSAAASLGMILLWDVDGGLTQIDKYLYSSEDYIKSGALLACGIVNSGVRNECDPALALLSDYVLHNSNTMRLGSIFGLGLAYAGSNREDVLTLLLPVMGDSKSSMEVAGVTALACGMIAVGSCNGDVTSTILQTIMEKSETELKDTYARWLPLGLGLNHLGKGEAIEAILAALEVVSEPFRSFANTLVDVCAYAGSGNVLKVQQLLHICSEHFDSKEKEEDKDKKEKKDKDKKEAPADMGAHQGVAVLGIALIAMGEEIGAEMALRTFGHLLRYGEPTLRRAVPLALALISVSNPRLNILDTLSKFSHDADPEVSYNSIFAMGMVGSGTNNARLAAMLRQLAQYHAKDPNNLFMVRLAQGLTHLGKGTLTLCPYHSDRQLMSQVAVAGLLTVLVSFLDVRNIILGKSHYVLYGLVAAMQPRMLVTFDEELRPLPVSVRVGQAVDVVGQAGKPKTITGFQTHTTPVLLAHGERAELATEEFLPVTPILEGFVILRKNPNYDL",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "26S proteasome non-ATPase regulatory subunit 2"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "12",
+                "asym_ids": [
+                  "L"
+                ],
+                "auth_asym_ids": [
+                  "f"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q13200"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_11",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MSEKKQPVDLGLLEEDDEFEEFPAEDWAGLDEDEDAHVWEDNWDDDNVEDDFSNQLRAELEKHGYKMETS",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "26S proteasome complex subunit SEM1"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "11",
+                "asym_ids": [
+                  "K"
+                ],
+                "auth_asym_ids": [
+                  "e"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P60896"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_10",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "FIKGRAPRAPPRERRRATRGGLRQVVAPPRALGSTSRPHFRRASVCRRRCRKSGGLLAASRKMAAAAVNGAAGFSSSGPAATSGAVLQAATGMYEQLKGEWNRKSPNLSKCGEELGRLKLVLLELNFLPTTGTKLTKQQLILARDILEIGAQWSILRKDIPSFERYMAQLKCYYFDYKEQLPESAYMHQLLGLNLLFLLSQNRVAEFHTELERLPAKDIQTNVYIKHPVSLEQYLMEGSYNKVFLAKGNIPAESYTFFIDILLDTIRDEIAGCIEKAYEKILFTEATRILFFNTPKKMTDYAKKRGWVLGPNNYYSFASQQQKPEDTTIPSTELAKQVIEYARQLEMIV",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "26S proteasome non-ATPase regulatory subunit 8"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "10",
+                "asym_ids": [
+                  "J"
+                ],
+                "auth_asym_ids": [
+                  "d"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P48556"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6MSB_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MITSAAGIISLLDEDEPQLKEFALHKLNAVVNDFWAEISESVDKIEVLYEDEGFRSRQFAALVASKVFYHLGAFEESLNYALGAGDLFNVNDNSEYVETIIAKCIDHYTKQCVENADLPEGEKKPIDQRLEGIVNKMFQRCLDDHKYKQAIGIALETRRLDVFEKTILESNDVPGMLAYSLKLCMSLMQNKQFRNKVLRVLVKIYMNLEKPDFINVCQCLIFLDDPQAVSDILEKLVKEDNLLMAYQICFDLYESASQQFLSSVIQNLRTVGTPIASVPGSTNTGTVPGSEKDSDSMETEEKTSSAFVGKTPEASPEPKDQTLKMIKILSGEMAIELHLQFLIRNNNTDLMILKNTKDAVRNSVCHTATVIANSFMHCGTTSDQFLRDNLEWLARATNWAKFTATASLGVIHKGHEKEALQLMATYLPKDTSPGSAYQEGGGLYALGLIHANHGGDIIDYLLNQLKNASNDIVRHGGSLGLGLAAMGTARQDVYDLLKTNLYQDDAVTGEAAGLALGLVMLGSKNAQAIEDMVGYAQETQHEKILRGLAVGIALVMYGRMEEADALIESLCRDKDPILRRSGMYTVAMAYCGSGNNKAIRRLLHVAVSDVNDDVRRAAVESLGFILFRTPEQCPSVVSLLSESYNPHVRYGAAMALGICCAGTGNKEAINLLEPMTNDPVNYVRQGALIASALIMIQQTEITCPKVNQFRQLYSKVINDKHDDVMAKFGAILAQGILDAGGHNVTISLQSRTGHTHMPSVVGVLVFTQFWFWFPLSHFLSLAYTPTCVIGLNKDLKMPKVQYKSNCKPSTFAYPAPLEVPKEKEKEKVSTAVLSITAKAKKKEKEKEKKEEEKMEVDEAEKKEEKEKKKEPEPNFQLLDNPARVMPAQLKVLTMPETCRYQPFKPLSIGGIIILKDTSEDIEELVEPVAAHGPKIEEEEQEPEPPEPFEYIDD",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "26S proteasome non-ATPase regulatory subunit 1"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "U"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q99460"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6MSB-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                    "G",
+                    "H",
+                    "I",
+                    "J",
+                    "K",
+                    "L",
+                    "M",
+                    "N",
+                    "O",
+                    "P",
+                    "Q",
+                    "R",
+                    "S",
+                    "T",
+                    "U",
+                    "V",
+                    "W",
+                    "X",
+                    "Y",
+                    "Z",
+                    "AA",
+                    "BA",
+                    "CA",
+                    "DA",
+                    "EA",
+                    "FA",
+                    "GA",
+                    "HA",
+                    "IA",
+                    "JA",
+                    "KA",
+                    "LA",
+                    "MA",
+                    "NA",
+                    "OA",
+                    "PA",
+                    "QA",
+                    "RA",
+                    "SA",
+                    "TA",
+                    "UA",
+                    "VA",
+                    "WA",
+                    "XA",
+                    "YA",
+                    "ZA",
+                    "AB",
+                    "BB",
+                    "CB",
+                    "DB",
+                    "EB",
+                    "FB",
+                    "GB",
+                    "HB"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6MDD",
+          "rcsb_accession_info": {
+            "initial_release_date": "2019-02-13T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.05
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6MDD_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SMTSRRWFHPNITGVEAENLLLTRGVDGSFLARPSKSNPGDFTLSVRRNGAVTHIKIQNTGDYYDLYGGEKFATLAELVQYYMEHHGQLKEKNGDVIELKYPLNCADPTSERWFHGHLSGKEAEKLLTEKGKHGSFLVRESQSHPGDFVLSVRTGDDKGESNDGKSKVTHVMIRCQELKYDVGGGERFDSLTDLVEHYKKNPMVETLGTVLQLKQPLNTTRINAAEIESRVRELSKLAETTDKVKQGFWEEFETLQQQECKLLYSRKEGQRQENKNKNRYKNILPFDHTRVVLHDGDPNEPVSDYINANIIMPEFETKCNNSKPKKSYIATQGCLQNTVNDFWRMVFQENSRVIVMTTKEVERGKSKCVKYWPDEYALKEYGVMRVRNVKESAAHDYTLRELKLSKVGQGNTERTVWQYHFRTWPDHGVPSDPGGVLDFLEEVHHKQESIMDAGPVVVHCSAGIGRTGTFIVIDILIDIIREKGVDCDIDVPKTIQMVRSQRSGMVQTEAQYRFIYMAVQHYIETL",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Tyrosine-protein phosphatase non-receptor type 11"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q06124"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6MDD-2",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "B",
+                    "E",
+                    "F",
+                    "H"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "6MDD-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "C",
+                    "D",
+                    "G"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6MD7",
+          "rcsb_accession_info": {
+            "initial_release_date": "2019-02-13T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              1.96
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6MD7_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "SMTSRRWFHPNITGVEAENLLLTRGVDGSFLARPSKSNPGDFTLSVRRNGAVTHIKIQNTGDYYDLYGGEKFATLAELVQYYMEHHGQLKEKNGDVIELKYPLNCADPTSERWFHGHLSGKEAEKLLTEKGKHGSFLVRESQSHPGDFVLSVRTGDDKGESNDGKSKVTHVMIRCQELKYDVGGGERFDSLTDLVEHYKKNPMVETLGTVLQLKQPLNTTRINAAEIESRVRELSKLAETTDKVKQGFWEEFETLQQQECKLLYSRKEGQRQENKNKNRYKNILPFDHTRVVLHDGDPNEPVSDYINANIIMPEFETKCNNSKPKKSYIATQGCLQNTVNDFWRMVFQENSRVIVMTTKEVERGKSKCVKYWPDEYALKEYGVMRVRNVKESAAHDYTLRELKLSKVGQGNTERTVWQYHFRTWPDHGVPSDPGGVLDFLEEVHHKQESIMDAGPVVVHCSAGIGRTGTFIVIDILIDIIREKGVDCDIDVPKTIQMVRSQRSGMVQTEAQYRFIYMAVQHYIETL",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Tyrosine-protein phosphatase non-receptor type 11"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "A",
+                  "B"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "Q06124"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6MD7-2",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "B",
+                    "J",
+                    "K",
+                    "L",
+                    "M",
+                    "N",
+                    "O",
+                    "Q"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            },
+            {
+              "rcsb_id": "6MD7-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                    "G",
+                    "H",
+                    "I",
+                    "P"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rcsb_id": "6M6X",
+          "rcsb_accession_info": {
+            "initial_release_date": "2021-03-17T00:00:00Z"
+          },
+          "exptl": [
+            {
+              "method": "X-RAY DIFFRACTION"
+            }
+          ],
+          "rcsb_entry_info": {
+            "resolution_combined": [
+              2.88
+            ]
+          },
+          "polymer_entities": [
+            {
+              "rcsb_id": "6M6X_3",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "GGSMEGILDFSNDLDIALLDQVVSTFYQGEGVQQKQAQEILTKFQDNPDAWEKADQILQFSTNPQSKFIALSILDKLITRKWKLLPNDHRIGIRNFVVGMIISMCQDDEVFKTQKNLINKSDLTLVQILKQEWPQNWPEFIPELIGSSSSSVNVCENNMIVLKLLSEEVFDFSAEQMTQAKALHLKNSMSKEFEQIFKLCFQVLEQGSSSSLIVATLESLLRYLHWIPYRYIYETNILELLSTKFMTSPDTRAITLKCLTEVSNLKIPQDNDLIKRQTVLFFQNTLQQIATSVMPVTADLKATYANANGNDQSFLQDLAMFLTTYLARNRALLESDESLRELLLNAHQYLIQLSKIEERELFKTTLDYWHNLVADLFYEPLKKHIYEEICSQLRLVIIENMVRPEEIQLYKSEREVLVYLTHLNVIDTEEIMISKLARQIDGSEWSWHNINTLSWAIGSISGTMSEKTEKRFVVTVIKDLLGLCEQKRGKDNKAVVARDIMYVVGEYPRFLKAHWNFLRTVILKLFEFMHETHEGVQDMACDTFIKIVQKCKYHFVIQQPRESEPFIQTIIRDIQKTTADLQPQQVHTFYKACGIIISEERSVAERNRLLSDLMQLPNMAWDTIVEQSTANPTLLLDSETVKIIANIIKTNVAVCTSMGADFYPQLGHIYYNMLQLYRAVSSMISTQVAAEGLIATKTPKVRGLRTIKKEILKLVETYISKARNLDDVVKVLVEPLLNAVLEDYMNNVPDARDAEVLNCMTTVVEKVGHMIPQGVILILQSVFECTLDMINKDFTEYPEHRVEFYKLLKVINEKSFAAFLELPPAAFKLFVDAICWAFKHNNRDVEVNGLQIALDLVKNIERMGNVPFANEFHKNYFFIFVSETFFVLTDSDHKSGFSKQALLLMKLISLVYDNKISVPLYQEAEVPQGTSNQVYLSQYLANMLSNAFPHLTSEQIASFLSALTKQCKDLVVFKGTLRDFLVQIKEVGGDPTDYLFAEDKENA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Exportin-1"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "3",
+                "asym_ids": [
+                  "C"
+                ],
+                "auth_asym_ids": [
+                  "C"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P30822"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6M6X_2",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "DIHFEPVVHLEKVDVKTMEEDEEVLYKVRAKLFRFDADAKEWKERGTGDCKFLKNKKTNKVRILMRRDKTLKICANHIIAPEYTLKPNVGSDRSWVYACTADIAEGEAEAFTFAIRFGSKENADKFKEEFEKAQEINKKA",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "Ran-specific GTPase-activating protein 1"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "2",
+                "asym_ids": [
+                  "B"
+                ],
+                "auth_asym_ids": [
+                  "B"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P41920"
+                  }
+                ]
+              }
+            },
+            {
+              "rcsb_id": "6M6X_1",
+              "entity_poly": {
+                "pdbx_seq_one_letter_code_can": "MAAQGEPQVQFKLVLVGDGGTGKTTFVKRHLTGEFEKKYVATLGVEVHPLVFHTNRGPIKFNVWDTAGLEKFGGLRDGYYIQAQCAIIMFDVTSRVTYKNVPNWHRDLVRVCENIPIVLCGNKVDIKDRKVKAKSIVFHRKKNLQYYDISAKSNYNFEKPFLWLARKLIGDPNLEFVAMPAAAPPEVVMDPALAAQYEHDLEVAQTTALPDEDDDL",
+                "type": "polypeptide(L)"
+              },
+              "rcsb_polymer_entity": {
+                "pdbx_description": "GTP-binding nuclear protein Ran"
+              },
+              "rcsb_polymer_entity_container_identifiers": {
+                "entity_id": "1",
+                "asym_ids": [
+                  "A"
+                ],
+                "auth_asym_ids": [
+                  "A"
+                ],
+                "reference_sequence_identifiers": [
+                  {
+                    "database_name": "UniProt",
+                    "database_accession": "P62826"
+                  }
+                ]
+              }
+            }
+          ],
+          "assemblies": [
+            {
+              "rcsb_id": "6M6X-1",
+              "pdbx_struct_assembly_gen": [
+                {
+                  "asym_id_list": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                    "G",
+                    "H",
+                    "I",
+                    "J",
+                    "K",
+                    "L",
+                    "M",
+                    "N",
+                    "O"
+                  ],
+                  "oper_expression": "1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

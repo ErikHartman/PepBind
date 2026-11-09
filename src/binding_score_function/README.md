@@ -100,3 +100,20 @@ The code is designed to be resumable and will skip already processed files by de
 - When generating decoys, it can reuse existing decoy configuration files
 
 To force reprocessing, use the `--force-redownload` or `--no-skip` flags.
+
+## Revision response figures
+
+Run all cells in these notebooks to reproduce the four retained response figures:
+
+- `notebooks/revision_2.ipynb`: the similarity-split violin and original-test bars.
+- `notebooks/external_validation.ipynb`: the full external cohort and 11-pair subset bars.
+
+Both use `response_plotting.py` and export PNG/PDF files to
+`revision_2_bopep_working_assets`. They load saved fits and cached scoring inputs;
+they do not fit models, dock complexes or regenerate features.
+
+The input-preparation scripts are kept separately for rebuilding the caches:
+
+- `external_validation.py`: AlphaFold docking and scores.
+- `external_validation_features.py`: supplemental inputs for the frozen equations.
+- `external_validation_boltz.py`: Boltz docking and scores.

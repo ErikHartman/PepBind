@@ -1,0 +1,30 @@
+{
+  "url": "https://search.rcsb.org/rcsbsearch/v2/query",
+  "parameters": {
+    "json": "{\"query\": {\"type\": \"group\", \"logical_operator\": \"and\", \"nodes\": [{\"type\": \"terminal\", \"service\": \"seqmotif\", \"parameters\": {\"value\": \"(KQSVKERL|KTPPECLL|KVHEVPDY|LANGDVWK|LELSWAEK|LEREGLPP|LESSVDPI|LGFEEWDV|LGSDVDGP|LGVKDARE|LKTPPECL|LLGSDVDG|LLMADADS|LLQPPPPP|LLRNDAHS|LLTPLPPS|LPGMTVPY|LPPGWERV|LPPYSGTV|LPQRPPKP)\", \"pattern_type\": \"regex\", \"sequence_type\": \"protein\"}}, {\"type\": \"terminal\", \"service\": \"text\", \"parameters\": {\"attribute\": \"rcsb_accession_info.initial_release_date\", \"operator\": \"less_or_equal\", \"value\": \"2021-09-30\"}}]}, \"return_type\": \"polymer_entity\", \"request_options\": {\"return_all_hits\": true, \"results_content_type\": [\"experimental\"]}}"
+  },
+  "retrieved_utc": "2026-10-30T19:08:37.015788+00:00",
+  "response": {
+    "query_id": "71980283-7a82-4a03-9d8f-7b543ee843b6",
+    "result_type": "polymer_entity",
+    "total_count": 4,
+    "result_set": [
+      {
+        "identifier": "2DWV_1",
+        "score": 1.0
+      },
+      {
+        "identifier": "6OF7_2",
+        "score": 1.0
+      },
+      {
+        "identifier": "7BQF_1",
+        "score": 1.0
+      },
+      {
+        "identifier": "7BQG_1",
+        "score": 1.0
+      }
+    ]
+  }
+}
