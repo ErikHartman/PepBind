@@ -117,3 +117,34 @@ The input-preparation scripts are kept separately for rebuilding the caches:
 - `external_validation.py`: AlphaFold docking and scores.
 - `external_validation_features.py`: supplemental inputs for the frozen equations.
 - `external_validation_boltz.py`: Boltz docking and scores.
+
+## Matched receptor sequences in external validation
+
+AlphaFold now uses the shared BoPep `Docker` interface and the observed receptor
+sequence from the template, matching the Boltz input policy. The full assayed
+receptor sequence remains in metadata; the modeled sequence is recorded
+separately. All five AlphaFold output models must match the intended receptor
+and peptide before scoring, including when existing results are reused.
+
+`external_validation_matched_templates.py` selects pairs whose saved AlphaFold
+receptor differs from the saved Boltz receptor. It requires a fresh output
+directory, preserves the original results, redocks only affected AlphaFold
+pairs, and refreshes supplemental scores and cross-predictor RMSD. Boltz
+structures are reused. Progress and source/code hashes are recorded in
+`run_manifest.json`.
+
+The prepared four-GPU job can be submitted from the repository root:
+
+```bash
+sbatch external_validation_matched_templates.slurm
+```
+
+Its output directory is
+`/srv/data1/er8813ha/bopep/external_val_matched_templates_20261113`. Completed
+inputs are written to `features.csv`, `analysis/supplemental_features.csv`, and
+`analysis/boltz_features.csv` there. The figure notebook defaults to this
+completed run and validates both dependent caches against its AlphaFold input
+hash. Set `EXTERNAL_VALIDATION_RUN` to select another complete run directory;
+individual paths can be overridden with `EXTERNAL_VALIDATION_FEATURES`,
+`EXTERNAL_VALIDATION_ANALYSIS`, `EXTERNAL_VALIDATION_SUPPLEMENT`, and
+`EXTERNAL_VALIDATION_BOLTZ_FEATURES`.

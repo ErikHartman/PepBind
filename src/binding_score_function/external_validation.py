@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Dock the prepared external cohort with BoPep's AlphaFold backend and save scores.
+"""Dock the prepared external cohort with BoPep's shared AlphaFold pipeline.
 
 One call per receptor; BoPep distributes its peptides across the allocated GPUs.
+The modeled receptor is the observed template chain, as in the Boltz pipeline.
 Terminal caps are recorded in the CSV but modeled as canonical uncapped chains.
 No binding-site residues, experimental complex poses, or model fitting are used.
 """
@@ -45,16 +46,34 @@ def load_cohort(csv_path):
 
 
 def write_csv(path, rows):
+    path = Path(path)
+    temporary = path.with_suffix(path.suffix + ".tmp")
     columns = list(dict.fromkeys(key for row in rows for key in row))
-    with Path(path).open("w", newline="") as handle:
+    with temporary.open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=columns)
         writer.writeheader()
         writer.writerows(rows)
+    temporary.replace(path)
 
 
-def dock_and_score(records, output_dir):
-    from bopep import ComplexScorer
-    from bopep.docking.alphafold_docker import AlphaFoldDocker
+def validate_models(processed, receptor_sequence, peptide_sequence):
+    """Reject missing or stale models before extracting any scores."""
+    from bopep.structure.parser import get_chain_sequences
+
+    processed = Path(processed)
+    if not (processed / "alphafold_metrics.json").is_file():
+        raise FileNotFoundError(processed / "alphafold_metrics.json")
+    for index in range(1, DOCKING_CONFIG["num_models"] + 1):
+        model = processed / f"alphafold_model_{index}.pdb"
+        if not model.is_file():
+            raise FileNotFoundError(model)
+        sequences = get_chain_sequences(str(model))
+        if sequences.get("A") != receptor_sequence or sequences.get("B") != peptide_sequence:
+            raise ValueError(f"AlphaFold model chains differ from the template receptor/peptide: {model}")
+
+
+def dock_and_score(records, output_dir, gpu_ids=None, reference_sequences=None):
+    from bopep import ComplexScorer, Docker
     from predictive_equation.interaction_confidence_fit import FEATURE_SCHEMAS
 
     output_dir = Path(output_dir).resolve()
@@ -63,7 +82,11 @@ def dock_and_score(records, output_dir):
     batches = defaultdict(list)
     for row in records:
         batches[row["target_id"]].append(row)
-    gpu_ids = [gpu.strip() for gpu in (os.environ.get("CUDA_VISIBLE_DEVICES") or "0,1,2,3").split(",")]
+    if gpu_ids is None:
+        gpu_ids = (os.environ.get("CUDA_VISIBLE_DEVICES") or "0,1,2,3").split(",")
+    gpu_ids = [str(gpu).strip() for gpu in gpu_ids]
+    if not gpu_ids or not all(gpu_ids) or len(set(gpu_ids)) != len(gpu_ids):
+        raise ValueError("GPU IDs must be nonempty and unique")
     features = FEATURE_SCHEMAS["alphafold"]
     score_names = [name.replace("peptide_", "sequence_") for name in features]
     scorer, results = ComplexScorer(), []
@@ -75,22 +98,34 @@ def dock_and_score(records, output_dir):
         template = output_dir / "templates" / target_id / "targ.pdb"
         template.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(batch[0]["target_pdb"], template)
-        docker = AlphaFoldDocker(output_dir=str(target_dir), gpu_ids=gpu_ids, **DOCKING_CONFIG)
+        docker = Docker(kwargs={"models": ["alphafold"], "output_dir": str(target_dir),
+                                "gpu_ids": gpu_ids, **DOCKING_CONFIG})
+        docker.set_target_structure(target_structure_path=str(template), keep_chains="A")
+        # Preserve the four-character template filename required by ColabFold,
+        # while naming output folders by the biological target.
+        docker.target_name = target_id
+        receptor_sequence = docker.target_sequence
+        if reference_sequences is not None and receptor_sequence != reference_sequences[target_id]:
+            raise ValueError(f"Template receptor differs from the saved Boltz receptor: {target_id}")
+        for record in batch:
+            processed = target_dir / "processed" / f"{target_id}_{record['peptide_sequence']}"
+            if (processed / "alphafold_metrics.json").exists():
+                # BoPep's cache check alone does not verify receptor identity.
+                validate_models(processed, receptor_sequence, record["peptide_sequence"])
         try:
-            docker.dock(
-                [row["peptide_sequence"] for row in batch],
-                target_structure=str(template),
-                target_sequence=batch[0]["target_sequence"],
-                target_name=target_id,
-            )
+            docker.dock_sequences([row["peptide_sequence"] for row in batch])
         except Exception:
             logging.exception("Docking failed for target %s; recording individual outcomes", target_id)
 
         for record in batch:
             row = dict(record)
+            row.update(modeled_target_sequence=receptor_sequence,
+                       modeled_target_length=len(receptor_sequence),
+                       receptor_query_policy="Shared BoPep Docker: observed template-chain sequence")
             row["chemistry_model"] = "Canonical uncapped chain; experimental terminal caps remain in metadata"
             processed = target_dir / "processed" / f"{target_id}_{row['peptide_sequence']}"
             try:
+                validate_models(processed, receptor_sequence, row["peptide_sequence"])
                 raw = scorer.score(scores_to_include=score_names, processed_dir=str(processed),
                                    sequence=row["peptide_sequence"], receptor_chain="A", sequence_chain="B")
                 scores = raw[row["peptide_sequence"]]
@@ -118,9 +153,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--csv", type=Path, default=ROOT / "data/external_val/complexes.csv")
     parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
+    parser.add_argument("--gpu-ids", help="Comma-separated IDs; defaults to CUDA_VISIBLE_DEVICES")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-    return bool(dock_and_score(load_cohort(args.csv), args.output_dir))
+    gpu_ids = args.gpu_ids.split(",") if args.gpu_ids else None
+    return bool(dock_and_score(load_cohort(args.csv), args.output_dir, gpu_ids=gpu_ids))
 
 
 if __name__ == "__main__":
